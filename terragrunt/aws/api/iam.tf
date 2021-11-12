@@ -16,15 +16,6 @@ resource "aws_iam_role" "api" {
   assume_role_policy = data.aws_iam_policy_document.service_principal.json
 }
 
-data "aws_iam_policy" "lambda_insights" {
-  name = "CloudWatchLambdaInsightsExecutionRolePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_insights" {
-  role       = aws_iam_role.api.name
-  policy_arn = data.aws_iam_policy.lambda_insights.arn
-}
-
 data "aws_iam_policy_document" "api_policies" {
 
   statement {
@@ -66,17 +57,6 @@ resource "aws_iam_policy" "api" {
 resource "aws_iam_role_policy_attachment" "api" {
   role       = aws_iam_role.api.name
   policy_arn = aws_iam_policy.api.arn
-}
-
-# Use AWS managed IAM policy
-####
-# Provides minimum permissions for a Lambda function to execute while
-# accessing a resource within a VPC - create, describe, delete network
-# interfaces and write permissions to CloudWatch Logs.
-####
-resource "aws_iam_role_policy_attachment" "AWSLambdaVPCAccessExecutionRole" {
-  role       = aws_iam_role.api.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
 resource "aws_iam_role" "waf_log_role" {

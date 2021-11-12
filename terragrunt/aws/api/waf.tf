@@ -9,7 +9,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
   rule {
     name     = "AWSManagedRulesAmazonIpReputationList"
-    priority = 1
+    priority = 10
 
     override_action {
       none {}
@@ -30,8 +30,30 @@ resource "aws_wafv2_web_acl" "api_waf" {
   }
 
   rule {
+    name     = "api_rate_limit"
+    priority = 20
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = 10000
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "api_rate_limit"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
     name     = "AWSManagedRulesCommonRuleSet"
-    priority = 2
+    priority = 30
 
     override_action {
       none {}
@@ -41,10 +63,6 @@ resource "aws_wafv2_web_acl" "api_waf" {
       managed_rule_group_statement {
         name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
-
-        excluded_rule {
-          name = "GenericRFI_BODY"
-        }
       }
     }
 
@@ -57,7 +75,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
   rule {
     name     = "AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 3
+    priority = 40
 
     override_action {
       none {}
@@ -79,7 +97,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
   rule {
     name     = "AWSManagedRulesLinuxRuleSet"
-    priority = 4
+    priority = 50
 
     override_action {
       none {}
@@ -101,7 +119,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
   rule {
     name     = "AWSManagedRulesSQLiRuleSet"
-    priority = 5
+    priority = 60
 
     override_action {
       none {}
@@ -121,27 +139,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
     }
   }
 
-  rule {
-    name     = "api_rate_limit"
-    priority = 101
 
-    action {
-      block {}
-    }
-
-    statement {
-      rate_based_statement {
-        limit              = 10000
-        aggregate_key_type = "IP"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "api_rate_limit"
-      sampled_requests_enabled   = true
-    }
-  }
 
   visibility_config {
     cloudwatch_metrics_enabled = true

@@ -1,5 +1,5 @@
 locals {
-  account_id       = "028051698106"
+  account_id       = "806545929748"
   domain           = ""
   env              = "production"
   product_name     = "scan-files"
