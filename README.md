@@ -1,4 +1,8 @@
-# Project template
+# Scan Files 🖨️
 
-This repository provides some base files for setting up a repository at
-CDS.
+_La version française sera disponible bientôt_
+
+This repository is for a file scanning product undertaken by the CDS SRE, Security and Support team.
+
+
+
