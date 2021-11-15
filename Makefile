@@ -31,7 +31,7 @@ migrations:
 	$(MAKE) -C api migrations
 
 db-connect:
-	psql postgresql://postgres:postgres@db/list-manager
+	psql postgresql://postgres:postgres@db/scan-files
 
 test: $(addsuffix .test,$(RESOURCES))
 
