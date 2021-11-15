@@ -1,7 +1,7 @@
 """create scan table
 
 Revision ID: fdbf608faf86
-Revises: 
+Revises:
 Create Date: 2021-11-15 20:45:58.403433
 
 """

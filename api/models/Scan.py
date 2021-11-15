@@ -1,7 +1,6 @@
 import datetime
 import uuid
 
-from enum import IntEnum
 from models import Base
 from sqlalchemy import DateTime, Column, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID

@@ -1,13 +1,9 @@
 from aws_lambda_powertools import Metrics
 from aws_lambda_powertools.metrics import MetricUnit
-from database.db import db_session
-from fastapi import Depends, FastAPI, HTTPException, Request
-from logger import log
+from fastapi import FastAPI, HTTPException, Request
 from os import environ
 from pydantic import BaseSettings
 from starlette.middleware.base import BaseHTTPMiddleware
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 from uuid import uuid4
 from .custom_middleware import add_security_headers
 from .routers import ops
