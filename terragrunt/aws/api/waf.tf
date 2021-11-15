@@ -152,19 +152,11 @@ resource "aws_cloudwatch_log_group" "api_waf" {
   # checkov:skip=CKV_AWS_158: CloudWatch default encryption key is acceptable
   name              = "/aws/kinesisfirehose/api_waf"
   retention_in_days = 14
-
-  tags = {
-    CostCenter = var.billing_code
-  }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "api_waf" {
   name        = "aws-waf-logs-${var.product_name}"
   destination = "extended_s3"
-
-  tags = {
-    CostCenter = var.billing_code
-  }
 
   extended_s3_configuration {
     role_arn   = aws_iam_role.waf_log_role.arn
