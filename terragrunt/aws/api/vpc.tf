@@ -59,8 +59,7 @@ resource "aws_security_group" "api" {
   vpc_id = module.vpc.vpc_id
 
   tags = {
-    CostCentre = var.billing_code
-    Name       = "${var.product_name}_api_sg"
+    Name = "${var.product_name}_api_sg"
   }
 
   egress {
