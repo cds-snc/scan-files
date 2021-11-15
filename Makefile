@@ -1,4 +1,5 @@
 RESOURCES = \
+	api \
 	terragrunt
 
 .PHONY: help build dev format fmt install lint migrate migrations fmt-ci lint-ci
