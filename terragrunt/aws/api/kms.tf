@@ -73,16 +73,3 @@ resource "aws_kms_key" "scan-files" {
     CostCenter = var.billing_code
   }
 }
-
-resource "aws_kms_key" "scan-files-us-east" {
-  provider = aws.us-east-1
-
-  description         = "KMS Key"
-  enable_key_rotation = true
-
-  policy = data.aws_iam_policy_document.kms_policies.json
-
-  tags = {
-    CostCenter = var.billing_code
-  }
-}

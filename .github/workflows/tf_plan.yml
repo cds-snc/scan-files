@@ -40,9 +40,18 @@ jobs:
           wget -O bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/$TERRAGRUNT_VERSION/terragrunt_linux_amd64
           chmod +x bin/*
           echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+          
+      - name: Install Conftest
+        run: |
+          wget "https://github.com/open-policy-agent/conftest/releases/download/v${{ env.CONFTEST_VERSION }}/conftest_${{ env.CONFTEST_VERSION }}_Linux_x86_64.tar.gz" \
+          && wget "https://github.com/open-policy-agent/conftest/releases/download/v${{ env.CONFTEST_VERSION }}/checksums.txt" \
+          && grep 'Linux_x86_64.tar.gz' < checksums.txt | sha256sum --check  --status \
+          && tar -zxvf "conftest_${{ env.CONFTEST_VERSION }}_Linux_x86_64.tar.gz" conftest \
+          && mv conftest /usr/local/bin \
+          && rm "conftest_${{ env.CONFTEST_VERSION }}_Linux_x86_64.tar.gz" checksums.txt
 
       - name: Terraform plan
-        uses: cds-snc/terraform-plan@v1
+        uses: cds-snc/terraform-plan@v2
         with:
           comment-delete: true
           comment-title: Plan for ${{ matrix.module }}
