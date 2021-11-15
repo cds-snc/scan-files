@@ -32,7 +32,7 @@ def test_healthcheck_success(mock_get_db_version):
 
 
 @patch("api_gateway.routers.ops.get_db_version")
-@patch("api_gateway.api.log")
+@patch("api_gateway.routers.ops.log")
 def test_healthcheck_failure(mock_log, mock_get_db_version):
     mock_get_db_version.side_effect = SQLAlchemyError()
     response = client.get("/healthcheck")
