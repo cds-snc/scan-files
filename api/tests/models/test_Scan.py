@@ -11,7 +11,7 @@ def test_scan_model():
         submitter="submitter",
         verdict="clean",
         quarantine_path="quarantine_path",
-        meta_data={}
+        meta_data={},
     )
     assert scan.file_name == "file_name"
     assert scan.file_size == 100
@@ -34,7 +34,7 @@ def test_scan_model_saved(session):
         submitter="submitter",
         verdict="clean",
         quarantine_path="quarantine_path",
-        meta_data={}
+        meta_data={},
     )
     session.add(scan)
     session.commit()
