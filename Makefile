@@ -1,4 +1,5 @@
 RESOURCES = \
+	api \
 	terragrunt
 
 .PHONY: help build dev format fmt install lint migrate migrations fmt-ci lint-ci
@@ -31,7 +32,7 @@ migrations:
 	$(MAKE) -C api migrations
 
 db-connect:
-	psql postgresql://postgres:postgres@db/list-manager
+	psql postgresql://postgres:postgres@db/scan-files
 
 test: $(addsuffix .test,$(RESOURCES))
 

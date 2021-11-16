@@ -1,0 +1,91 @@
+name: Lint, format and test code
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - api/**
+      - terragrunt/**
+      - .github/workflows/ci_code.yml
+
+env:
+  TERRAGRUNT_VERSION: v0.31.1
+
+jobs:
+
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: scan-files
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    strategy:
+      fail-fast: false
+      matrix:
+          folder: ["api", "terragrunt"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check for changes
+        uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # v2.10.2
+        id: filter
+        with:
+          filters: |
+            changes:
+              - '${{ matrix.folder }}/**'
+              - '.github/workflows/ci_code.yml'
+
+      - name: Setup python
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Setup node
+        if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'terragrunt' }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Setup Terragrunt
+        if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder == 'terragrunt' }}
+        run: |
+          mkdir -p bin
+          wget -O bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/$TERRAGRUNT_VERSION/terragrunt_linux_amd64
+          chmod +x bin/*
+          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+
+      - name: Install dev dependencies
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        working-directory: ${{ matrix.folder }}
+        run: make install-dev
+
+      - name: Install dependencies
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        working-directory: ${{ matrix.folder }}
+        run: make install
+
+      - name: Lint
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        working-directory: ${{ matrix.folder }}
+        run: make lint-ci
+
+      - name: Format
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        working-directory: ${{ matrix.folder }}
+        run: make fmt-ci
+
+      - name: Test
+        if: ${{ steps.filter.outputs.changes == 'true' }}
+        working-directory: ${{ matrix.folder }}
+        env:
+          SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@127.0.0.1/scan-files
+          SQLALCHEMY_DATABASE_TEST_URI: postgresql://postgres:postgres@127.0.0.1/scan-files
+        run: make test
