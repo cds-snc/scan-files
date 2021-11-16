@@ -13,6 +13,27 @@ function test_migrate_resp {
 }
 
 function migrate {
+  aws lambda get-function \
+    --function-name api \
+    --region ca-central-1 \
+    --query 'Configuration.[State, LastUpdateStatus]' > status
+
+  # Loop until ["Active","Successful"] vs {"LastUpdateStatus": "InProgress"}
+  COUNTER=1
+  while [[ $(jq < status '. | if type=="array" then true else false end') == "false" ]]
+  do
+    if [ $COUNTER -eq 12 ]; then
+      echo "Migration error: Lambda ready state timeout after 120 seconds"
+      break
+    fi
+    sleep 10
+    aws lambda get-function \
+      --function-name api \
+      --region ca-central-1 \
+      --query 'Configuration.[State, LastUpdateStatus]' > status
+    COUNTER=$((COUNTER+1))
+  done
+
   aws lambda invoke \
     --function-name api \
     --cli-binary-format raw-in-base64-out \
