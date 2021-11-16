@@ -23,7 +23,7 @@ function migrate {
   while [[ $(jq < status '. | if type=="array" then true else false end') == "false" ]]
   do
     if [ $COUNTER -eq 12 ]; then
-      "Migration error: Lambda ready state timeout after 120 seconds"
+      echo "Migration error: Lambda ready state timeout after 120 seconds"
       break
     fi
     sleep 10
