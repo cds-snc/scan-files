@@ -64,3 +64,16 @@ jobs:
 
       - name: Logout of Amazon ECR
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
+
+      - name: Deploy lambda
+        if: matrix.image == 'api'
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ matrix.image }} \
+            --image-uri $REGISTRY/${{ matrix.image }}:latest
+
+      - name: Migrate Database
+        if: matrix.image == 'api'
+        run: |
+          source .github/workflows/scripts/migrate.sh
+          migrate

@@ -32,20 +32,6 @@ data "aws_iam_policy_document" "api_policies" {
       "arn:aws:logs:${var.region}:${var.account_id}:log-group:*"
     ]
   }
-
-  statement {
-
-    effect = "Allow"
-
-    actions = [
-      "ecr:GetDownloadUrlForlayer",
-      "ecr:BatchGetImage"
-    ]
-    resources = [
-      aws_ecr_repository.api.arn
-    ]
-  }
-
 }
 
 resource "aws_iam_policy" "api" {
