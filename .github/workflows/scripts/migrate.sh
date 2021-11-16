@@ -19,13 +19,19 @@ function migrate {
     --query 'Configuration.[State, LastUpdateStatus]' > status
 
   # Loop until ["Active","Successful"] vs {"LastUpdateStatus": "InProgress"}
+  COUNTER=1
   while [[ $(jq < status '. | if type=="array" then true else false end') == "false" ]]
   do
+    if [ $COUNTER -eq 12 ]; then
+      "Migration error: Lambda ready state timeout after 120 seconds"
+      break
+    fi
     sleep 10
     aws lambda get-function \
       --function-name api \
       --region ca-central-1 \
       --query 'Configuration.[State, LastUpdateStatus]' > status
+    COUNTER=$((COUNTER+1))
   done
 
   aws lambda invoke \
