@@ -14,7 +14,5 @@ module "api" {
 
   policies = [
     data.aws_iam_policy_document.api_policies.json,
-    data.aws_iam_policy_document.firehose_assume_role.json,
-    data.aws_iam_policy_document.write_waf_logs.json
   ]
 }
