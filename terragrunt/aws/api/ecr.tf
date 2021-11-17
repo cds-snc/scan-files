@@ -8,4 +8,9 @@ resource "aws_ecr_repository" "api" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }

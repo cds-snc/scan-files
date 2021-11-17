@@ -68,4 +68,9 @@ resource "aws_kms_key" "scan-files" {
   enable_key_rotation = true
 
   policy = data.aws_iam_policy_document.kms_policies.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
