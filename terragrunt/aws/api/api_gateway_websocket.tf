@@ -50,4 +50,9 @@ resource "aws_apigatewayv2_stage" "api_wskt_stage" {
     destination_arn = aws_cloudwatch_log_group.api_wskt_access.arn
     format          = "$context.identity.sourceIp [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId"
   }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }

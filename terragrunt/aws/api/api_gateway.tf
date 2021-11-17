@@ -98,4 +98,9 @@ resource "aws_api_gateway_stage" "api" {
     destination_arn = aws_cloudwatch_log_group.api_access.arn
     format          = "{\"requestId\":\"$context.requestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"responseLength\":\"$context.responseLength\"}"
   }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
