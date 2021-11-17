@@ -1,5 +1,5 @@
 module "api" {
-  source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.44//lambda"
+  source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
   name                     = "api"
   billing_tag_value        = var.billing_code
   allow_api_gateway_invoke = true
