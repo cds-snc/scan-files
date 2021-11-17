@@ -8,8 +8,15 @@ def test_handler_api_gateway_event(mock_mangum, context_fixture, capsys):
     mock_asgi_handler = MagicMock()
     mock_asgi_handler.return_value = True
     mock_mangum.return_value = mock_asgi_handler
-    assert main.handler({"httpMethod": "GET"}, context_fixture) is True
-    mock_asgi_handler.assert_called_once_with({"httpMethod": "GET"}, context_fixture)
+    event = {
+        "requestContext": {
+            "resourcePath": "/",
+            "httpMethod": "GET",
+            "path": "/Prod/",
+        }
+    }
+    assert main.handler(event, context_fixture) is True
+    mock_asgi_handler.assert_called_once_with(event, context_fixture)
 
     log = capsys.readouterr().out.strip()
     metrics_output = json.loads(log)
