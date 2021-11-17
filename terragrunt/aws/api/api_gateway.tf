@@ -7,7 +7,7 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }

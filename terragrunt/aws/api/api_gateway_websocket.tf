@@ -6,7 +6,7 @@ resource "aws_apigatewayv2_api" "api_wskt" {
   route_selection_expression = "$request.body.action"
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
