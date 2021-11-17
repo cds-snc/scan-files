@@ -2,7 +2,7 @@ from os import environ
 from fastapi import APIRouter, Depends
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from database.db import get_session
+from database.db import get_db_version, get_session
 from logger import log
 
 router = APIRouter()
@@ -13,13 +13,6 @@ router = APIRouter()
 @router.get("/version")
 def version():
     return {"version": environ.get("GIT_SHA", "unknown")}
-
-
-def get_db_version(session):
-
-    query = "SELECT version_num FROM alembic_version"
-    full_name = session.execute(query).fetchone()[0]
-    return full_name
 
 
 @router.get("/healthcheck")
