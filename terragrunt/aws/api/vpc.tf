@@ -59,7 +59,9 @@ resource "aws_security_group" "api" {
   vpc_id = module.vpc.vpc_id
 
   tags = {
-    Name = "${var.product_name}_api_sg"
+    Name       = "${var.product_name}_api_sg"
+    CostCentre = var.billing_code
+    Terraform  = true
   }
 
   egress {
