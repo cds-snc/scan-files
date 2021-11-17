@@ -154,7 +154,6 @@ resource "aws_wafv2_web_acl" "api_waf" {
 }
 
 resource "aws_cloudwatch_log_group" "api_waf" {
-  # checkov:skip=CKV_AWS_158: CloudWatch default encryption key is acceptable
   name              = "/aws/kinesisfirehose/api_waf"
   retention_in_days = 14
 

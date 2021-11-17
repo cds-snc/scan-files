@@ -58,6 +58,11 @@ resource "aws_iam_role_policy_attachment" "api" {
 resource "aws_iam_role" "waf_log_role" {
   name               = "${var.product_name}-logs"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume_role.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_policy" "write_waf_logs" {

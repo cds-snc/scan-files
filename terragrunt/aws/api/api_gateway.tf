@@ -19,7 +19,6 @@ resource "aws_api_gateway_resource" "resource" {
 }
 
 resource "aws_api_gateway_method" "method" {
-  # checkov:skip=CKV_AWS_59: Public access is required for this API.  Sensitive methods are protected by an API auth key.
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.resource.id
   http_method   = "ANY"
