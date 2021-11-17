@@ -1,5 +1,5 @@
 module "api" {
-  source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.44//lambda"
+  source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
   name                     = "api"
   billing_tag_value        = var.billing_code
   allow_api_gateway_invoke = true
@@ -10,6 +10,11 @@ module "api" {
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
     subnet_ids         = module.vpc.private_subnet_ids
+  }
+
+  environment_variables = {
+    API_AUTH_TOKEN          = var.api_auth_token
+    SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
   }
 
   policies = [

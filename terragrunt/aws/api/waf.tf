@@ -3,6 +3,11 @@ resource "aws_wafv2_web_acl" "api_waf" {
   description = "WAF for API protection"
   scope       = "REGIONAL"
 
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
+
   default_action {
     allow {}
   }
@@ -149,9 +154,13 @@ resource "aws_wafv2_web_acl" "api_waf" {
 }
 
 resource "aws_cloudwatch_log_group" "api_waf" {
-  # checkov:skip=CKV_AWS_158: CloudWatch default encryption key is acceptable
   name              = "/aws/kinesisfirehose/api_waf"
   retention_in_days = 14
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "api_waf" {
@@ -167,6 +176,11 @@ resource "aws_kinesis_firehose_delivery_stream" "api_waf" {
       log_group_name  = aws_cloudwatch_log_group.api_waf.name
       log_stream_name = "WAFLogS3Delivery"
     }
+  }
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
   }
 }
 

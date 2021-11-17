@@ -14,6 +14,11 @@ data "aws_iam_policy_document" "service_principal" {
 resource "aws_iam_role" "api" {
   name               = "${var.product_name}-api"
   assume_role_policy = data.aws_iam_policy_document.service_principal.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 data "aws_iam_policy_document" "api_policies" {
@@ -38,6 +43,11 @@ resource "aws_iam_policy" "api" {
   name   = "${var.product_name}-api"
   path   = "/"
   policy = data.aws_iam_policy_document.api_policies.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "api" {
@@ -48,12 +58,22 @@ resource "aws_iam_role_policy_attachment" "api" {
 resource "aws_iam_role" "waf_log_role" {
   name               = "${var.product_name}-logs"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume_role.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_policy" "write_waf_logs" {
   name        = "${var.product_name}_WriteLogs"
   description = "Allow writing WAF logs to S3 + CloudWatch"
   policy      = data.aws_iam_policy_document.write_waf_logs.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "write_waf_logs" {

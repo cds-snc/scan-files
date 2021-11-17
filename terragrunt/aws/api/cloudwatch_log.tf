@@ -2,9 +2,13 @@
 # API Gateway CloudWatch logging
 #
 resource "aws_cloudwatch_log_group" "api_access" {
-  # checkov:skip=CKV_AWS_158: CloudWatch default encryption key is acceptable
   name              = "/aws/api-gateway/api-access"
   retention_in_days = 14
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 # This account will be used by all API Gateway resources in the account and region
@@ -15,6 +19,11 @@ resource "aws_api_gateway_account" "api_cloudwatch" {
 resource "aws_iam_role" "api_cloudwatch" {
   name               = "ApiGatewayCloudWatchRole"
   assume_role_policy = data.aws_iam_policy_document.api_assume.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "api_cloudwatch" {

@@ -2,7 +2,6 @@
 data "aws_iam_policy_document" "kms_policies" {
   # checkov:skip=CKV_AWS_109: `resources=["*"]` references the key the policy is attached to
   # checkov:skip=CKV_AWS_111: `resources=["*"]` references the key the policy is attached to
-
   statement {
 
     effect = "Allow"
@@ -68,4 +67,9 @@ resource "aws_kms_key" "scan-files" {
   enable_key_rotation = true
 
   policy = data.aws_iam_policy_document.kms_policies.json
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
 }
