@@ -11,6 +11,19 @@ resource "aws_cloudwatch_log_group" "api_access" {
   }
 }
 
+#
+# API Gateway CloudWatch logging
+#
+resource "aws_cloudwatch_log_group" "api_wskt_access" {
+  name              = "/aws/api-gatewayv2/api-wskt-access"
+  retention_in_days = 14
+
+  tags = {
+    CostCenter = var.billing_code
+    Terraform  = true
+  }
+}
+
 # This account will be used by all API Gateway resources in the account and region
 resource "aws_api_gateway_account" "api_cloudwatch" {
   cloudwatch_role_arn = aws_iam_role.api_cloudwatch.arn
