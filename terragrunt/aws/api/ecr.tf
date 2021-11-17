@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "api" {
   }
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }

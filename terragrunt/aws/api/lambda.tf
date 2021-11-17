@@ -3,7 +3,7 @@ module "api" {
   name                     = "api"
   billing_tag_value        = var.billing_code
   allow_api_gateway_invoke = true
-  api_gateway_source_arn   = aws_api_gateway_rest_api.api.arn
+  api_gateway_source_arn   = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
   ecr_arn                  = aws_ecr_repository.api.arn
   enable_lambda_insights   = true
   image_uri                = "${aws_ecr_repository.api.repository_url}:latest"
@@ -20,4 +20,12 @@ module "api" {
   policies = [
     data.aws_iam_policy_document.api_policies.json,
   ]
+}
+
+resource "aws_lambda_permission" "apigatewayv2" {
+  statement_id  = "AllowAPIGatewayV2Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = module.api.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api_wskt.execution_arn}/*/*"
 }

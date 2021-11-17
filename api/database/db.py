@@ -22,3 +22,10 @@ def get_session():
         yield session
     finally:
         session.close()
+
+
+def get_db_version(session):
+
+    query = "SELECT version_num FROM alembic_version"
+    full_name = session.execute(query).fetchone()[0]
+    return full_name

@@ -42,7 +42,7 @@ remote_state {
     dynamodb_table      = "terraform-state-lock-dynamo"
     region              = "ca-central-1"
     key                 = "${path_relative_to_include()}/terraform.tfstate"
-    s3_bucket_tags      = { CostCenter : local.cost_center_code }
-    dynamodb_table_tags = { CostCenter : local.cost_center_code }
+    s3_bucket_tags      = { CostCentre : local.cost_center_code }
+    dynamodb_table_tags = { CostCentre : local.cost_center_code }
   }
 }

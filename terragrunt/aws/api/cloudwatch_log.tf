@@ -6,7 +6,20 @@ resource "aws_cloudwatch_log_group" "api_access" {
   retention_in_days = 14
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+#
+# API Gateway CloudWatch logging
+#
+resource "aws_cloudwatch_log_group" "api_wskt_access" {
+  name              = "/aws/api-gatewayv2/api-wskt-access"
+  retention_in_days = 14
+
+  tags = {
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
@@ -21,7 +34,7 @@ resource "aws_iam_role" "api_cloudwatch" {
   assume_role_policy = data.aws_iam_policy_document.api_assume.json
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }

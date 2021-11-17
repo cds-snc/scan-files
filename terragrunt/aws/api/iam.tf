@@ -16,7 +16,7 @@ resource "aws_iam_role" "api" {
   assume_role_policy = data.aws_iam_policy_document.service_principal.json
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "api" {
   policy = data.aws_iam_policy_document.api_policies.json
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
@@ -60,7 +60,7 @@ resource "aws_iam_role" "waf_log_role" {
   assume_role_policy = data.aws_iam_policy_document.firehose_assume_role.json
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
@@ -71,7 +71,7 @@ resource "aws_iam_policy" "write_waf_logs" {
   policy      = data.aws_iam_policy_document.write_waf_logs.json
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }

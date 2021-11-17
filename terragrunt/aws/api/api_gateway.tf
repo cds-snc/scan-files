@@ -7,7 +7,7 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
     Terraform  = true
   }
 }
@@ -97,5 +97,10 @@ resource "aws_api_gateway_stage" "api" {
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_access.arn
     format          = "{\"requestId\":\"$context.requestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"responseLength\":\"$context.responseLength\"}"
+  }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
   }
 }
