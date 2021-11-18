@@ -1,0 +1,89 @@
+{
+  "archive_ts":"2021-11-27T17:20:03.982011Z",
+  "classification":"TLP:AMBER",
+  "error_count":0,
+  "errors":[
+     
+  ],
+  "expiry_ts":"2021-12-12T17:20:03.930469Z",
+  "file_count":1,
+  "files":[
+     {
+        "name":"eicar.com",
+        "sha256":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f",
+        "size":68
+     }
+  ],
+  "max_score":-1000,
+  "metadata":{
+     "ingest_id":"123",
+     "requestor":"app",
+     "s3_location":"s3://foo/bar/",
+     "ts":"2021-11-12T17:20:03.930402Z",
+     "type":"INGEST"
+  },
+  "params":{
+     "classification":"TLP:AMBER",
+     "deep_scan":false,
+     "description":"api test",
+     "generate_alert":false,
+     "groups":[
+        "USERS"
+     ],
+     "ignore_cache":false,
+     "ignore_dynamic_recursion_prevention":false,
+     "ignore_filtering":false,
+     "ignore_size":false,
+     "initial_data":null,
+     "malicious":false,
+     "max_extracted":100,
+     "max_supplementary":100,
+     "never_drop":false,
+     "priority":150,
+     "profile":false,
+     "psid":null,
+     "quota_item":false,
+     "service_spec":{
+        
+     },
+     "services":{
+        "excluded":[
+           
+        ],
+        "resubmit":[
+           
+        ],
+        "runtime_excluded":[
+           
+        ],
+        "selected":[
+           "Filtering",
+           "Antivirus",
+           "Static Analysis",
+           "Extraction",
+           "Networking"
+        ]
+     },
+     "submitter":"foo",
+     "ttl":30,
+     "type":"INGEST"
+  },
+  "results":[
+     "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f.Safelist.v4_1_0_stable0.cLORsssTwDCB"
+  ],
+  "scan_key":"456",
+  "sid":"789",
+  "state":"completed",
+  "times":{
+     "completed":"2021-11-12T17:20:04.843894Z",
+     "submitted":"2021-11-12T17:20:03.982278Z"
+  },
+  "verdict":{
+     "malicious":[
+        
+     ],
+     "non_malicious":[
+        
+     ]
+  }
+}

@@ -1,10 +1,22 @@
 import datetime
 import uuid
 
+from enum import Enum
 from models import Base
 from sqlalchemy import DateTime, Column, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.sql.sqltypes import Numeric
+
+
+class ScanProviders(Enum):
+    ASSEMBLYLINE = "Assemblyline"
+
+
+class ScanVerdicts(Enum):
+    IN_PROGRESS = "in_progress"
+    CLEAN = "clean"
+    MALICIOUS = "malicious"
+    ERROR = "error"
 
 
 class Scan(Base):
@@ -12,12 +24,12 @@ class Scan(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     file_name = Column(String, nullable=False)
-    file_size = Column(Numeric, nullable=False)
-    save_path = Column(String, nullable=False)
-    sha256 = Column(String, nullable=False)
     scan_provider = Column(String, nullable=False)
-    submitter = Column(String, nullable=False)
 
+    submitter = Column(String, nullable=True)
+    file_size = Column(Numeric, nullable=True)
+    save_path = Column(String, nullable=True)
+    sha256 = Column(String, nullable=True)
     verdict = Column(String, nullable=True)
     quarantine_path = Column(String, nullable=True)
     meta_data = Column(JSONB, nullable=True)
