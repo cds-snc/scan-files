@@ -6,7 +6,7 @@ from pydantic import BaseSettings
 from starlette.middleware.base import BaseHTTPMiddleware
 from uuid import uuid4
 from .custom_middleware import add_security_headers
-from .routers import ops, web_socket
+from .routers import ops
 
 
 class Settings(BaseSettings):
@@ -27,7 +27,6 @@ app = FastAPI(
 )
 
 app.include_router(ops.router)
-app.include_router(web_socket.router)
 
 # https://github.com/tiangolo/fastapi/issues/1472; can't include custom middlware when running tests
 if environ.get("CI") is None:

@@ -21,11 +21,3 @@ module "api" {
     data.aws_iam_policy_document.api_policies.json,
   ]
 }
-
-resource "aws_lambda_permission" "apigatewayv2" {
-  statement_id  = "AllowAPIGatewayV2Invoke"
-  action        = "lambda:InvokeFunction"
-  function_name = module.api.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_wskt.execution_arn}/*/*"
-}
