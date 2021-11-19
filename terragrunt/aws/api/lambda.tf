@@ -15,6 +15,9 @@ module "api" {
   environment_variables = {
     API_AUTH_TOKEN          = var.api_auth_token
     SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
+    MLWR_HOST               = var.mlwr_host
+    MLWR_USER               = var.mlwr_user
+    MLWR_KEY                = var.mlwr_key
   }
 
   policies = [

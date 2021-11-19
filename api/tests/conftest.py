@@ -39,6 +39,11 @@ def context_fixture():
 
 
 @pytest.fixture(scope="session")
+def assemblyline_results():
+    open("tests/api_gateway/fixtures/assemblyline_results.json", "rb")
+
+
+@pytest.fixture(scope="session")
 def session():
     db_engine = create_engine(os.environ.get("SQLALCHEMY_DATABASE_TEST_URI"))
     Session = sessionmaker(bind=db_engine)
