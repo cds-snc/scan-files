@@ -1,10 +1,11 @@
-import os
 import json
+import os
 from uuid import uuid4
 from api_gateway import api
+from api_gateway.routers.scans import determine_verdict
 from factories import ScanFactory
 from fastapi.testclient import TestClient
-from models.Scan import Scan, ScanVerdicts
+from models.Scan import Scan, ScanProviders, ScanVerdicts
 from requests import HTTPError
 from sqlalchemy.exc import SQLAlchemyError
 from unittest.mock import ANY, patch
@@ -169,7 +170,7 @@ def test_get_assemblyline_results_inprogress(mock_db_session, mock_client, sessi
 def test_get_assemblyline_results_upstream_scan_error(
     mock_db_session, mock_client, session
 ):
-    scan = ScanFactory()
+    scan = ScanFactory(sha256=None)
     session.commit()
 
     al_request = json.loads(load_fixture("assemblyline_request.json"))
@@ -179,6 +180,7 @@ def test_get_assemblyline_results_upstream_scan_error(
     random_uuid = str(uuid4())
     al_result["files"][0]["sha256"] = random_uuid
     al_result["error_count"] = 1
+    del al_result["max_score"]
 
     mock_client().ingest.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
@@ -195,7 +197,7 @@ def test_get_assemblyline_results_upstream_scan_error(
         "verdict": ScanVerdicts.ERROR.value,
     }
     assert response.status_code == 200
-    assert updated_scan.sha256 == random_uuid
+    assert updated_scan.sha256 is None
 
 
 @patch("api_gateway.routers.scans.get_assemblyline_client")
@@ -212,7 +214,7 @@ def test_get_assemblyline_results_upstream_malicious_file(
     al_result = json.loads(load_fixture("assemblyline_results.json"))
     random_uuid = str(uuid4())
     al_result["files"][0]["sha256"] = random_uuid
-    al_result["verdict"]["malicious"] = ["foo"]
+    al_result["max_score"] = 1000
 
     mock_client().ingest.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
@@ -303,3 +305,59 @@ def test_get_assemblyline_results_random_assemblyline_error(
         "error": "error retrieving scan results from assemblyline"
     }
     assert response.status_code == 502
+
+
+def test_assemblyline_score_to_verdict():
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, -1000)
+        == ScanVerdicts.CLEAN.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 1)
+        == ScanVerdicts.CLEAN.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 299)
+        == ScanVerdicts.CLEAN.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 300)
+        == ScanVerdicts.SUSPICIOUS.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 699)
+        == ScanVerdicts.SUSPICIOUS.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 700)
+        == ScanVerdicts.SUSPICIOUS.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 999)
+        == ScanVerdicts.SUSPICIOUS.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 1000)
+        == ScanVerdicts.MALICIOUS.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, 10000)
+        == ScanVerdicts.MALICIOUS.value
+    )
+
+    # Test for error conditions
+    assert determine_verdict("foo", -1000) == ScanVerdicts.ERROR.value
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, "foo")
+        == ScanVerdicts.ERROR.value
+    )
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, -1)
+        == ScanVerdicts.ERROR.value
+    )
+    assert determine_verdict(None, None) == ScanVerdicts.ERROR.value
+    assert (
+        determine_verdict(ScanProviders.ASSEMBLYLINE.value, None)
+        == ScanVerdicts.ERROR.value
+    )
+    assert determine_verdict(None, 100) == ScanVerdicts.ERROR.value
