@@ -110,17 +110,18 @@ def retrieve_assemblyline_messages(session):
             )
 
             if scan and scan.completed is None:
-                if submission_details["error_count"] > 0:
-                    verdict = ScanVerdicts.ERROR.value
-                elif submission_details["verdict"]["malicious"] == []:
-                    verdict = ScanVerdicts.CLEAN.value
+                if "max_score" in submission_details:
+                    verdict = determine_verdict(
+                        ScanProviders.ASSEMBLYLINE.value,
+                        submission_details["max_score"],
+                    )
+                    scan.completed = submission_details["times"]["completed"]
+                    scan.file_size = submission_details["files"][0]["size"]
+                    scan.sha256 = submission_details["files"][0]["sha256"]
                 else:
-                    verdict = ScanVerdicts.MALICIOUS.value
+                    verdict = ScanVerdicts.ERROR.value
 
                 scan.verdict = verdict
-                scan.completed = submission_details["times"]["completed"]
-                scan.file_size = submission_details["files"][0]["size"]
-                scan.sha256 = submission_details["files"][0]["sha256"]
                 scan.meta_data = submission_details
                 scan_results[scan.id] = scan
                 session.commit()
@@ -133,3 +134,28 @@ def retrieve_assemblyline_messages(session):
             break
 
     return scan_results
+
+
+def determine_verdict(provider, value):
+    if provider is None or value is None:
+        log.error(
+            f"Provider({provider}) and Value({value}) are required to calculate scan verdicts"
+        )
+        return ScanVerdicts.ERROR.value
+
+    if provider == ScanProviders.ASSEMBLYLINE.value:
+        if not isinstance(value, int):
+            return ScanVerdicts.ERROR.value
+        if (
+            value == -1000 or 0 <= value <= 299
+        ):  # Ignore informational ratings and merge with clean
+            return ScanVerdicts.CLEAN.value
+        elif 300 <= value <= 999:
+            return ScanVerdicts.SUSPICIOUS.value
+        elif value >= 1000:
+            return ScanVerdicts.MALICIOUS.value
+        else:
+            return ScanVerdicts.UNKNOWN.value
+    else:
+        log.error("Unsupported provider: ", provider)
+        return ScanVerdicts.ERROR.value
