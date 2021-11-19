@@ -43,6 +43,7 @@ def start_assemblyline_scan(
             file_name=file.filename, scan_provider=ScanProviders.ASSEMBLYLINE.value
         )
         session.add(scan)
+        session.commit()
 
         meta_data = {
             "git_sha": environ.get("GIT_SHA", "latest"),
@@ -55,7 +56,6 @@ def start_assemblyline_scan(
             params=settings,
             metadata=meta_data,
         )
-        session.commit()
     except Exception as err:
         log.error(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY

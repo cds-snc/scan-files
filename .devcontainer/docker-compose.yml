@@ -26,7 +26,16 @@ services:
     environment:
       SHELL: /bin/zsh
       <<: *db-connection-strings
- 
+  api:
+    build:
+      context: ../api/
+    volumes:
+      - ../api:/function
+    environment:
+      <<: *db-connection-strings
+      AWS_LOCALSTACK: "True"
+      OPENAPI_URL: "/openapi.json"
+
   db:
     image: postgres:11.2
     volumes:
