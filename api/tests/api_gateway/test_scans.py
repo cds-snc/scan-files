@@ -353,7 +353,7 @@ def test_assemblyline_score_to_verdict():
     )
     assert (
         determine_verdict(ScanProviders.ASSEMBLYLINE.value, -1)
-        == ScanVerdicts.ERROR.value
+        == ScanVerdicts.UNKNOWN.value
     )
     assert determine_verdict(None, None) == ScanVerdicts.ERROR.value
     assert (

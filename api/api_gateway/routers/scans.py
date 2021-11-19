@@ -155,7 +155,7 @@ def determine_verdict(provider, value):
         elif value >= 1000:
             return ScanVerdicts.MALICIOUS.value
         else:
-            return ScanVerdicts.ERROR.value
+            return ScanVerdicts.UNKNOWN.value
     else:
         log.error("Unsupported provider: ", provider)
         return ScanVerdicts.ERROR.value

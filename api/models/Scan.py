@@ -18,6 +18,7 @@ class ScanVerdicts(Enum):
     SUSPICIOUS = "suspicious"
     MALICIOUS = "malicious"
     ERROR = "error"
+    UNKNOWN = "unknown"
 
 
 class Scan(Base):
