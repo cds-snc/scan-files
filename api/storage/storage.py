@@ -38,7 +38,6 @@ def put_file(file):
         obj.put(Body=file.file.read())
         return f"s3://{bucket}/{file.filename}_{name}"
     except Exception as err:
-        print(err)
         log.error(f"Error uploading {file.filename} to s3")
         log.error(err)
         return None
