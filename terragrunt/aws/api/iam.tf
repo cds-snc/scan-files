@@ -37,6 +37,25 @@ data "aws_iam_policy_document" "api_policies" {
       "arn:aws:logs:${var.region}:${var.account_id}:log-group:*"
     ]
   }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+      "s3:ListBucketVersions",
+      "s3:GetBucketLocation",
+      "s3:Get*",
+      "s3:Put*"
+    ]
+    resources = [
+      module.file-queue.s3_bucket_arn,
+      "${module.file-queue.s3_bucket_arn}/*",
+      module.quarantined-files.s3_bucket_arn,
+      "${module.quarantined-files.s3_bucket_arn}/*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "api" {
