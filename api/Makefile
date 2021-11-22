@@ -3,7 +3,7 @@
 build: ;
 
 dev:
-	uvicorn main:app --reload --host 0.0.0.0 --port 8000
+	API_AUTH_TOKEN=123 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 fmt:
 	black . $(ARGS)

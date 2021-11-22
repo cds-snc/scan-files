@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, Response, status, UploadFile
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from os import environ
+from storage.storage import put_file
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from uuid import UUID
@@ -30,6 +31,7 @@ def start_assemblyline_scan(
 ):
     try:
         al_client = get_assemblyline_client()
+
         settings = {
             "classification": "TLP:A//REL TO CDS-SNC.CA",  # classification
             "description": "CDS file scanning api",  # file description
@@ -37,10 +39,11 @@ def start_assemblyline_scan(
             "ttl": 1,
         }
 
-        file.file.seek(0)
-
+        save_path = put_file(file)
         scan = Scan(
-            file_name=file.filename, scan_provider=ScanProviders.ASSEMBLYLINE.value
+            file_name=file.filename,
+            save_path=save_path,
+            scan_provider=ScanProviders.ASSEMBLYLINE.value,
         )
         session.add(scan)
         session.commit()
@@ -49,7 +52,10 @@ def start_assemblyline_scan(
             "git_sha": environ.get("GIT_SHA", "latest"),
             "requestor": "scan-files-api",
             "scan_id": str(scan.id),
+            "save_path": save_path,
         }
+
+        file.file.seek(0)
         response = al_client.ingest(
             content=file.file.read(),
             nq="cds_snc_queue",

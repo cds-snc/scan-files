@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from uuid import uuid4
 from api_gateway import api
 from api_gateway.routers.scans import determine_verdict
@@ -18,9 +19,11 @@ def load_fixture(name):
     return fixture.read()
 
 
+@patch("storage.storage.get_session")
 @patch("api_gateway.routers.scans.get_assemblyline_client")
 @patch("database.db.get_session")
-def test_file_upload_success(mock_db_session, mock_client):
+def test_file_upload_success(mock_db_session, mock_client, mock_aws_session):
+    os.environ["FILE_QUEUE_BUCKET"] = "foo"
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = client.post(
@@ -56,9 +59,11 @@ def test_file_upload_fail_not_authorized(mock_db_session, mock_client):
     assert response.status_code == 401
 
 
+@patch("storage.storage.get_session")
 @patch("api_gateway.routers.scans.get_assemblyline_client")
 @patch("api_gateway.routers.scans.get_session")
-def test_send_to_assemblyline(mock_db_session, mock_client):
+def test_send_to_assemblyline(mock_db_session, mock_client, mock_aws_session):
+    os.environ["FILE_QUEUE_BUCKET"] = "foo"
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = client.post(
@@ -72,9 +77,10 @@ def test_send_to_assemblyline(mock_db_session, mock_client):
     assert response.json() == {"status": "OK", "scan_id": ANY}
 
 
+@patch("storage.storage.get_session")
 @patch("api_gateway.routers.scans.get_assemblyline_client")
 @patch("database.db.get_session")
-def test_send_to_assemblyline_error(mock_db_session, mock_client):
+def test_send_to_assemblyline_error(mock_db_session, mock_client, mock_aws_session):
     mock_client().ingest.side_effect = HTTPError()
     filename = "tests/api_gateway/fixtures/file.txt"
 
@@ -361,3 +367,25 @@ def test_assemblyline_score_to_verdict():
         == ScanVerdicts.ERROR.value
     )
     assert determine_verdict(None, 100) == ScanVerdicts.ERROR.value
+
+
+@patch("storage.storage.get_session")
+@patch("api_gateway.routers.scans.get_assemblyline_client")
+@patch("api_gateway.routers.scans.get_session")
+def test_send_to_assemblyline_save_to_s3(
+    mock_db_session, mock_client, mock_aws_session, session
+):
+    os.environ["FILE_QUEUE_BUCKET"] = "foo"
+    filename = "tests/api_gateway/fixtures/file.txt"
+    response = client.post(
+        "/assemblyline",
+        files={"file": ("random_file", open(filename, "rb"), "text/plain")},
+        headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    new_scan = session.query(Scan).filter(Scan.id == data["scan_id"]).one_or_none()
+    assert re.match("s3://foo/random_file_(.*)", new_scan.save_path)
