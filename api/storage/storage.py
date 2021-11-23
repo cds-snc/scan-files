@@ -28,7 +28,11 @@ def get_object(record):
 
 def put_file(file):
 
-    client = get_session().resource("s3")
+    if environ.get("AWS_LOCALSTACK", False):
+        client = get_session().resource("s3", endpoint_url="http://localstack:4566")
+    else:
+        client = get_session().resource("s3")
+
     bucket = environ.get("FILE_QUEUE_BUCKET", None)
 
     try:
