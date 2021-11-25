@@ -64,7 +64,20 @@ data "aws_iam_policy_document" "api_policies" {
       "states:ListActivities",
       "states:CreateActivity",
       "states:DescribeExecution",
+    ]
+
+    resources = [
+      "arn:aws:states:${var.region}:${var.account_id}:*"
+    ]
+  }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
       "states:StartExecution",
+      "states:StopExecution"
     ]
 
     resources = [

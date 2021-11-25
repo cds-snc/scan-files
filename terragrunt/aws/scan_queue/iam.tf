@@ -79,11 +79,6 @@ data "aws_iam_policy_document" "scan_runner_policies" {
     effect = "Allow"
 
     actions = [
-      "states:ListStateMachines",
-      "states:ListActivities",
-      "states:CreateStateMachine",
-      "states:CreateActivity",
-      "states:DescribeExecution",
       "states:StartExecution",
       "states:StopExecution"
     ]
@@ -91,6 +86,22 @@ data "aws_iam_policy_document" "scan_runner_policies" {
     resources = [
       aws_sfn_state_machine.scan_queue.arn,
       aws_sfn_state_machine.scan_queue_lock_cleanup.arn,
+    ]
+  }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "states:ListStateMachines",
+      "states:ListActivities",
+      "states:CreateActivity",
+      "states:DescribeExecution",
+    ]
+
+    resources = [
+      "arn:aws:states:${var.region}:${var.account_id}:*"
     ]
   }
 
