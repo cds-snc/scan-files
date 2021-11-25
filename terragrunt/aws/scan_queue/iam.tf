@@ -19,12 +19,14 @@ data "aws_iam_policy_document" "service_principal" {
 resource "aws_iam_role" "scan_queue" {
   name               = "${var.product_name}-scan_queue"
   assume_role_policy = data.aws_iam_policy_document.service_principal.json
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
 
 data "aws_iam_policy_document" "scan_runner_policies" {
-
-
-
   statement {
 
     effect = "Allow"
@@ -111,6 +113,11 @@ resource "aws_iam_policy" "scan_queue" {
   name   = "${var.product_name}-scan_queue"
   path   = "/"
   policy = data.aws_iam_policy_document.scan_runner_policies.json
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "scan_runner" {
