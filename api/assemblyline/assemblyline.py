@@ -87,6 +87,8 @@ def poll_for_results():
         message = None
         while True:
             message = al_client.ingest.get_message("cds_snc_queue")
+            # Results of completed scans are retrieved one at a time until "None" is returned
+            # indicating no additional results are available
             if message is None:
                 break
 
