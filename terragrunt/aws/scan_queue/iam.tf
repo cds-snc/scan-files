@@ -47,10 +47,8 @@ data "aws_iam_policy_document" "scan_runner_policies" {
     actions = [
       "states:ListStateMachines",
       "states:ListActivities",
-      "states:CreateStateMachine",
       "states:CreateActivity",
       "states:DescribeExecution",
-      "states:StartExecution",
       "states:StopExecution"
     ]
 
@@ -80,7 +78,6 @@ data "aws_iam_policy_document" "scan_runner_policies" {
 
     actions = [
       "states:StartExecution",
-      "states:StopExecution"
     ]
 
     resources = [
@@ -98,6 +95,7 @@ data "aws_iam_policy_document" "scan_runner_policies" {
       "states:ListActivities",
       "states:CreateActivity",
       "states:DescribeExecution",
+      "states:StopExecution"
     ]
 
     resources = [

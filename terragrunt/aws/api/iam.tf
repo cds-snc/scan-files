@@ -64,6 +64,7 @@ data "aws_iam_policy_document" "api_policies" {
       "states:ListActivities",
       "states:CreateActivity",
       "states:DescribeExecution",
+      "states:StopExecution"
     ]
 
     resources = [
@@ -77,7 +78,7 @@ data "aws_iam_policy_document" "api_policies" {
 
     actions = [
       "states:StartExecution",
-      "states:StopExecution"
+
     ]
 
     resources = [
