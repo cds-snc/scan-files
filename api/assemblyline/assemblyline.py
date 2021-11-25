@@ -8,8 +8,6 @@ from models.Scan import Scan, ScanProviders, ScanVerdicts
 from os import environ
 from storage.storage import get_file
 
-SCAN_QUEUE_STATE_MACHINE = "assemblyline-file-scan-queue"
-
 
 def get_assemblyline_client():
     return get_client(
@@ -22,11 +20,12 @@ def get_assemblyline_client():
 def add_to_scan_queue(payload):
     client = get_session().client("stepfunctions")
     response = client.list_state_machines()
+    state_machine = environ.get("SCAN_QUEUE_STATEMACHINE_NAME")
 
     stateMachine = [
         stateMachine
         for stateMachine in response["stateMachines"]
-        if stateMachine.get("name") == SCAN_QUEUE_STATE_MACHINE
+        if stateMachine.get("name") == state_machine
     ]
 
     if stateMachine:
@@ -35,14 +34,16 @@ def add_to_scan_queue(payload):
             input=dumps(payload),
         )
     else:
-        log.error(f"State machine: {SCAN_QUEUE_STATE_MACHINE} is not defined")
-        raise ValueError(f"State machine: {SCAN_QUEUE_STATE_MACHINE} is not defined")
+        log.error(f"State machine: {state_machine} is not defined")
+        raise ValueError(f"State machine: {state_machine} is not defined")
 
 
 def launch_scan(execution_id, scan_id, file=None):
     try:
         al_client = get_assemblyline_client()
         session = next(get_db_session())
+        state_machine = environ.get("SCAN_QUEUE_STATEMACHINE_NAME")
+
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
         if file is None:
             file = get_file(scan.save_path, True)
@@ -56,7 +57,7 @@ def launch_scan(execution_id, scan_id, file=None):
 
         meta_data = {
             "git_sha": environ.get("GIT_SHA", "latest"),
-            "requestor": "scan-files-step-function",
+            "requestor": state_machine,
             "scan_id": str(scan.id),
             "save_path": scan.save_path,
             "execution_id": execution_id,
@@ -71,7 +72,6 @@ def launch_scan(execution_id, scan_id, file=None):
         )
 
     except Exception as err:
-        print(err)
         log.error({"error": "error sending file to assemblyline"})
         log.error(err)
         return False

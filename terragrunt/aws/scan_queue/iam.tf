@@ -89,7 +89,8 @@ data "aws_iam_policy_document" "scan_runner_policies" {
     ]
 
     resources = [
-      "arn:aws:states:${var.region}:${var.account_id}:*"
+      aws_sfn_state_machine.scan_queue.arn,
+      aws_sfn_state_machine.scan_queue_lock_cleanup.arn,
     ]
   }
 
@@ -104,7 +105,7 @@ data "aws_iam_policy_document" "scan_runner_policies" {
     ]
 
     resources = [
-      "arn:aws:events:${var.region}:${var.account_id}:*"
+      "arn:aws:events:${var.region}:${var.account_id}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
     ]
   }
 }

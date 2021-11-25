@@ -10,6 +10,11 @@ dependency "api" {
   config_path = "../api"
 
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+
+  mock_outputs = {
+    function_arn  = ""
+    function_name = ""
+  }
 }
 
 inputs = {

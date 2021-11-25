@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "api_policies" {
     ]
 
     resources = [
-      "arn:aws:states:${var.region}:${var.account_id}:*"
+      "arn:aws:states:${var.region}:${var.account_id}:stateMachine:${var.scan_queue_statemachine_name}"
     ]
   }
 
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "api_policies" {
     ]
 
     resources = [
-      "arn:aws:events:${var.region}:${var.account_id}:*"
+      "arn:aws:events:${var.region}:${var.account_id}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
     ]
   }
 
@@ -98,7 +98,8 @@ data "aws_iam_policy_document" "api_policies" {
     ]
 
     resources = [
-      "arn:aws:dynamodb:${var.region}:${var.account_id}:*"
+      "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.locktable_name}",
+      "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.completed_scans_table_name}"
     ]
   }
 }

@@ -6,7 +6,7 @@ resource "aws_dynamodb_table" "scan-locktable" {
 
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockName"
-  name         = "scan-locktable"
+  name         = var.locktable_name
 
   server_side_encryption {
     enabled = true

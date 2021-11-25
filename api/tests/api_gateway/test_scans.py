@@ -59,6 +59,7 @@ def test_file_upload_fail_not_authorized(mock_db_session):
 @patch("api_gateway.routers.scans.get_db_session")
 def test_send_to_scan_queue(mock_db_session, mock_aws_client):
     os.environ["FILE_QUEUE_BUCKET"] = "foo"
+    os.environ["SCAN_QUEUE_STATEMACHINE_NAME"] = "bar"
     filename = "tests/api_gateway/fixtures/file.txt"
 
     mock_client = MagicMock()
@@ -67,7 +68,7 @@ def test_send_to_scan_queue(mock_db_session, mock_aws_client):
         "stateMachines": [
             {
                 "stateMachineArn": "arn",
-                "name": "assemblyline-file-scan-queue",
+                "name": "bar",
             },
         ]
     }
