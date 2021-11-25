@@ -16,7 +16,7 @@ db_engine = create_engine(
 db_session = sessionmaker(bind=db_engine)
 
 
-def get_session():
+def get_db_session():
     session = db_session()
     try:
         yield session

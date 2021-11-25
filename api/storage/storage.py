@@ -4,7 +4,7 @@ from logger import log
 from uuid import uuid4
 
 
-def get_object(record):
+def get_object(record, ref_only=False):
 
     if environ.get("AWS_LOCALSTACK", False):
         client = get_session().resource("s3", endpoint_url="http://localstack:4566")
@@ -13,7 +13,11 @@ def get_object(record):
 
     obj = client.Object(record["s3"]["bucket"]["name"], record["s3"]["object"]["key"])
     try:
-        body = obj.get()["Body"].read()
+        if ref_only:
+            body = obj.get()["Body"]
+        else:
+            body = obj.get()["Body"].read()
+
         log.info(
             f"Downloaded {record['s3']['object']['key']} from {record['s3']['bucket']['name']} with length {len(body)}"
         )

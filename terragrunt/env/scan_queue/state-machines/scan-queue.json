@@ -1,0 +1,270 @@
+{
+    "StartAt": "Get Lock",
+    "States": {
+      "Get Lock": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "Acquire Lock",
+            "States": {
+              "Acquire Lock": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::dynamodb:updateItem",
+                "Parameters": {
+                  "TableName": "${table_semaphore}",
+                  "Key": {
+                    "LockName": {
+                      "S": "${lock_name}"
+                    }
+                  },
+                  "ExpressionAttributeNames":  {
+                    "#currentlockcount": "currentlockcount",
+                    "#lockownerid.$": "$$.Execution.Id"
+                  },
+                  "ExpressionAttributeValues": {
+                    ":increase": {
+                      "N": "1"
+                    },
+                    ":limit": {
+                      "N": "${concurrent_scan_limit}"
+                    },
+                    ":lockacquiredtime": {
+                      "S.$": "$$.State.EnteredTime"
+                    }
+                  },
+                  "UpdateExpression": "SET #currentlockcount = #currentlockcount + :increase, #lockownerid = :lockacquiredtime",
+                  "ConditionExpression": "currentlockcount <> :limit and attribute_not_exists(#lockownerid)",
+                  "ReturnValues": "UPDATED_NEW"
+                },
+                "Retry": [ 
+                    {
+                      "ErrorEquals": ["DynamoDB.AmazonDynamoDBException"],
+                      "MaxAttempts": 0
+                    },
+                    {
+                      "ErrorEquals": [ "States.ALL" ],
+                      "MaxAttempts": 6,
+                      "BackoffRate": 2
+                    } 
+                  ], 
+                "Catch": [
+                  {
+                    "ErrorEquals": ["DynamoDB.AmazonDynamoDBException"],
+                    "Next": "Initialize Lock Item",
+                    "ResultPath": "$.lockinfo.acquisitionerror"
+                  },
+                  {
+                    "ErrorEquals": [
+                      "DynamoDB.ConditionalCheckFailedException"
+                    ],
+                    "Next": "Get Current Lock Record",
+                    "ResultPath": "$.lockinfo.acquisitionerror"
+                  }
+                ],
+                "End": true
+              },
+              "Initialize Lock Item": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::dynamodb:putItem",
+                "Parameters": {
+                  "TableName": "${table_semaphore}",
+                  "Item": {
+                    "LockName": {
+                      "S": "${lock_name}"
+                    },
+                    "currentlockcount": {
+                        "N": "0"
+                    }
+                  },
+                  "ConditionExpression": "LockName <> :lockname",
+                  "ExpressionAttributeValues": {
+                      ":lockname": {"S": "${lock_name}"}
+                  }
+                },
+                "Catch": [
+                  {
+                    "ErrorEquals": [ "States.ALL" ],
+                    "Next": "Acquire Lock",
+                    "ResultPath": null
+                  }
+                ],
+                "Next": "Acquire Lock",
+                "ResultPath": null
+              },
+              "Get Current Lock Record": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::dynamodb:getItem",
+                "Parameters": {
+                  "TableName": "${table_semaphore}",
+                  "ExpressionAttributeNames":  {
+                    "#lockownerid.$": "$$.Execution.Id"
+                  },
+                  "Key": {
+                    "LockName": {
+                      "S": "${lock_name}"
+                    }
+                  },
+                  "ProjectionExpression": "#lockownerid"
+                },
+                "ResultSelector": {
+                  "Item.$": "$.Item",
+                  "ItemString.$": "States.JsonToString($.Item)"
+                },
+                "ResultPath": "$.lockinfo.currentlockitem",
+                "Next": "Check If Lock Already Acquired"
+              },
+              "Check If Lock Already Acquired": {
+                "Type": "Choice",
+                "Choices": [
+                  {
+                    "And": [
+                      {
+                        "Variable": "$.lockinfo.currentlockitem.ItemString",
+                        "IsPresent": true
+                      },
+                      {
+                        "Variable": "$.lockinfo.currentlockitem.ItemString",
+                        "StringMatches": "*Z*"
+                      }
+                     ],
+                     "Next": "Continue Because Lock Was Already Acquired"
+                  }
+                ],
+                "Default": "Wait to Get Lock"
+              },
+              "Continue Because Lock Was Already Acquired": {
+                "Type": "Pass",
+                "End": true
+              },
+              "Wait to Get Lock": {
+                "Type": "Wait",
+                "Seconds": 3,
+                "Next": "Acquire Lock"
+              }
+            }
+          }
+        ],
+        "ResultPath": null,
+        "Next": "Submit to AssemblyLine"
+      },     
+      "Submit to AssemblyLine": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "Start AssemblyLine scan",
+            "States": {
+              "Start AssemblyLine scan": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                  "FunctionName": "${worker_lambda}",
+                  "Payload": {
+                    "task": "assemblyline_scan",
+                    "Input.$": "$",
+                    "execution_id.$": "$$.Execution.Id"
+                  }
+                },
+                "ResultSelector": {
+                  "payload.$": "$.Payload"
+                },
+                "End": true
+              }
+            }
+          }
+        ],
+        "Next": "Get AssemblyLine Result"
+      },
+      "Get AssemblyLine Result": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "Get Assemblyline Result",
+            "States": {
+              "Get Assemblyline Result": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                  "FunctionName": "${worker_lambda}",
+                  "Payload": {
+                    "task": "assemblyline_result",
+                    "Input.$": "$.[0].payload",
+                    "execution_id.$": "$$.Execution.Id"
+                  }
+                },
+                "ResultSelector": {
+                  "payload.$": "$.Payload"
+                },
+                "End": true
+              }
+            }
+          }
+        ],
+        "Next": "Check If Results Available"
+      },
+      "Check If Results Available": {
+        "Type": "Choice",
+        "InputPath": "$.[0]",
+        "Choices": [
+          {
+            "Variable": "$.payload",
+            "BooleanEquals": true,
+            "Next": "Release Lock"
+          }
+        ],
+        "Default": "Wait to Get Results"
+      },
+      "Wait to Get Results": {
+        "Type": "Wait",
+        "Seconds": 30,
+        "Next": "Get AssemblyLine Result"
+      },
+      "Release Lock": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:updateItem",
+        "Parameters": {
+          "TableName": "${table_semaphore}",
+          "Key": {
+            "LockName": {
+              "S": "${lock_name}"
+            }
+          },
+          "ExpressionAttributeNames":  {
+            "#currentlockcount": "currentlockcount",
+            "#lockownerid.$": "$$.Execution.Id"
+          },
+          "ExpressionAttributeValues": {
+            ":decrease": {
+              "N": "1"
+            }
+          },
+          "UpdateExpression": "SET #currentlockcount = #currentlockcount - :decrease REMOVE #lockownerid",
+          "ConditionExpression": "attribute_exists(#lockownerid)",
+          "ReturnValues": "UPDATED_NEW"
+        },
+        "Retry": [ 
+          {
+            "ErrorEquals": [ "DynamoDB.ConditionalCheckFailedException" ],
+            "MaxAttempts": 0
+          },
+          {
+            "ErrorEquals": [ "States.ALL" ],
+            "MaxAttempts": 5,
+            "BackoffRate": 1.5
+          } ], 
+        "Catch": [
+          {
+            "ErrorEquals": [
+              "DynamoDB.ConditionalCheckFailedException"
+            ],
+            "Next": "Success State",
+            "ResultPath": null
+          }
+        ],
+        "ResultPath": null,
+        "Next": "Success State"
+      },
+      "Success State": {
+        "Type": "Succeed"
+      }
+    }
+  }

@@ -1,5 +1,7 @@
 from mangum import Mangum
 from api_gateway import api
+from assemblyline.assemblyline import launch_scan
+from database.dynamodb import get_scan_result
 from logger import log
 from os import environ
 from database.migrate import migrate_head
@@ -21,6 +23,12 @@ def handler(event, context):
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
+
+    elif event.get("task", "") == "assemblyline_scan":
+        return launch_scan(event["execution_id"], event["Input"]["scan_id"])
+
+    elif event.get("task", "") == "assemblyline_result":
+        return get_scan_result(event["execution_id"])
 
     elif event.get("task", "") == "migrate":
         try:
