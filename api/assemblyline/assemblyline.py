@@ -8,6 +8,8 @@ from models.Scan import Scan, ScanProviders, ScanVerdicts
 from os import environ
 from storage.storage import get_file
 
+SCAN_QUEUE_STATE_MACHINE = "assemblyline-file-scan-queue"
+
 
 def get_assemblyline_client():
     return get_client(
@@ -20,12 +22,11 @@ def get_assemblyline_client():
 def add_to_scan_queue(payload):
     client = get_session().client("stepfunctions")
     response = client.list_state_machines()
-    state_machine = "assemblyline-file-scan-queue"
 
     stateMachine = [
         stateMachine
         for stateMachine in response["stateMachines"]
-        if stateMachine.get("name") == state_machine
+        if stateMachine.get("name") == SCAN_QUEUE_STATE_MACHINE
     ]
 
     if stateMachine:
@@ -34,8 +35,8 @@ def add_to_scan_queue(payload):
             input=dumps(payload),
         )
     else:
-        log.error(f"State machine: {state_machine} is not defined")
-        raise ValueError(f"State machine: {state_machine} is not defined")
+        log.error(f"State machine: {SCAN_QUEUE_STATE_MACHINE} is not defined")
+        raise ValueError(f"State machine: {SCAN_QUEUE_STATE_MACHINE} is not defined")
 
 
 def launch_scan(execution_id, scan_id, file=None):
