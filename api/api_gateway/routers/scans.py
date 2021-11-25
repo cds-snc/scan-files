@@ -34,7 +34,7 @@ def start_assemblyline_scan(
     except Exception as err:
         log.error(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
-        return {"error": f"error sending file [{file}] to scan queue"}
+        return {"error": f"error sending file [{file.filename}] to scan queue"}
 
     return {"status": "OK", "scan_id": str(scan.id)}
 

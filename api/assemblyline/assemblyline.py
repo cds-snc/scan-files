@@ -6,7 +6,7 @@ from json import dumps
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from os import environ
-from storage.storage import get_object
+from storage.storage import get_file
 
 
 def get_assemblyline_client():
@@ -20,11 +20,12 @@ def get_assemblyline_client():
 def add_to_scan_queue(payload):
     client = get_session().client("stepfunctions")
     response = client.list_state_machines()
+    state_machine = "assemblyline-file-scan-queue"
 
     stateMachine = [
         stateMachine
         for stateMachine in response["stateMachines"]
-        if stateMachine.get("name") == "assemblyline-file-scan-queue"
+        if stateMachine.get("name") == state_machine
     ]
 
     if stateMachine:
@@ -33,17 +34,17 @@ def add_to_scan_queue(payload):
             input=dumps(payload),
         )
     else:
-        log.error("State machine: assemblyline-file-scan-queue is not defined")
+        log.error(f"State machine: {state_machine} is not defined")
+        raise ValueError(f"State machine: {state_machine} is not defined")
 
 
 def launch_scan(execution_id, scan_id, file=None):
     try:
         al_client = get_assemblyline_client()
-
-        session = get_db_session()
+        session = next(get_db_session())
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
         if file is None:
-            file = get_object(scan.save_path, True)
+            file = get_file(scan.save_path, True)
 
         settings = {
             "classification": "TLP:A//REL TO CDS-SNC.CA",  # classification
@@ -60,7 +61,7 @@ def launch_scan(execution_id, scan_id, file=None):
             "execution_id": execution_id,
         }
 
-        file.file.seek(0)
+        file.seek(0)
         al_client.ingest(
             content=file.read(),
             nq="cds_snc_queue",
@@ -69,6 +70,7 @@ def launch_scan(execution_id, scan_id, file=None):
         )
 
     except Exception as err:
+        print(err)
         log.error({"error": "error sending file to assemblyline"})
         log.error(err)
         return False
@@ -77,15 +79,16 @@ def launch_scan(execution_id, scan_id, file=None):
 
 
 def poll_for_results():
-    al_client = get_assemblyline_client()
-    session = get_db_session()
 
-    message = None
-    while True:
-        message = al_client.ingest.get_message("cds_snc_queue")
-        if message is None:
-            break
-        else:
+    try:
+        al_client = get_assemblyline_client()
+        session = next(get_db_session())
+        message = None
+        while True:
+            message = al_client.ingest.get_message("cds_snc_queue")
+            if message is None:
+                break
+
             submission_details = al_client.submission(message["submission"]["sid"])
             log_scan_result(message["submission"]["metadata"]["execution_id"])
             scan = (
@@ -113,9 +116,15 @@ def poll_for_results():
                 log.error(
                     f"Received results for scan_id not in database: {message['submission']['metadata']['scan_id']}"
                 )
+                return False
 
-        if environ.get("CI"):
-            break
+            if environ.get("CI"):
+                break
+    except Exception as err:
+        log.error({"error": "error sending file to assemblyline"})
+        log.error(err)
+        return False
+
     return True
 
 

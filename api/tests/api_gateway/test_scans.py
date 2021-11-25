@@ -1,5 +1,7 @@
 import os
 import re
+
+from requests.models import HTTPError
 from api_gateway import api
 from factories import ScanFactory
 from fastapi.testclient import TestClient
@@ -80,6 +82,59 @@ def test_send_to_scan_queue(mock_db_session, mock_aws_client):
         stateMachineArn="arn",
         input=ANY,
     )
+
+
+@patch("assemblyline.assemblyline.get_session")
+@patch("api_gateway.routers.scans.get_db_session")
+def test_send_to_scan_queue_invalid_state_machine(mock_db_session, mock_aws_client):
+    os.environ["FILE_QUEUE_BUCKET"] = "foo"
+    filename = "tests/api_gateway/fixtures/file.txt"
+
+    mock_client = MagicMock()
+    mock_aws_client.return_value.client.return_value = mock_client
+    mock_aws_client.return_value.client.return_value.list_state_machines.return_value = {
+        "stateMachines": [
+            {
+                "stateMachineArn": "arn",
+                "name": "foo",
+            },
+        ]
+    }
+
+    response = client.post(
+        "/assemblyline",
+        files={"file": ("random_file", open(filename, "rb"), "text/plain")},
+        headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
+    )
+
+    assert response.json() == {
+        "error": "error sending file [random_file] to scan queue"
+    }
+    assert response.status_code == 502
+
+
+@patch("assemblyline.assemblyline.get_session")
+@patch("api_gateway.routers.scans.get_db_session")
+def test_send_to_scan_queue_random_error(mock_db_session, mock_aws_client):
+    os.environ["FILE_QUEUE_BUCKET"] = "foo"
+    filename = "tests/api_gateway/fixtures/file.txt"
+
+    mock_client = MagicMock()
+    mock_aws_client.return_value.client.return_value = mock_client
+    mock_aws_client.return_value.client.return_value.list_state_machines.side_effect = (
+        HTTPError
+    )
+
+    response = client.post(
+        "/assemblyline",
+        files={"file": ("random_file", open(filename, "rb"), "text/plain")},
+        headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
+    )
+
+    assert response.json() == {
+        "error": "error sending file [random_file] to scan queue"
+    }
+    assert response.status_code == 502
 
 
 @patch("api_gateway.routers.scans.get_db_session")

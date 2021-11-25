@@ -20,7 +20,8 @@
      "requestor":"app",
      "s3_location":"s3://foo/bar/",
      "ts":"2021-11-12T17:20:03.930402Z",
-     "type":"INGEST"
+     "type":"INGEST",
+     "execution_id": "456"
   },
   "params":{
      "classification":"TLP:AMBER",

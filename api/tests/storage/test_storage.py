@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch, call
 
 
 def load_fixture(name):
-    fixture = open(f"tests/storage/fixtures/{name}", "r")
+    fixture = open(f"tests/api_gateway/fixtures/{name}", "r")
     return fixture.read()
 
 
@@ -30,6 +30,23 @@ def test_get_object(mock_get_session, mock_log):
     mock_log.info.assert_called_once_with(
         "Downloaded key from bucket_name with length 4"
     )
+
+
+@patch("storage.storage.log")
+@patch("storage.storage.get_session")
+def test_get_file(mock_get_session, mock_log):
+    filename = "tests/api_gateway/fixtures/file.txt"
+    mock_return = MagicMock()
+    mock_return.Object.return_value.download_file.return_value.__getitem__.return_value.read.return_value = open(
+        filename, "rb"
+    )
+
+    mock_get_session.return_value.resource.return_value = mock_return
+
+    assert storage.get_file("s3://bucket_name/file.txt").name == filename
+    mock_return.Object.assert_called_once_with("bucket_name", "file.txt")
+    mock_return.Object().download_file().__getitem__.assert_called_once_with("Body")
+    mock_log.info.assert_called_once_with("Downloaded file.txt from bucket_name")
 
 
 @patch("storage.storage.log")
