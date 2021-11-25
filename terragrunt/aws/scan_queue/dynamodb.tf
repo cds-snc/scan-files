@@ -8,6 +8,10 @@ resource "aws_dynamodb_table" "scan-locktable" {
   hash_key     = "LockName"
   name         = "scan-locktable"
 
+  server_side_encryption {
+    enabled = true
+  }
+
   point_in_time_recovery {
     enabled = "false"
   }
@@ -31,6 +35,10 @@ resource "aws_dynamodb_table" "completed-scans" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "EXECUTION_ID"
   name         = "completed-scans"
+
+  server_side_encryption {
+    enabled = true
+  }
 
   point_in_time_recovery {
     enabled = "false"

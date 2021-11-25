@@ -6,3 +6,4 @@ skip-check:
   - CKV_AWS_120 # API Gateway: caching is not wanted
   - CKV_AWS_136 # ECR: default encryption key is acceptable 
   - CKV_AWS_158 # CloudWatch: default encryption key is acceptable
+  - CKV_AWS_28  # Dynamodb point in time recovery is not required
