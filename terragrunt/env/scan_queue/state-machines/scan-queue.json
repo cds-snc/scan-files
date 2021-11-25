@@ -138,7 +138,7 @@
               },
               "Wait to Get Lock": {
                 "Type": "Wait",
-                "Seconds": 3,
+                "Seconds": ${retry_interval_seconds},
                 "Next": "Acquire Lock"
               }
             }
@@ -215,7 +215,7 @@
       },
       "Wait to Get Results": {
         "Type": "Wait",
-        "Seconds": 30,
+        "Seconds": ${retry_interval_seconds},
         "Next": "Get AssemblyLine Result"
       },
       "Release Lock": {

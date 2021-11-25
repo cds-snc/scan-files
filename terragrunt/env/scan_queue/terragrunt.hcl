@@ -13,9 +13,10 @@ dependency "api" {
 }
 
 inputs = {
-  concurrent_scan_limit = 10
-  api_function_arn      = dependency.api.outputs.function_arn
-  api_function_name     = dependency.api.outputs.function_name
+  concurrent_scan_limit  = 10
+  retry_interval_seconds = 60
+  api_function_arn       = dependency.api.outputs.function_arn
+  api_function_name      = dependency.api.outputs.function_name
 }
 
 include {
