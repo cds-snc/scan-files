@@ -18,7 +18,8 @@
         "requestor":"app",
         "s3_location":"s3: //foo/bar/",
         "ts":"2021-11-12T17:32:43.449509Z",
-        "type":"INGEST"
+        "type":"INGEST",
+        "execution_id": "456"
      },
      "notification":{
         "queue":"cds_snc_queue",

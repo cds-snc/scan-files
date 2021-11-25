@@ -26,6 +26,7 @@ jobs:
       matrix:
         include:
           - module: api
+          - module: scan_queue
 
     runs-on: ubuntu-latest
     steps:

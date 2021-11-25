@@ -54,6 +54,68 @@ data "aws_iam_policy_document" "api_policies" {
       "${module.file-queue.s3_bucket_arn}/*",
     ]
   }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "states:ListStateMachines",
+      "states:ListActivities",
+      "states:CreateActivity",
+      "states:DescribeExecution",
+      "states:StopExecution"
+    ]
+
+    resources = [
+      "arn:aws:states:${var.region}:${var.account_id}:*"
+    ]
+  }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "states:StartExecution",
+
+    ]
+
+    resources = [
+      "arn:aws:states:${var.region}:${var.account_id}:stateMachine:${var.scan_queue_statemachine_name}"
+    ]
+  }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "events:PutTargets",
+      "events:PutRule",
+      "events:DescribeRule"
+    ]
+
+    resources = [
+      "arn:aws:events:${var.region}:${var.account_id}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+    ]
+  }
+
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:PutItem",
+    ]
+
+    resources = [
+      "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.locktable_name}",
+      "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.completed_scans_table_name}"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "api" {

@@ -26,3 +26,15 @@ variable "rds_password" {
 variable "rds_username" {
   type = string
 }
+
+variable "locktable_name" {
+  type = string
+}
+
+variable "completed_scans_table_name" {
+  type = string
+}
+
+variable "scan_queue_statemachine_name" {
+  type = string
+}

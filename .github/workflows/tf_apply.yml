@@ -47,9 +47,19 @@ jobs:
             api:
               - 'terragrunt/aws/api/**'
               - 'terragrunt/env/api/**'
+            scan_queue:
+              - 'terragrunt/aws/scan_queue/**'
+              - 'terragrunt/env/scan_queue/**'
 
       - name: Apply api
         if: ${{ steps.filter.outputs.api == 'true' }}
         working-directory: terragrunt/env/api
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply scan_queue
+        if: ${{ steps.filter.outputs.scan_queue == 'true' }}
+        working-directory: terragrunt/env/scan_queue
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
