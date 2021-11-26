@@ -7,6 +7,8 @@ module "api" {
   ecr_arn                  = aws_ecr_repository.api.arn
   enable_lambda_insights   = true
   image_uri                = "${aws_ecr_repository.api.repository_url}:latest"
+  timeout                  = 120
+
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
     subnet_ids         = module.vpc.private_subnet_ids
