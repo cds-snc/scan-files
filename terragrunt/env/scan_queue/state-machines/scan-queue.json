@@ -145,65 +145,42 @@
           }
         ],
         "ResultPath": null,
-        "Next": "Submit to AssemblyLine"
+        "Next": "Start AssemblyLine scan"
       },     
-      "Submit to AssemblyLine": {
-        "Type": "Parallel",
-        "Branches": [
-          {
-            "StartAt": "Start AssemblyLine scan",
-            "States": {
-              "Start AssemblyLine scan": {
-                "Type": "Task",
-                "Resource": "arn:aws:states:::lambda:invoke",
-                "Parameters": {
-                  "FunctionName": "${worker_lambda}",
-                  "Payload": {
-                    "task": "assemblyline_scan",
-                    "Input.$": "$",
-                    "execution_id.$": "$$.Execution.Id"
-                  }
-                },
-                "ResultSelector": {
-                  "payload.$": "$.Payload"
-                },
-                "End": true
-              }
-            }
+      "Start AssemblyLine scan": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "Parameters": {
+          "FunctionName": "${worker_lambda}",
+          "Payload": {
+            "task": "assemblyline_scan",
+            "Input.$": "$",
+            "execution_id.$": "$$.Execution.Id"
           }
-        ],
+        },
+        "ResultSelector": {
+          "payload.$": "$.Payload"
+        },
         "Next": "Get AssemblyLine Result"
       },
       "Get AssemblyLine Result": {
-        "Type": "Parallel",
-        "Branches": [
-          {
-            "StartAt": "Get Assemblyline Result",
-            "States": {
-              "Get Assemblyline Result": {
-                "Type": "Task",
-                "Resource": "arn:aws:states:::lambda:invoke",
-                "Parameters": {
-                  "FunctionName": "${worker_lambda}",
-                  "Payload": {
-                    "task": "assemblyline_result",
-                    "Input.$": "$.[0].payload",
-                    "execution_id.$": "$$.Execution.Id"
-                  }
-                },
-                "ResultSelector": {
-                  "payload.$": "$.Payload"
-                },
-                "End": true
-              }
-            }
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "Parameters": {
+          "FunctionName": "${worker_lambda}",
+          "Payload": {
+            "task": "assemblyline_result",
+            "Input.$": "$.payload",
+            "execution_id.$": "$$.Execution.Id"
           }
-        ],
+        },
+        "ResultSelector": {
+          "payload.$": "$.Payload"
+        },
         "Next": "Check If Results Available"
       },
       "Check If Results Available": {
         "Type": "Choice",
-        "InputPath": "$.[0]",
         "Choices": [
           {
             "Variable": "$.payload",

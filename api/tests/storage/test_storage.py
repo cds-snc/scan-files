@@ -2,7 +2,7 @@ import os
 import re
 
 from storage import storage
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import ANY, MagicMock, patch, call
 
 
 def load_fixture(name):
@@ -35,17 +35,10 @@ def test_get_object(mock_get_session, mock_log):
 @patch("storage.storage.log")
 @patch("storage.storage.get_session")
 def test_get_file(mock_get_session, mock_log):
-    filename = "tests/api_gateway/fixtures/file.txt"
-    mock_return = MagicMock()
-    mock_return.Object.return_value.download_file.return_value.__getitem__.return_value.read.return_value = open(
-        filename, "rb"
+    storage.get_file("s3://bucket_name/file.txt")
+    mock_get_session().resource().Bucket().download_fileobj.assert_called_once_with(
+        "file.txt", ANY
     )
-
-    mock_get_session.return_value.resource.return_value = mock_return
-
-    assert storage.get_file("s3://bucket_name/file.txt").name == filename
-    mock_return.Object.assert_called_once_with("bucket_name", "file.txt")
-    mock_return.Object().download_file().__getitem__.assert_called_once_with("Body")
     mock_log.info.assert_called_once_with("Downloaded file.txt from bucket_name")
 
 

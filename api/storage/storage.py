@@ -1,6 +1,7 @@
 from boto3wrapper.wrapper import get_session
-from os import environ
 from logger import log
+from os import environ
+from tempfile import TemporaryFile
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -15,20 +16,20 @@ def get_file(save_path, ref_only=False):
     else:
         client = get_session().resource("s3")
 
-    obj = client.Object(bucket, key)
-
     try:
         basename = key.split("/")[-1].strip()
 
+        file = TemporaryFile()
         if ref_only:
-            body = obj.download_file(basename)["Body"]
+            client.Bucket(bucket).download_fileobj(basename, file)
         else:
-            body = obj.download_file(basename)["Body"].read()
+            client.Bucket(bucket).download_fileobj(basename, file)
+            file.seek(0)
+            file = file.read()
 
         log.info(f"Downloaded {key} from {bucket}")
-        return body
+        return file
     except Exception as err:
-        print(err)
         log.error(f"Error downloading {key} from {bucket}")
         log.error(err)
         return False
@@ -70,11 +71,11 @@ def put_file(file):
     bucket = environ.get("FILE_QUEUE_BUCKET", None)
 
     try:
-        name = str(uuid4())
-        obj = client.Object(bucket, name)
+        key = f"{file.filename}_{str(uuid4())}"
+        obj = client.Object(bucket, key)
         file.file.seek(0)
         obj.put(Body=file.file.read())
-        return f"s3://{bucket}/{file.filename}_{name}"
+        return f"s3://{bucket}/{key}"
     except Exception as err:
         log.error(f"Error uploading {file.filename} to s3")
         log.error(err)
