@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo hitting api crawl endpoint
+curl "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+  "task": "assemblyline_scan",
+  "execution_id": "arn:aws:states:ca-central-1:806545929748:execution:assemblyline-file-scan-queue:52740f50-50c1-4f1f-99f1-e467d656be6b",
+  "Input": {
+    "scan_id": "112cdab5-59a9-47dd-94cb-c9c3f6ff9405"
+  }
+}' |jq

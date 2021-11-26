@@ -56,7 +56,7 @@ def launch_scan(execution_id, scan_id, file=None):
         }
 
         meta_data = {
-            "git_sha": environ.get("GIT_SHA", "latest"),
+            "git_sha": environ.get("GIT_SHA", "") if environ.get("GIT_SHA", "") != "" else 'latest',
             "requestor": state_machine,
             "scan_id": str(scan.id),
             "save_path": scan.save_path,
