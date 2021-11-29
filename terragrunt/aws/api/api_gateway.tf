@@ -20,6 +20,11 @@ resource "aws_api_gateway_domain_name" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_api_gateway_base_path_mapping" "api" {

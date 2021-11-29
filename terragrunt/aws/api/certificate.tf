@@ -4,7 +4,8 @@ resource "aws_acm_certificate" "scan_files_certificate" {
   validation_method         = "DNS"
 
   tags = {
-    CostCenter = var.billing_code
+    CostCentre = var.billing_code
+    Terraform  = true
   }
 
   lifecycle {
