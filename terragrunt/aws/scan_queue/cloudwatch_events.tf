@@ -3,7 +3,7 @@
 #
 resource "aws_cloudwatch_event_rule" "sfn_events" {
   name        = "state-machine-${var.env}-lock-cleanup"
-  description = "Capture State Machine events from the Scan queue step function"
+  description = "Capture failure State Maching events from the Scan queue step function"
   event_pattern = jsonencode({
     "source" : ["aws.states"],
     "detail" : {
