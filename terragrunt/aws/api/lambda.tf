@@ -23,6 +23,7 @@ module "api" {
     FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
     SCAN_QUEUE_STATEMACHINE_NAME = var.scan_queue_statemachine_name
     COMPLETED_SCANS_TABLE_NAME   = var.completed_scans_table_name
+    OPENAPI_URL                  = "/openapi.json" # Enable /docs api endpoint
   }
 
   policies = [
