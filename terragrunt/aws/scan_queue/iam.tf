@@ -63,6 +63,7 @@ data "aws_iam_policy_document" "scan_runner_policies" {
 
     actions = [
       "dynamodb:GetRecords",
+      "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:UpdateItem"
     ]
