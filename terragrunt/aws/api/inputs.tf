@@ -38,3 +38,11 @@ variable "completed_scans_table_name" {
 variable "scan_queue_statemachine_name" {
   type = string
 }
+
+variable "domain_name" {
+  type = string
+}
+
+variable "hosted_zone_id" {
+  type = string
+}
