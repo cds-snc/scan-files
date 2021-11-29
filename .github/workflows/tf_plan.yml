@@ -26,6 +26,7 @@ jobs:
       matrix:
         include:
           - module: api
+          - module: hosted_zone
           - module: scan_queue
 
     runs-on: ubuntu-latest
