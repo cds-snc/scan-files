@@ -23,6 +23,9 @@ lint:
 lint-ci:
 	flake8 .
 
+load-test:
+	locust
+
 migrations:
 	cd db_migrations &&\
 	alembic upgrade head
