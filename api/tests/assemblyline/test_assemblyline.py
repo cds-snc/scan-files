@@ -2,7 +2,13 @@ import json
 import os
 from uuid import uuid4
 from api_gateway import api
-from assemblyline.assemblyline import determine_verdict, launch_scan, poll_for_results
+from assemblyline.assemblyline import (
+    determine_verdict,
+    launch_scan,
+    poll_for_results,
+    resubmit_stale_scans,
+)
+from datetime import datetime, timedelta
 from factories import ScanFactory
 from fastapi.testclient import TestClient
 from models.Scan import Scan, ScanProviders, ScanVerdicts
@@ -235,6 +241,39 @@ def test_get_assemblyline_results_random_assemblyline_error(
 
     response = poll_for_results()
     assert response is False
+
+
+@patch("assemblyline.assemblyline.add_to_scan_queue")
+def test_rescan_to_scan_queue(mock_scan_queue, session):
+    current_time = datetime.utcnow()
+    four_weeks_ago = current_time - timedelta(weeks=4)
+    two_days_ago = current_time - timedelta(days=2)
+    one_day_ago = current_time - timedelta(days=1)
+
+    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=four_weeks_ago)
+    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=two_days_ago)
+    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=one_day_ago)
+    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=current_time)
+    ScanFactory(verdict=ScanVerdicts.CLEAN.value, submitted=two_days_ago)
+    session.commit()
+    assert resubmit_stale_scans() is True
+
+    assert mock_scan_queue.call_count == 3
+
+
+@patch("assemblyline.assemblyline.add_to_scan_queue")
+@patch("assemblyline.assemblyline.get_db_session")
+def test_rescan_to_scan_queue_sql_error(mock_db_session, mock_scan_queue):
+    mock_db_session().__next__().query.side_effect = SQLAlchemyError()
+
+    assert resubmit_stale_scans() is False
+    assert mock_scan_queue.call_count == 0
+
+
+@patch("assemblyline.assemblyline.add_to_scan_queue")
+def test_rescan_to_scan_queue_random_error(mock_scan_queue):
+    mock_scan_queue.side_effect = HTTPError()
+    assert resubmit_stale_scans() is False
 
 
 def test_assemblyline_score_to_verdict():
