@@ -13,10 +13,7 @@ install:
 
 install-dev:
 	pip3 install --user -r requirements_dev.txt
-
-load-test:
-	locust
-
+	
 lint:
 	flake8 .
 

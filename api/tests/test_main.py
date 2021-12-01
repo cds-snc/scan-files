@@ -38,6 +38,33 @@ def test_handler_heartbeat_event():
     assert main.handler({"task": "heartbeat"}, {}) == "Success"
 
 
+@patch("main.launch_scan")
+def test_handler_assemblyline_scan_event(mock_launch_scan, context_fixture):
+    main.handler(
+        {"task": "assemblyline_scan", "execution_id": 123, "Input": {"scan_id": "123"}},
+        context_fixture,
+    )
+    mock_launch_scan.assert_called_once()
+
+
+@patch("main.poll_for_results")
+@patch("main.get_scan_result")
+def test_handler_assemblyline_result_event(
+    mock_get_scan_result, mock_poll_for_results, context_fixture
+):
+    main.handler({"task": "assemblyline_result", "execution_id": 123}, context_fixture)
+    mock_poll_for_results.assert_called_once()
+    mock_get_scan_result.assert_called_once()
+
+
+@patch("main.resubmit_stale_scans")
+def test_handler_assemblyline_resubmit_stale_event(
+    mock_resubmit_stale_scans, context_fixture
+):
+    main.handler({"task": "assemblyline_resubmit_stale"}, context_fixture)
+    mock_resubmit_stale_scans.assert_called_once()
+
+
 @patch("main.migrate_head")
 def test_handler_migrate_event_failed(mock_migrate_head, context_fixture):
     mock_migrate_head.side_effect = Exception()

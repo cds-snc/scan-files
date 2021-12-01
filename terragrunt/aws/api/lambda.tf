@@ -30,3 +30,24 @@ module "api" {
     data.aws_iam_policy_document.api_policies.json,
   ]
 }
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = module.api.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.arn
+}
+
+resource "aws_cloudwatch_event_rule" "assemblyline_rescan_every_24_hours" {
+  name                = "retry-stale-scans-${var.env}"
+  description         = "Fires every 24 hours"
+  schedule_expression = "cron(0 0 * * ? *)"
+}
+
+resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
+  rule      = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.name
+  target_id = "${var.product_name}-${var.env}-assemblyline-stale-scan-resubmitter"
+  arn       = module.api.function_arn
+  input     = jsonencode({ task = "assemblyline_resubmit_stale" })
+}

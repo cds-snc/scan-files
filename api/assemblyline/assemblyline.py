@@ -2,11 +2,14 @@ from assemblyline_client import get_client
 from boto3wrapper.wrapper import get_session
 from database.db import get_db_session
 from database.dynamodb import log_scan_result
+from datetime import datetime, timedelta
 from json import dumps
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from os import environ
 from storage.storage import get_file
+from sqlalchemy import and_
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def get_assemblyline_client():
@@ -129,6 +132,35 @@ def poll_for_results():
         return False
 
     return True
+
+
+def resubmit_stale_scans():
+    session = next(get_db_session())
+    current_time = datetime.utcnow()
+    one_day_ago = current_time - timedelta(days=1)
+    try:
+        scans_in_progress = (
+            session.query(Scan)
+            .filter(
+                and_(
+                    Scan.verdict == ScanVerdicts.IN_PROGRESS.value,
+                    Scan.submitted < one_day_ago,
+                )
+            )
+            .all()
+        )
+        for scan in scans_in_progress:
+            add_to_scan_queue({"scan_id": str(scan.id)})
+        return True
+
+    except SQLAlchemyError as err:
+        log.error({"error": "error retriving in-progress scans > 1 day"})
+        log.error(err)
+    except Exception as err:
+        log.error({"error": "error sending file to assemblyline"})
+        log.error(err)
+
+    return False
 
 
 def determine_verdict(provider, value):
