@@ -250,10 +250,10 @@ def test_rescan_to_scan_queue(mock_scan_queue, session):
     two_days_ago = current_time - timedelta(days=2)
     one_day_ago = current_time - timedelta(days=1)
 
-    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=four_weeks_ago)
-    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=two_days_ago)
-    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=one_day_ago)
-    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, submitted=current_time)
+    ScanFactory(verdict=None, submitted=four_weeks_ago)
+    ScanFactory(verdict=None, submitted=two_days_ago)
+    ScanFactory(verdict=None, submitted=one_day_ago)
+    ScanFactory(verdict=None, submitted=current_time)
     ScanFactory(verdict=ScanVerdicts.CLEAN.value, submitted=two_days_ago)
     session.commit()
     assert resubmit_stale_scans() is True
