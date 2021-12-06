@@ -56,6 +56,19 @@ def launch_scan(execution_id, scan_id, file=None):
             "description": "CDS file scanning api",  # file description
             "name": scan.file_name,  # file name
             "ttl": 1,
+            "services": {
+                "excluded": [],
+                "resubmit": [],
+                "runtime_excluded": [],
+                "selected": [
+                    "Filtering",
+                    "Antivirus",
+                    "Cuckoo",
+                    "Static Analysis",
+                    "Extraction",
+                    "Networking",
+                ],
+            },
         }
 
         meta_data = {
@@ -67,12 +80,14 @@ def launch_scan(execution_id, scan_id, file=None):
         }
 
         file.seek(0)
-        al_client.ingest(
+        response = al_client.submit(
             content=file.read(),
-            nq="cds_snc_queue",
             params=settings,
             metadata=meta_data,
         )
+        log.info(response)
+        scan.meta_data = response
+        session.commit()
 
     except Exception as err:
         log.error({"error": "error sending file to assemblyline"})
@@ -82,50 +97,32 @@ def launch_scan(execution_id, scan_id, file=None):
     return True
 
 
-def poll_for_results():
-
+def poll_for_results(scan_id):
     try:
         al_client = get_assemblyline_client()
         session = next(get_db_session())
-        message = None
-        while True:
-            message = al_client.ingest.get_message("cds_snc_queue")
-            # Results of completed scans are retrieved one at a time until "None" is returned
-            # indicating no additional results are available
-            if message is None:
-                break
 
-            submission_details = al_client.submission(message["submission"]["sid"])
-            log_scan_result(message["submission"]["metadata"]["execution_id"])
-            scan = (
-                session.query(Scan)
-                .filter(Scan.id == message["submission"]["metadata"]["scan_id"])
-                .one_or_none()
-            )
-
-            if scan and scan.completed is None:
-                if "max_score" in submission_details:
-                    verdict = determine_verdict(
-                        ScanProviders.ASSEMBLYLINE.value,
-                        submission_details["max_score"],
-                    )
-                    scan.completed = submission_details["times"]["completed"]
-                    scan.file_size = submission_details["files"][0]["size"]
-                    scan.sha256 = submission_details["files"][0]["sha256"]
-                else:
-                    verdict = ScanVerdicts.ERROR.value
-
+        scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
+        if scan:
+            submission_details = al_client.submission(scan.meta_data["sid"])
+            log_scan_result(submission_details["metadata"]["execution_id"])
+            if submission_details["state"] == "completed" and scan.completed is None:
+                verdict = determine_verdict(
+                    ScanProviders.ASSEMBLYLINE.value,
+                    submission_details["max_score"],
+                )
+                scan.completed = submission_details["times"]["completed"]
+                scan.file_size = submission_details["files"][0]["size"]
+                scan.sha256 = submission_details["files"][0]["sha256"]
                 scan.verdict = verdict
                 scan.meta_data = submission_details
                 session.commit()
             else:
-                log.error(
-                    f"Received results for scan_id not in database: {message['submission']['metadata']['scan_id']}"
-                )
                 return False
+        else:
+            log.error(f"Received request for scan_id not in database: {scan_id}")
+            return False
 
-            if environ.get("CI"):
-                break
     except Exception as err:
         log.error({"error": "error sending file to assemblyline"})
         log.error(err)

@@ -32,7 +32,7 @@ def test_send_to_assemblyline_with_file(mock_db_session, mock_client, mock_aws_s
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = launch_scan("execution_id", "scan_id", open(filename, "rb"))
-    mock_client().ingest.assert_called_once()
+    mock_client().submit.assert_called_once()
     assert response is True
 
 
@@ -40,7 +40,7 @@ def test_send_to_assemblyline_with_file(mock_db_session, mock_client, mock_aws_s
 @patch("assemblyline.assemblyline.get_client")
 @patch("database.db.db_session")
 def test_send_to_assemblyline_error(mock_db_session, mock_client, mock_aws_session):
-    mock_client().ingest.side_effect = HTTPError()
+    mock_client().submit.side_effect = HTTPError()
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = launch_scan("execution_id", "scan_id", open(filename, "rb"))
@@ -63,13 +63,13 @@ def test_send_to_assemblyline_retrieve_from_s3(mock_client, mock_aws_session, se
 
     os.environ["FILE_QUEUE_BUCKET"] = "foo"
     launch_scan("execution_id", str(scan.id))
-    mock_client().ingest.assert_called_once()
+    mock_client().submit.assert_called_once()
 
 
 @patch("assemblyline.assemblyline.get_session")
 @patch("assemblyline.assemblyline.get_client")
 def test_get_assemblyline_results_completed(mock_client, mock_aws_session, session):
-    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value)
+    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
     session.commit()
 
     al_request = json.loads(load_fixture("assemblyline_request.json"))
@@ -79,10 +79,10 @@ def test_get_assemblyline_results_completed(mock_client, mock_aws_session, sessi
     random_uuid = str(uuid4())
     al_result["files"][0]["sha256"] = random_uuid
 
-    mock_client().ingest.get_message.return_value = al_request
+    mock_client().submit.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
     assert response is True
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
@@ -93,25 +93,20 @@ def test_get_assemblyline_results_completed(mock_client, mock_aws_session, sessi
 
 @patch("assemblyline.assemblyline.get_session")
 @patch("assemblyline.assemblyline.get_client")
-def test_get_assemblyline_results_polled_empty(mock_client, mock_aws_session, session):
-    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value)
+def test_get_assemblyline_results_invalid_scan_id(
+    mock_client, mock_aws_session, session
+):
+    ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
     session.commit()
 
-    mock_client().ingest.get_message.return_value = None
-
-    response = poll_for_results()
-    assert response is True
-
-    updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
-
-    assert updated_scan.completed is None
-    assert updated_scan.verdict == ScanVerdicts.IN_PROGRESS.value
+    response = poll_for_results(str(uuid4()))
+    assert response is False
 
 
 @patch("assemblyline.assemblyline.get_session")
 @patch("assemblyline.assemblyline.get_client")
 def test_get_assemblyline_results_inprogress(mock_client, mock_aws_session, session):
-    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value)
+    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
     session.commit()
 
     al_request = json.loads(load_fixture("assemblyline_request.json"))
@@ -120,11 +115,12 @@ def test_get_assemblyline_results_inprogress(mock_client, mock_aws_session, sess
     al_result = json.loads(load_fixture("assemblyline_results.json"))
     random_uuid = str(uuid4())
     al_result["files"][0]["sha256"] = random_uuid
+    al_result["state"] = "scanning"
 
-    mock_client().ingest.get_message.return_value = al_request
+    mock_client().submit.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
     assert response is False
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
@@ -135,37 +131,10 @@ def test_get_assemblyline_results_inprogress(mock_client, mock_aws_session, sess
 
 @patch("assemblyline.assemblyline.get_session")
 @patch("assemblyline.assemblyline.get_client")
-def test_get_assemblyline_results_upstream_scan_error(
-    mock_client, mock_aws_session, session
-):
-    scan = ScanFactory(sha256=None, verdict=ScanVerdicts.IN_PROGRESS.value)
-    session.commit()
-
-    al_request = json.loads(load_fixture("assemblyline_request.json"))
-    al_request["submission"]["metadata"]["scan_id"] = str(scan.id)
-
-    al_result = json.loads(load_fixture("assemblyline_results.json"))
-    random_uuid = str(uuid4())
-    al_result["files"][0]["sha256"] = random_uuid
-    del al_result["max_score"]
-
-    mock_client().ingest.get_message.return_value = al_request
-    mock_client().submission.return_value = al_result
-
-    response = poll_for_results()
-    assert response is True
-
-    updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
-    assert updated_scan.verdict == ScanVerdicts.ERROR.value
-    assert updated_scan.sha256 is None
-
-
-@patch("assemblyline.assemblyline.get_session")
-@patch("assemblyline.assemblyline.get_client")
 def test_get_assemblyline_results_upstream_malicious_file(
     mock_client, mock_aws_session, session
 ):
-    scan = ScanFactory()
+    scan = ScanFactory(meta_data={"sid": "123"})
     session.commit()
 
     al_request = json.loads(load_fixture("assemblyline_request.json"))
@@ -176,10 +145,10 @@ def test_get_assemblyline_results_upstream_malicious_file(
     al_result["files"][0]["sha256"] = random_uuid
     al_result["max_score"] = 1000
 
-    mock_client().ingest.get_message.return_value = al_request
+    mock_client().submit.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
     assert response is True
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
@@ -196,6 +165,7 @@ def test_get_assemblyline_results_already_processed(
         completed="2021-12-12T17:20:03.930469Z",
         verdict=ScanVerdicts.CLEAN.value,
         sha256="bar",
+        meta_data={"sid": "123"},
     )
     session.commit()
 
@@ -204,10 +174,10 @@ def test_get_assemblyline_results_already_processed(
 
     al_result = json.loads(load_fixture("assemblyline_results.json"))
 
-    mock_client().ingest.get_message.return_value = al_request
+    mock_client().submit.get_message.return_value = al_request
     mock_client().submission.return_value = al_result
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
     assert response is False
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
@@ -221,11 +191,11 @@ def test_get_assemblyline_results_already_processed(
 def test_get_assemblyline_results_random_sql_error(
     mock_db_session, mock_client, mock_aws_session, session
 ):
-    ScanFactory()
+    scan = ScanFactory(meta_data={"sid": "123"})
     session.commit()
     mock_db_session.side_effect = SQLAlchemyError()
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
 
     assert response is False
 
@@ -235,11 +205,11 @@ def test_get_assemblyline_results_random_sql_error(
 def test_get_assemblyline_results_random_assemblyline_error(
     mock_client, mock_aws_session, session
 ):
-    ScanFactory()
+    scan = ScanFactory(meta_data={"sid": "123"})
     session.commit()
-    mock_client().ingest.get_message.side_effect = HTTPError()
+    mock_client().submit.get_message.side_effect = HTTPError()
 
-    response = poll_for_results()
+    response = poll_for_results(str(scan.id))
     assert response is False
 
 
