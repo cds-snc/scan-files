@@ -143,7 +143,7 @@ def resubmit_stale_scans():
             session.query(Scan)
             .filter(
                 and_(
-                    Scan.verdict == None,
+                    Scan.verdict == None,  # noqa
                     Scan.submitted < one_day_ago,
                 )
             )
