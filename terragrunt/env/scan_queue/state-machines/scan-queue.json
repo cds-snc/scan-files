@@ -159,9 +159,7 @@
             "execution_id.$": "$$.Execution.Id"
           }
         },
-        "ResultSelector": {
-          "payload.$": "$.Payload"
-        },
+        "ResultPath": "$.payload" ,
         "Next": "Get AssemblyLine Result"
       },
       "Get AssemblyLine Result": {
@@ -171,20 +169,18 @@
           "FunctionName": "${worker_lambda}",
           "Payload": {
             "task": "assemblyline_result",
-            "Input.$": "$.payload",
+            "Input.$": "$",
             "execution_id.$": "$$.Execution.Id"
           }
         },
-        "ResultSelector": {
-          "payload.$": "$.Payload"
-        },
+        "ResultPath": "$.payload",
         "Next": "Check If Results Available"
       },
       "Check If Results Available": {
         "Type": "Choice",
         "Choices": [
           {
-            "Variable": "$.payload",
+            "Variable": "$.payload.Payload",
             "BooleanEquals": true,
             "Next": "Release Lock"
           }

@@ -52,7 +52,14 @@ def test_handler_assemblyline_scan_event(mock_launch_scan, context_fixture):
 def test_handler_assemblyline_result_event(
     mock_get_scan_result, mock_poll_for_results, context_fixture
 ):
-    main.handler({"task": "assemblyline_result", "execution_id": 123}, context_fixture)
+    main.handler(
+        {
+            "task": "assemblyline_result",
+            "execution_id": 123,
+            "Input": {"scan_id": "123"},
+        },
+        context_fixture,
+    )
     mock_poll_for_results.assert_called_once()
     mock_get_scan_result.assert_called_once()
 
