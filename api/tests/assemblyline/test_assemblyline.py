@@ -246,6 +246,22 @@ def test_rescan_to_scan_queue_random_error(mock_scan_queue):
     assert resubmit_stale_scans() is False
 
 
+@patch("assemblyline.assemblyline.get_file")
+@patch("assemblyline.assemblyline.add_to_scan_queue")
+def test_rescan_no_file_in_s3(mock_scan_queue, mock_get_file, session):
+    current_time = datetime.utcnow()
+
+    four_weeks_ago = current_time - timedelta(weeks=4)
+    scan = ScanFactory(verdict=None, submitted=four_weeks_ago)
+    session.commit()
+
+    mock_get_file().return_value = False
+    assert resubmit_stale_scans() is True
+
+    check_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
+    assert check_scan.verdict == ScanVerdicts.ERROR.value
+
+
 def test_assemblyline_score_to_verdict():
     assert (
         determine_verdict(ScanProviders.ASSEMBLYLINE.value, -1000)
