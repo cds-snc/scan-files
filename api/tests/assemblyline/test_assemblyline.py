@@ -213,21 +213,26 @@ def test_get_assemblyline_results_random_assemblyline_error(
     assert response is False
 
 
+@patch("assemblyline.assemblyline.get_file")
 @patch("assemblyline.assemblyline.add_to_scan_queue")
-def test_rescan_to_scan_queue(mock_scan_queue, session):
+def test_rescan_to_scan_queue(mock_scan_queue, mock_get_file, session):
     current_time = datetime.utcnow()
     four_weeks_ago = current_time - timedelta(weeks=4)
     two_days_ago = current_time - timedelta(days=2)
     one_day_ago = current_time - timedelta(days=1)
 
-    ScanFactory(verdict=None, submitted=four_weeks_ago)
-    ScanFactory(verdict=None, submitted=two_days_ago)
-    ScanFactory(verdict=None, submitted=one_day_ago)
-    ScanFactory(verdict=None, submitted=current_time)
-    ScanFactory(verdict=ScanVerdicts.CLEAN.value, submitted=two_days_ago)
+    ScanFactory(verdict=None, submitted=four_weeks_ago, save_path="s3://foo/file.txt")
+    ScanFactory(verdict=None, submitted=two_days_ago, save_path="s3://foo/file.txt")
+    ScanFactory(verdict=None, submitted=one_day_ago, save_path="s3://foo/file.txt")
+    ScanFactory(verdict=None, submitted=current_time, save_path="s3://foo/file.txt")
+    ScanFactory(
+        verdict=ScanVerdicts.CLEAN.value,
+        submitted=two_days_ago,
+        save_path="s3://foo/file.txt",
+    )
     session.commit()
-    assert resubmit_stale_scans() is True
 
+    assert resubmit_stale_scans() is True
     assert mock_scan_queue.call_count == 3
 
 
@@ -240,10 +245,27 @@ def test_rescan_to_scan_queue_sql_error(mock_db_session, mock_scan_queue):
     assert mock_scan_queue.call_count == 0
 
 
+@patch("assemblyline.assemblyline.get_file")
 @patch("assemblyline.assemblyline.add_to_scan_queue")
-def test_rescan_to_scan_queue_random_error(mock_scan_queue):
+def test_rescan_to_scan_queue_random_error(mock_scan_queue, mock_get_file):
     mock_scan_queue.side_effect = HTTPError()
     assert resubmit_stale_scans() is False
+
+
+@patch("assemblyline.assemblyline.get_file")
+@patch("assemblyline.assemblyline.add_to_scan_queue")
+def test_rescan_no_file_in_s3(mock_scan_queue, mock_get_file, session):
+    current_time = datetime.utcnow()
+
+    four_weeks_ago = current_time - timedelta(weeks=4)
+    scan = ScanFactory(verdict=None, submitted=four_weeks_ago)
+    session.commit()
+
+    mock_get_file.return_value = False
+    assert resubmit_stale_scans() is True
+
+    check_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
+    assert check_scan.verdict == ScanVerdicts.ERROR.value
 
 
 def test_assemblyline_score_to_verdict():

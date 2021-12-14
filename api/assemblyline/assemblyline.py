@@ -147,7 +147,18 @@ def resubmit_stale_scans():
             .all()
         )
         for scan in scans_in_progress:
-            add_to_scan_queue({"scan_id": str(scan.id)})
+            status_or_file = get_file(scan.save_path, True)
+            if status_or_file is False:
+                log.error(
+                    {
+                        "error": f"{scan.save_path} does not exist. No further retries will be attempted"
+                    }
+                )
+                scan.verdict = ScanVerdicts.ERROR.value
+                scan.completed = datetime.utcnow()
+                session.commit()
+            else:
+                add_to_scan_queue({"scan_id": str(scan.id)})
         return True
 
     except SQLAlchemyError as err:
