@@ -64,6 +64,25 @@ def test_handler_assemblyline_result_event(
     mock_get_scan_result.assert_called_once()
 
 
+@patch("main.poll_for_results")
+@patch("main.get_scan_result")
+def test_handler_assemblyline_result_event_scan_not_complete(
+    mock_get_scan_result, mock_poll_for_results, context_fixture
+):
+
+    mock_poll_for_results.return_value = False
+    main.handler(
+        {
+            "task": "assemblyline_result",
+            "execution_id": 123,
+            "Input": {"scan_id": "123"},
+        },
+        context_fixture,
+    )
+    mock_poll_for_results.assert_called_once()
+    assert not mock_get_scan_result.called
+
+
 @patch("main.resubmit_stale_scans")
 def test_handler_assemblyline_resubmit_stale_event(
     mock_resubmit_stale_scans, context_fixture

@@ -33,8 +33,10 @@ def handler(event, context):
         return launch_scan(event["execution_id"], event["Input"]["scan_id"])
 
     elif event.get("task", "") == "assemblyline_result":
-        poll_for_results(event["Input"]["scan_id"])
-        return get_scan_result(event["execution_id"])
+        success = poll_for_results(event["Input"]["scan_id"])
+        if success:
+            return get_scan_result(event["execution_id"])
+        return success
 
     elif event.get("task", "") == "assemblyline_resubmit_stale":
         return resubmit_stale_scans()
