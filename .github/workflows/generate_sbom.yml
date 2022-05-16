@@ -12,7 +12,7 @@ on:
 jobs:
   generate-sbom:
     name: Generate and upload SBOM
-    uses: cds-snc/security-tools/.github/workflows/generate_sbom.yml@main
+    uses: cds-snc/security-tools/.github/workflows/generate_sbom.yml@fix/generate-sbom
     with:
       project_name: ${{ github.repository.name }}
       project_type: python
