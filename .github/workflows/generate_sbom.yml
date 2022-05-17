@@ -1,17 +1,22 @@
 name: Generate SBOM
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - main
+    paths:
+      - api/requirements.txt
+      - .github/workflows/generate_sbom.yml
   push:
     branches:
       - main
+    paths:
+      - api/requirements.txt
+      - .github/workflows/generate_sbom.yml      
 
 jobs:
   generate-sbom:
-    name: Generate and upload SBOM
+    name: Generate SBOM
     uses: cds-snc/security-tools/.github/workflows/generate_sbom.yml@main
     with:
       project_name: scan-files/api
