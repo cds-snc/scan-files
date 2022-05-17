@@ -14,7 +14,7 @@ jobs:
     name: Generate and upload SBOM
     uses: cds-snc/security-tools/.github/workflows/generate_sbom.yml@fix/generate-sbom
     with:
-      project_name: $GITHUB_REPOSITORY
+      project_name: scan-files/api
       project_type: python
       project_version: main
       working_directory: api
