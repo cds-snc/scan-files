@@ -20,4 +20,3 @@ jobs:
       working_directory: api
     secrets:
       dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
-      dependency_track_url: ${{ secrets.DEPENDENCY_TRACK_URL }}
