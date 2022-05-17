@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check for changes
-        uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # v2.10.2
+        uses: dorny/paths-filter@1ec7035ff53cbd7a98744bd986f6ca1c7e17d1cb # v2.10.2
         id: filter
         with:
           filters: |
