@@ -1,0 +1,27 @@
+name: Generate SBOM
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - api/requirements.txt
+      - .github/workflows/generate_sbom.yml
+  push:
+    branches:
+      - main
+    paths:
+      - api/requirements.txt
+      - .github/workflows/generate_sbom.yml      
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM
+    uses: cds-snc/security-tools/.github/workflows/generate_sbom.yml@main
+    with:
+      project_name: scan-files/api
+      project_type: python
+      project_version: main
+      working_directory: api
+    secrets:
+      dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
