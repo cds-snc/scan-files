@@ -22,7 +22,7 @@ data "aws_iam_policy" "admin" {
 }
 
 resource "aws_iam_role_policy_attachment" "admin" {
-  role       = local.cbs_admin_role
+  role       = local.oidc_role
   policy_arn = data.aws_iam_policy.admin.arn
   depends_on = [module.gh_oidc_roles]
 }
