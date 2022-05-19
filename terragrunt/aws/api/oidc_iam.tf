@@ -12,7 +12,12 @@ module "gh_oidc_roles" {
       claim     = "*"
     }
   ]
-  billing_tag_value = var.billing_tag_value
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+
 }
 
 data "aws_iam_policy" "admin" {
