@@ -13,10 +13,7 @@ module "gh_oidc_roles" {
     }
   ]
 
-  tags = {
-    CostCentre = var.billing_code
-    Terraform  = true
-  }
+  billing_tag_value = var.billing_code
 
 }
 
