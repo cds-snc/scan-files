@@ -28,4 +28,4 @@ jobs:
           project_name: scan-files/api
           project_type: python
           project_version: main
-          working-directory: api
+          working_directory: api
