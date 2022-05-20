@@ -14,15 +14,20 @@ env:
   TF_VAR_mlwr_key: ${{ secrets.MLWR_KEY }}
   TF_VAR_api_auth_token: ${{ secrets.TF_VARS_API_AUTH_TOKEN }}
   TF_VAR_rds_password: ${{ secrets.TF_VARS_RDS_PASSWORD }}
+  AWS_REGION: ca-central-1
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
 
 jobs:
   terragrunt-apply:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ca-central-1
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -54,12 +59,19 @@ jobs:
               - 'terragrunt/aws/scan_queue/**'
               - 'terragrunt/env/scan_queue/**'
 
+      - name: configure aws credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/gh_admin_role
+          role-session-name: TFApply
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Apply hosted_zone
         if: ${{ steps.filter.outputs.hosted_zone == 'true' }}
         working-directory: terragrunt/env/hosted_zone
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
-          
+
       - name: Apply api
         if: ${{ steps.filter.outputs.api == 'true' }}
         working-directory: terragrunt/env/api
@@ -71,4 +83,3 @@ jobs:
         working-directory: terragrunt/env/scan_queue
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
-
