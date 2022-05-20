@@ -21,11 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Generate SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@496f79b604b24dcbc905f22eb1abb7398566b1ec
+      - name: Generate api SBOM
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           project_name: scan-files/api
           project_type: python
-          project_version: main
           working_directory: api
