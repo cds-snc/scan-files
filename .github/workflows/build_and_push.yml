@@ -7,7 +7,15 @@ on:
 
 env:
   GITHUB_SHA: ${{ github.sha }}
-  REGISTRY: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+  REGISTRY: 806545929748.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
 
 jobs:
   changes:
@@ -45,12 +53,11 @@ jobs:
           -t $REGISTRY/${{ matrix.image }}:$GITHUB_SHA \
           -t $REGISTRY/${{ matrix.image }}:latest .
 
-      - name: Configure AWS credentials
-        id: aws-creds
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
+          role-session-name: ECRPush
           aws-region: ca-central-1
 
       - name: Login to ECR
