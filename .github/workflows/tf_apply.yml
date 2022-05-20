@@ -62,7 +62,7 @@ jobs:
       - name: configure aws credentials using OIDC
         uses: aws-actions/configure-aws-credentials@master
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/OIDCGithubWorkflowRole
+          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: TFApply
           aws-region: ${{ env.AWS_REGION }}
 
