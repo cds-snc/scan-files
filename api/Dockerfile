@@ -17,7 +17,6 @@ ENV PYTHONPATH=/pymodules
 
 COPY ./requirements.txt ${FUNCTION_DIR}
 
-
 RUN python3.9 -m pip install -r ${FUNCTION_DIR}/requirements.txt --target /pymodules
 
 # Install the runtime interface client
