@@ -42,3 +42,11 @@ jobs:
           docker build \
           --build-arg git_sha=$GITHUB_SHA \
           -t $REGISTRY/${{ matrix.image }}:latest .
+
+      - name: Generate ${{ matrix.image }}/docker SBOM
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@43971382a09f23dc7c60b19d3aba9c1ab1c70216
+        with:
+          dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          docker_image: $REGISTRY/${{ matrix.image }}:latest
+          project_name: scan-files/${{ matrix.image }}/docker
+          project_type: docker          
