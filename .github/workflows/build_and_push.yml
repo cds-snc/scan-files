@@ -86,7 +86,7 @@ jobs:
           migrate
 
       - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb # pin@d39a08b2145375940f52c0b4b8c58a8cf3603bdb
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb # pin@665d1d1e1a0ac5b741154bcc4b63b9a6e33c7749
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           docker_image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
