@@ -20,6 +20,9 @@
       "matchUpdateTypes": [
         "minor"
       ],
+      "excludePackageNames": [
+        "python"
+      ],
       "groupName": "all minor dependencies",
       "groupSlug": "all-minor"
     }
