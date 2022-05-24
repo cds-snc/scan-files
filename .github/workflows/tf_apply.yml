@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2.0.0
+        uses: hashicorp/setup-terraform@17d4c9b8043b238f6f35641cdd8433da1e6f3867 # pin@v2.0.0
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
@@ -45,7 +45,7 @@ jobs:
           chmod +x bin/terragrunt
           echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
-      - uses: dorny/paths-filter@v2.10.2
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # pin@v2
         id: filter
         with:
           filters: |
@@ -60,7 +60,7 @@ jobs:
               - 'terragrunt/env/scan_queue/**'
 
       - name: configure aws credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@master
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # pin@v1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: TFApply

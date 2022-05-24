@@ -1,4 +1,5 @@
 {
+  "schedule": ["every weekend"],
   "extends": [
     "config:base"
   ],

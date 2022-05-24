@@ -15,9 +15,9 @@ jobs:
       images: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # pin@v2
         id: filter
         with:
           filters: |
@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - name: Build container
         working-directory: ./${{ matrix.image }}
@@ -44,9 +44,9 @@ jobs:
           -t $REGISTRY/${{ matrix.image }}:latest .
 
       - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@b09c1aefae9876dd2a23888c50b2daaa137ba01d
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@b09c1aefae9876dd2a23888c50b2daaa137ba01d # pin@v1
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           docker_image: $REGISTRY/${{ matrix.image }}:latest
           project_name: scan-files/${{ matrix.image }}/docker
-          project_type: docker          
+          project_type: docker
