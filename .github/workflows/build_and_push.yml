@@ -24,9 +24,9 @@ jobs:
       images: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # pin@v2
         id: filter
         with:
           filters: |
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # pin@v2
 
       - name: Build container
         working-directory: ./${{ matrix.image }}
@@ -54,7 +54,7 @@ jobs:
           -t $REGISTRY/${{ matrix.image }}:latest .
 
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # pin@v1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: ECRPush
@@ -62,7 +62,7 @@ jobs:
 
       - name: Login to ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@3d4e073ce6a6845ed27b30a0fe05b6e22c80ac6b # pin@v1
 
       - name: Push containers to ECR
         run: |
@@ -86,9 +86,16 @@ jobs:
           migrate
 
       - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb # pin@d39a08b2145375940f52c0b4b8c58a8cf3603bdb
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           docker_image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
           project_name: scan-files/${{ matrix.image }}/docker
           project_type: docker
+
+      - name: scan-files API healthcheck
+        uses: jtalk/url-health-check-action@d6ec9590f0f1bd173fa43aeac8b75c2270e9069d # pin@v2
+        with:
+          url: https://scan-files.alpha.canada.ca/version
+          max-attempts: 3
+          retry-delay: 5s
