@@ -1,4 +1,3 @@
-
 name: "Terraform security scan"
 
 on:
@@ -7,7 +6,7 @@ on:
       - main
     paths:
       - "terragrunt/**"
-      - ".github/workflows/terraform-security-scan.yml"      
+      - ".github/workflows/terraform-security-scan.yml"
   pull_request:
     paths:
       - "terragrunt/**"
@@ -18,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - name: Checkov security scan
-        uses: bridgecrewio/checkov-action@d259454a31835b99ea6cf9aa1c2d08190f2f65c9 # latest as of November 16, 2021
+        uses: bridgecrewio/checkov-action@d259454a31835b99ea6cf9aa1c2d08190f2f65c9 # pin@v12.1565.0
         with:
           config_file: terragrunt/.checkov.yml
           directory: terragrunt/aws

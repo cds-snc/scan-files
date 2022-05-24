@@ -24,7 +24,7 @@ jobs:
       images: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # pin@v2
         id: filter
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # pin@v3
 
       - name: Build container
         working-directory: ./${{ matrix.image }}
@@ -54,7 +54,7 @@ jobs:
           -t $REGISTRY/${{ matrix.image }}:latest .
 
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@8a84b07f2009032ade05a88a28750d733cc30db1 # pin@v1
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # pin@v1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: ECRPush
@@ -86,7 +86,7 @@ jobs:
           migrate
 
       - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@d39a08b2145375940f52c0b4b8c58a8cf3603bdb # pin@b09c1aefae9876dd2a23888c50b2daaa137ba01d
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@b09c1aefae9876dd2a23888c50b2daaa137ba01d # pin@v1
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           docker_image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
