@@ -45,7 +45,7 @@ jobs:
           chmod +x bin/terragrunt
           echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # renovate: tag=v2
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
         id: filter
         with:
           filters: |
@@ -60,7 +60,7 @@ jobs:
               - 'terragrunt/env/scan_queue/**'
 
       - name: configure aws credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # renovate: tag=v1
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: TFApply
