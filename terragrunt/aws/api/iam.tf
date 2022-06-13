@@ -116,6 +116,16 @@ data "aws_iam_policy_document" "api_policies" {
       "arn:aws:dynamodb:${var.region}:${var.account_id}:table/${var.completed_scans_table_name}"
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameters",
+    ]
+    resources = [
+      "arn:aws:ssm:${var.region}:${var.account_id}:parameter/ENVIRONMENT_VARIABLES"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "api" {
