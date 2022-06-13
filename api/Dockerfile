@@ -12,8 +12,6 @@ ARG FUNCTION_DIR
 
 WORKDIR ${FUNCTION_DIR}
 
-ARG AWS_CLI_VERSION="2.4.5"
-
 RUN mkdir -p /pymodules
 ENV PYTHONPATH=/pymodules
 
@@ -27,6 +25,7 @@ RUN pip install \
     awslambdaric
 
 # Install AWS cli
+ARG AWS_CLI_VERSION="2.4.5"
 RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip
 RUN unzip awscliv2.zip
 RUN aws/install
