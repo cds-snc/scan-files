@@ -1,6 +1,5 @@
 # Define function directory
 ARG FUNCTION_DIR="/function"
-ARG AWS_CLI_VERSION="2.4.5"
 
 FROM python:3.9-slim-buster
 
@@ -12,6 +11,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 ARG FUNCTION_DIR
 
 WORKDIR ${FUNCTION_DIR}
+
+ARG AWS_CLI_VERSION="2.4.5"
 
 RUN mkdir -p /pymodules
 ENV PYTHONPATH=/pymodules
