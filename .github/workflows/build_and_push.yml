@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # renovate: tag=v3
 
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # renovate: tag=v2
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
         id: filter
         with:
           filters: |
@@ -54,7 +54,7 @@ jobs:
           -t $REGISTRY/${{ matrix.image }}:latest .
 
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # renovate: tag=v1
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: ECRPush
@@ -62,7 +62,7 @@ jobs:
 
       - name: Login to ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@3d4e073ce6a6845ed27b30a0fe05b6e22c80ac6b # renovate: tag=v1
+        uses: aws-actions/amazon-ecr-login@3d4e073ce6a6845ed27b30a0fe05b6e22c80ac6b # tag=v1.4.0
 
       - name: Push containers to ECR
         run: |
