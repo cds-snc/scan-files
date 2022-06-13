@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # renovate: tag=v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
       - name: Checkov security scan
         uses: bridgecrewio/checkov-action@d259454a31835b99ea6cf9aa1c2d08190f2f65c9 # renovate: tag=v12.1565.0
