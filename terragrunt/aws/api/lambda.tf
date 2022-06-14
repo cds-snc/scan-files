@@ -15,15 +15,8 @@ module "api" {
   }
 
   environment_variables = {
-    API_AUTH_TOKEN               = var.api_auth_token
-    SQLALCHEMY_DATABASE_URI      = module.rds.proxy_connection_string_value
-    MLWR_HOST                    = var.mlwr_host
-    MLWR_USER                    = var.mlwr_user
-    MLWR_KEY                     = var.mlwr_key
-    FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
-    SCAN_QUEUE_STATEMACHINE_NAME = var.scan_queue_statemachine_name
-    COMPLETED_SCANS_TABLE_NAME   = var.completed_scans_table_name
-    OPENAPI_URL                  = "/openapi.json" # Enable /docs api endpoint
+    SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
+    FILE_QUEUE_BUCKET       = module.file-queue.s3_bucket_id
   }
 
   policies = [
