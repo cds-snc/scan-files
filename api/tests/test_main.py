@@ -1,5 +1,6 @@
-import main
 import json
+import main
+import os
 from unittest.mock import MagicMock, patch
 
 
@@ -96,3 +97,16 @@ def test_handler_migrate_event_failed(mock_migrate_head, context_fixture):
     mock_migrate_head.side_effect = Exception()
     assert main.handler({"task": "migrate"}, context_fixture) == "Error"
     mock_migrate_head.assert_called_once()
+
+
+def test_dotenv(tmp_path):
+    with patch.dict(os.environ, {"DOTENV_PATH": str(tmp_path / "scanfiles/.env")}, clear=True):
+        file = tmp_path / "scanfiles/.env"
+        file.parent.mkdir()
+        file.touch()
+        file.write_text("FOO=BAR")
+
+        import main
+        with patch("main.load_dotenv") as mock_load_dotenv:
+            main.setup_module()
+            mock_load_dotenv.assert_called_once()
