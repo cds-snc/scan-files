@@ -26,10 +26,10 @@ RUN pip install \
 
 # Install AWS cli
 ARG AWS_CLI_VERSION="2.4.5"
-RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip
-RUN unzip awscliv2.zip
-RUN aws/install
-RUN rm -rf \
+RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip \
+ && unzip awscliv2.zip \
+ && aws/install \
+ && rm -rf \
     awscliv2.zip \
     aws \
     /usr/local/aws-cli/v2/*/dist/aws_completer \
