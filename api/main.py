@@ -13,7 +13,12 @@ from mangum import Mangum
 from os import environ
 
 
-load_dotenv()
+def setup_module():
+    if environ.get("DOTENV_PATH"):
+        load_dotenv(f"{environ.get('DOTENV_PATH')}/.env")
+
+
+setup_module()
 app = api.app
 metrics = Metrics(namespace="ScanFiles", service="api")
 
