@@ -14,6 +14,11 @@ module "api" {
     subnet_ids         = module.vpc.private_subnet_ids
   }
 
+  environment_variables = {
+    SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
+    FILE_QUEUE_BUCKET       = module.file-queue.s3_bucket_id
+  }
+
   policies = [
     data.aws_iam_policy_document.api_policies.json,
   ]
