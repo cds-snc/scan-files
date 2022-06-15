@@ -7,18 +7,11 @@ from assemblyline.assemblyline import (
 from aws_lambda_powertools import Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
-from dotenv import load_dotenv
 from logger import log
 from mangum import Mangum
 from os import environ
 
 
-def setup_module():
-    if environ.get("DOTENV_PATH"):
-        load_dotenv(f"{environ.get('DOTENV_PATH')}/.env")
-
-
-setup_module()
 app = api.app
 metrics = Metrics(namespace="ScanFiles", service="api")
 
