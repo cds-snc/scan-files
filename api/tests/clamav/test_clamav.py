@@ -43,7 +43,7 @@ def test_current_library_search_path():
 
 
 def test_scan_output_to_json_clean():
-    file_path = "/tmp/test.txt"
+    file_path = "/clamav/test.txt"
     signature = AV_SIGNATURE_OK
     output = textwrap.dedent(
         """\
@@ -68,7 +68,7 @@ def test_scan_output_to_json_clean():
 
 
 def test_scan_output_to_json_infected():
-    file_path = "/tmp/eicar.com.txt"
+    file_path = "/clamav/eicar.com.txt"
     signature = "Eicar-Test-Signature FOUND"
     output = textwrap.dedent(
         """\
@@ -155,15 +155,15 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav_defs/bytecode.cvd",
+            "local_path": "/clamav/clamav_defs/bytecode.cvd",
             "s3_path": "clamav_defs/bytecode.cvd",
         },
         "daily": {
-            "local_path": "/tmp/clamav_defs/daily.cvd",
+            "local_path": "/clamav/clamav_defs/daily.cvd",
             "s3_path": "clamav_defs/daily.cvd",
         },
         "main": {
-            "local_path": "/tmp/clamav_defs/main.cvd",
+            "local_path": "/clamav/clamav_defs/main.cvd",
             "s3_path": "clamav_defs/main.cvd",
         },
     }
@@ -273,15 +273,15 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav_defs/bytecode.cld",
+            "local_path": "/clamav/clamav_defs/bytecode.cld",
             "s3_path": "clamav_defs/bytecode.cld",
         },
         "daily": {
-            "local_path": "/tmp/clamav_defs/daily.cld",
+            "local_path": "/clamav/clamav_defs/daily.cld",
             "s3_path": "clamav_defs/daily.cld",
         },
         "main": {
-            "local_path": "/tmp/clamav_defs/main.cld",
+            "local_path": "/clamav/clamav_defs/main.cld",
             "s3_path": "clamav_defs/main.cld",
         },
     }
