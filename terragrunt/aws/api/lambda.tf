@@ -36,6 +36,11 @@ resource "aws_cloudwatch_event_rule" "assemblyline_rescan_every_24_hours" {
   name                = "retry-stale-scans-${var.env}"
   description         = "Fires every 24 hours"
   schedule_expression = "cron(0 0 * * ? *)"
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
