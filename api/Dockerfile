@@ -56,8 +56,8 @@ RUN usermod -a -G clamav python
 RUN chown -R python:python ${FUNCTION_DIR}
 
 # Setup ClamAV
-RUN mkdir /tmp/clamav_defs
-RUN chown -R python:python /tmp/clamav_defs /var/log/clamav
+RUN mkdir -p /clamav/clamav_defs
+RUN chown -R python:python /clamav/clamav_defs /var/log/clamav
 RUN sed -i 's/User clamav/User python/g' /etc/clamav/clamd.conf
 RUN sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf
 RUN sed -i 's/DatabaseOwner clamav/DatabaseOwner python/g' /etc/clamav/freshclam.conf

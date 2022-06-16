@@ -130,7 +130,7 @@ def update_defs_from_freshclam(path, library_path=""):
 
 
 def md5_from_file(filename):
-    hash_md5 = hashlib.md5()
+    hash_md5 = hashlib.md5()  # nosec - [B303:blacklist] MD5 being used for file hashing
     with open(filename, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
