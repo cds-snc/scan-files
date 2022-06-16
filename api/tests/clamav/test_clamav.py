@@ -100,7 +100,9 @@ def test_md5_from_s3_tags_no_md5():
     mock_s3_client.return_value.get_object_tagging.return_value = tag_set
     md5_hash = md5_from_s3_tags(mock_s3_client, s3_bucket_name, s3_key_name)
 
-    mock_s3_client.get_object_tagging.assert_called_once_with(Bucket=s3_bucket_name, Key=s3_key_name)
+    mock_s3_client.get_object_tagging.assert_called_once_with(
+        Bucket=s3_bucket_name, Key=s3_key_name
+    )
     assert md5_hash == ""
 
 
@@ -166,7 +168,9 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
         },
     }
 
-    to_download = update_defs_from_s3(mock_s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX)
+    to_download = update_defs_from_s3(
+        mock_s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX
+    )
     assert expected_to_download == to_download
 
 
@@ -282,5 +286,7 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
         },
     }
     with s3_stubber:
-        to_download = update_defs_from_s3(s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX)
+        to_download = update_defs_from_s3(
+            s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX
+        )
         assert expected_to_download == to_download

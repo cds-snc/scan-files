@@ -78,7 +78,9 @@ def upload_defs_to_s3(s3_client, bucket, prefix, local_path):
                         % (local_file_path, os.path.join(bucket, prefix, filename))
                     )
                     if os.environ.get("AWS_LOCALSTACK", False):
-                        s3 = get_session().resource("s3", endpoint_url="http://localstack:4566")
+                        s3 = get_session().resource(
+                            "s3", endpoint_url="http://localstack:4566"
+                        )
                     else:
                         s3 = get_session().resource("s3")
 
