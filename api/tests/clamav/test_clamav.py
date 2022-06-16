@@ -153,15 +153,15 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav/bytecode.cvd",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/bytecode.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/bytecode.cvd",
         },
         "daily": {
-            "local_path": "/tmp/clamav/daily.cvd",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/daily.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/daily.cvd",
         },
         "main": {
-            "local_path": "/tmp/clamav/main.cvd",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/main.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/main.cvd",
         },
     }
@@ -271,15 +271,15 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav/bytecode.cld",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/bytecode.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/bytecode.cld",
         },
         "daily": {
-            "local_path": "/tmp/clamav/daily.cld",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/daily.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/daily.cld",
         },
         "main": {
-            "local_path": "/tmp/clamav/main.cld",  # nosec - Lambdas can only write to the /tmp folder
+            "local_path": "/tmp/clamav/main.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
             "s3_path": "clamav_defs/main.cld",
         },
     }
