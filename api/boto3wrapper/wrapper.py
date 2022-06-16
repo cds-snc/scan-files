@@ -10,6 +10,5 @@ def get_session():
     if use_localstack:
         options["aws_access_key_id"] = "foo"
         options["aws_secret_access_key"] = "bar"
-        options["endpoint_url"] = "http://localstack:4566"
 
     return Session(**options)

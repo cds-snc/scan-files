@@ -4,6 +4,8 @@ from assemblyline.assemblyline import (
     poll_for_results,
     resubmit_stale_scans,
 )
+
+from clamav_scanner.update import update_virus_defs
 from aws_lambda_powertools import Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
@@ -40,6 +42,9 @@ def handler(event, context):
 
     elif event.get("task", "") == "assemblyline_resubmit_stale":
         return resubmit_stale_scans()
+
+    elif event.get("task", "") == "clamav_update_virus_defs":
+        return update_virus_defs()
 
     elif event.get("task", "") == "migrate":
         try:

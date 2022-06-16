@@ -50,6 +50,20 @@
       "editor.formatOnSave": true
     }
   },
+  "features": {
+    "docker-from-docker": {
+      "version": "latest",
+      "moby": true
+    },
+    "terraform": {
+      "version": "1.0.3",
+      "tflint": "latest",
+      "terragrunt": "0.31.1"
+    },
+    "aws-cli": {
+      "version": "2.2.29"
+    }
+  },
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
     "esbenp.prettier-vscode",

@@ -52,6 +52,8 @@ data "aws_iam_policy_document" "api_policies" {
     resources = [
       module.file-queue.s3_bucket_arn,
       "${module.file-queue.s3_bucket_arn}/*",
+      module.clamav-defs.s3_bucket_arn,
+      "${module.clamav-defs.s3_bucket_arn}/*",
     ]
   }
 
