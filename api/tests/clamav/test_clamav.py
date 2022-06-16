@@ -1,7 +1,6 @@
 import botocore.session
 import datetime
 import os
-import re
 import textwrap
 
 from botocore.stub import Stubber
