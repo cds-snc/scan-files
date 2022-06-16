@@ -3,6 +3,8 @@ import os
 from boto3wrapper.wrapper import get_session
 
 from clamav_scanner import clamav
+
+from .common import AWS_ENDPOINT_URL
 from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_S3_BUCKET
 from .common import AV_DEFINITION_S3_PREFIX
@@ -11,12 +13,8 @@ from .common import get_timestamp
 
 
 def update_virus_defs():
-    if os.environ.get("AWS_LOCALSTACK", False):
-        s3 = get_session().resource("s3", endpoint_url="http://localstack:4566")
-        s3_client = get_session().client("s3", endpoint_url="http://localstack:4566")
-    else:
-        s3 = get_session().resource("s3")
-        s3_client = get_session().client("s3")
+    s3 = get_session().resource("s3", endpoint_url=AWS_ENDPOINT_URL)
+    s3_client = get_session().client("s3", endpoint_url=AWS_ENDPOINT_URL)
 
     print("ClamAV virus definition update starting at %s\n" % (get_timestamp()))
     to_download = clamav.update_defs_from_s3(

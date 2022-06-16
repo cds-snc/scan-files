@@ -8,6 +8,7 @@ import subprocess
 import botocore
 from pytz import utc
 
+from .common import AWS_ENDPOINT_URL
 from .common import AV_DEFINITION_S3_PREFIX
 from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
@@ -24,12 +25,11 @@ from .common import create_dir
 from boto3wrapper.wrapper import get_session
 
 
-RE_SEARCH_DIR = r"SEARCH_DIR\(\"=([A-z0-9\/\-_]*)\"\)"
+rd_ld = re.compile(r"SEARCH_DIR\(\"=([A-z0-9\/\-_]*)\"\)")
 
 
 def current_library_search_path():
     ld_verbose = subprocess.check_output(["ld", "--verbose"]).decode("utf-8")
-    rd_ld = re.compile(RE_SEARCH_DIR)
     return rd_ld.findall(ld_verbose)
 
 
@@ -77,12 +77,7 @@ def upload_defs_to_s3(s3_client, bucket, prefix, local_path):
                         "Uploading %s to s3://%s"
                         % (local_file_path, os.path.join(bucket, prefix, filename))
                     )
-                    if os.environ.get("AWS_LOCALSTACK", False):
-                        s3 = get_session().resource(
-                            "s3", endpoint_url="http://localstack:4566"
-                        )
-                    else:
-                        s3 = get_session().resource("s3")
+                    s3 = get_session().resource("s3", endpoint_url=AWS_ENDPOINT_URL)
 
                     s3_object = s3.Object(bucket, os.path.join(prefix, filename))
                     s3_object.upload_file(os.path.join(local_path, filename))
