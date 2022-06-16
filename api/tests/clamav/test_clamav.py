@@ -7,7 +7,7 @@ import textwrap
 from botocore.stub import Stubber
 from unittest.mock import patch, MagicMock
 
-from clamav_scanner.clamav import RE_SEARCH_DIR
+from clamav_scanner.clamav import rd_ld
 from clamav_scanner.clamav import scan_output_to_json
 from clamav_scanner.clamav import md5_from_s3_tags
 from clamav_scanner.clamav import time_from_s3
@@ -26,7 +26,6 @@ s3_client = botocore.session.get_session().create_client("s3")
 def test_current_library_search_path():
     # Calling `ld --verbose` returns a lot of text but the line to check is this one:
     search_path = """SEARCH_DIR("=/usr/x86_64-redhat-linux/lib64"); SEARCH_DIR("=/usr/lib64"); SEARCH_DIR("=/usr/local/lib64"); SEARCH_DIR("=/lib64"); SEARCH_DIR("=/usr/x86_64-redhat-linux/lib"); SEARCH_DIR("=/usr/local/lib"); SEARCH_DIR("=/lib"); SEARCH_DIR("=/usr/lib");"""  # noqa
-    rd_ld = re.compile(RE_SEARCH_DIR)
     all_search_paths = rd_ld.findall(search_path)
     expected_search_paths = [
         "/usr/x86_64-redhat-linux/lib64",
