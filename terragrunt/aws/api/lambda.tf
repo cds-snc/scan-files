@@ -7,7 +7,7 @@ module "api" {
   ecr_arn                  = aws_ecr_repository.api.arn
   enable_lambda_insights   = true
   image_uri                = "${aws_ecr_repository.api.repository_url}:latest"
-  timeout                  = 120
+  timeout                  = 300
 
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
@@ -32,6 +32,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   source_arn    = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.arn
 }
 
+# Rescan stale files every 24 hours
 resource "aws_cloudwatch_event_rule" "assemblyline_rescan_every_24_hours" {
   name                = "retry-stale-scans-${var.env}"
   description         = "Fires every 24 hours"
@@ -48,4 +49,23 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
   target_id = "${var.product_name}-${var.env}-assemblyline-stale-scan-resubmitter"
   arn       = module.api.function_arn
   input     = jsonencode({ task = "assemblyline_resubmit_stale" })
+}
+
+# Update ClamAV virus database every 2 hours
+resource "aws_cloudwatch_event_rule" "clamav_update_avdefs" {
+  name                = "clamav-update-avdefs-${var.env}"
+  description         = "Updates ClamAV virus database every 2 hours"
+  schedule_expression = "rate(2 hour)"
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_defs" {
+  rule      = aws_cloudwatch_event_rule.clamav_update_avdefs.name
+  target_id = "${var.product_name}-${var.env}-clamav-update-avdefs"
+  arn       = module.api.function_arn
+  input     = jsonencode({ task = "clamav_update_virus_defs" })
 }
