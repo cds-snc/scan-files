@@ -56,6 +56,7 @@ resource "aws_cloudwatch_event_rule" "clamav_update_avdefs" {
   name                = "clamav-update-avdefs-${var.env}"
   description         = "Updates ClamAV virus database every 2 hours"
   schedule_expression = "rate(2 hour)"
+  is_enabled          = false # Disabled until we have a working solution
 
   tags = {
     CostCentre = var.billing_code
