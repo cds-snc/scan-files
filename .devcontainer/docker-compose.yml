@@ -30,7 +30,7 @@ services:
       <<: *db-connection-strings
       AWS_LOCALSTACK: "True"
       OPENAPI_URL: "/openapi.json"
-      AV_DEFINITION_PATH: "/clamav/clamav_defs"
+      AV_DEFINITION_PATH: "/tmp/clamav"
       AV_DEFINITION_S3_BUCKET: "clamav-defs"
       CLAMAVLIB_PATH: "/etc/clamav"
       CLAMSCAN_PATH: "/usr/bin/clamscan"

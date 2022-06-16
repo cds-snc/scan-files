@@ -5,7 +5,10 @@ import os.path
 
 AV_DEFINITION_S3_BUCKET = os.getenv("AV_DEFINITION_S3_BUCKET")
 AV_DEFINITION_S3_PREFIX = os.getenv("AV_DEFINITION_S3_PREFIX", "clamav_defs")
-AV_DEFINITION_PATH = os.getenv("AV_DEFINITION_PATH", "/clamav/clamav_defs")
+AV_DEFINITION_PATH = os.getenv(
+    "AV_DEFINITION_PATH",
+    "/tmp/clamav",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+)
 AV_SCAN_START_SNS_ARN = os.getenv("AV_SCAN_START_SNS_ARN")
 AV_SCAN_START_METADATA = os.getenv("AV_SCAN_START_METADATA", "av-scan-start")
 AV_SIGNATURE_METADATA = os.getenv("AV_SIGNATURE_METADATA", "av-signature")
