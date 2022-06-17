@@ -15,7 +15,7 @@ ARG SHELLCHECK_CHECKSUM
 
 # Install packages
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends \
+    && apt-get -y install --no-install-recommends clamav clamav-daemon \
     && apt-get autoremove -y && apt-get clean -y
 
 # Install ShellCheck
@@ -62,6 +62,15 @@ output=json\n\
 # COPY requirements.txt /tmp/pip-tmp/
 # RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
 #    && rm -rf /tmp/pip-tmp
+
+# Setup ClamAV
+RUN mkdir -p /tmp/clamav \
+ && mkdir -p /tmp/clamav/quarantine \
+ && chown -R vscode:vscode /tmp/clamav /var/log/clamav \
+ && sed -i 's/User clamav/User vscode/g' /etc/clamav/clamd.conf \
+ && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
+ && sed -i 's/DatabaseOwner clamav/DatabaseOwner vscode/g' /etc/clamav/freshclam.conf \
+ && sed -i 's=UpdateLogFile /var/log/clamav/freshclam.log=UpdateLogFile /tmp/clamav/freshclam.log=g' /etc/clamav/freshclam.conf
 
 
 RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g typescript" 2>&1

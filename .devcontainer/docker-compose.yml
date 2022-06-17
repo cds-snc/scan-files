@@ -20,6 +20,12 @@ services:
     command: sleep infinity
     environment:
       SHELL: /bin/zsh
+      AWS_LOCALSTACK: "True"
+      AV_DEFINITION_PATH: "/tmp/clamav"
+      AV_DEFINITION_S3_BUCKET: "clamav-defs"
+      CLAMAVLIB_PATH: "/etc/clamav"
+      CLAMSCAN_PATH: "/usr/bin/clamscan"
+      FRESHCLAM_PATH: "/usr/bin/freshclam"
       <<: *db-connection-strings
   api:
     build:

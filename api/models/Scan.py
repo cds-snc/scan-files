@@ -10,6 +10,7 @@ from sqlalchemy.sql.sqltypes import Numeric
 
 class ScanProviders(Enum):
     ASSEMBLYLINE = "Assemblyline"
+    CLAMAV = "clamav"
 
 
 class ScanVerdicts(Enum):
