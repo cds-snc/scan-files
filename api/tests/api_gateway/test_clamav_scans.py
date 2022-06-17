@@ -20,7 +20,9 @@ def load_fixture(name):
 @patch("storage.storage.get_session")
 @patch("database.db.get_db_session")
 def test_clamav_file_upload_success(mock_db_session, mock_aws_session, mock_scan_queue):
-    create_dir("/tmp/clamav/quarantine")
+    create_dir(
+        "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    )
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = client.post(
@@ -57,7 +59,9 @@ def test_clamav_file_upload_fail_not_authorized(mock_db_session):
 @patch("api_gateway.routers.clamav.launch_scan")
 @patch("api_gateway.routers.clamav.get_db_session")
 def test_clamav_start_scan(mock_db_session, mock_launch_scan):
-    create_dir("/tmp/clamav/quarantine")
+    create_dir(
+        "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    )
     filename = "tests/api_gateway/fixtures/file.txt"
 
     client.post(
