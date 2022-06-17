@@ -17,7 +17,7 @@ def load_fixture(name):
     return fixture.read()
 
 
-@patch("api_gateway.routers.scans.add_to_scan_queue")
+@patch("api_gateway.routers.assemblyline.add_to_scan_queue")
 @patch("storage.storage.get_session")
 @patch("database.db.get_db_session")
 def test_file_upload_success(mock_db_session, mock_aws_session, mock_scan_queue):
@@ -56,7 +56,7 @@ def test_file_upload_fail_not_authorized(mock_db_session):
 
 
 @patch("assemblyline.assemblyline.get_session")
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_send_to_scan_queue(mock_db_session, mock_aws_client):
     os.environ["FILE_QUEUE_BUCKET"] = "foo"
     os.environ["SCAN_QUEUE_STATEMACHINE_NAME"] = "bar"
@@ -86,7 +86,7 @@ def test_send_to_scan_queue(mock_db_session, mock_aws_client):
 
 
 @patch("assemblyline.assemblyline.get_session")
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_send_to_scan_queue_invalid_state_machine(mock_db_session, mock_aws_client):
     os.environ["FILE_QUEUE_BUCKET"] = "foo"
     filename = "tests/api_gateway/fixtures/file.txt"
@@ -115,7 +115,7 @@ def test_send_to_scan_queue_invalid_state_machine(mock_db_session, mock_aws_clie
 
 
 @patch("assemblyline.assemblyline.get_session")
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_send_to_scan_queue_random_error(mock_db_session, mock_aws_client):
     os.environ["FILE_QUEUE_BUCKET"] = "foo"
     filename = "tests/api_gateway/fixtures/file.txt"
@@ -138,7 +138,7 @@ def test_send_to_scan_queue_random_error(mock_db_session, mock_aws_client):
     assert response.status_code == 502
 
 
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_get_results_completed(mock_db_session, session):
     scan = ScanFactory(
         completed="2021-12-12T17:20:03.930469Z",
@@ -156,7 +156,7 @@ def test_get_results_completed(mock_db_session, session):
     assert response.status_code == 200
 
 
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_get_results_in_progress(mock_db_session, session):
     scan = ScanFactory()
     session.commit()
@@ -191,9 +191,9 @@ def test_get_assemblyline_results_random_sql_error(mock_db_session):
     assert response.status_code == 500
 
 
-@patch("api_gateway.routers.scans.add_to_scan_queue")
+@patch("api_gateway.routers.assemblyline.add_to_scan_queue")
 @patch("storage.storage.get_session")
-@patch("api_gateway.routers.scans.get_db_session")
+@patch("api_gateway.routers.assemblyline.get_db_session")
 def test_send_to_assemblyline_save_to_s3(
     mock_db_session, mock_aws_session, mock_scan_queue, session
 ):

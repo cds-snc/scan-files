@@ -6,7 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from uuid import uuid4
 
 from .custom_middleware import add_security_headers
-from .routers import ops, scans
+from .routers import ops, assemblyline, clamav
 
 
 class Settings(BaseSettings):
@@ -31,7 +31,8 @@ app = FastAPI(
 )
 
 app.include_router(ops.router)
-app.include_router(scans.router)
+app.include_router(assemblyline.router, prefix="/assemblyline", tags=["assemblyline"])
+app.include_router(clamav.router, prefix="/clamav", tags=["clamav"])
 
 # https://github.com/tiangolo/fastapi/issues/1472; can't include custom middlware when running tests
 if environ.get("CI") is None:

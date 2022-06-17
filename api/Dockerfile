@@ -57,6 +57,7 @@ RUN chown -R python:python ${FUNCTION_DIR}
 
 # Setup ClamAV
 RUN mkdir -p /tmp/clamav \
+ && mkdir -p /tmp/clamav/quarantine \
  && chown -R python:python /tmp/clamav /var/log/clamav \
  && sed -i 's/User clamav/User python/g' /etc/clamav/clamd.conf \
  && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \

@@ -12,7 +12,7 @@ from uuid import UUID
 router = APIRouter()
 
 
-@router.post("/assemblyline")
+@router.post("")
 def start_assemblyline_scan(
     response: Response,
     file: UploadFile = File(...),
@@ -39,7 +39,7 @@ def start_assemblyline_scan(
     return {"status": "OK", "scan_id": str(scan.id)}
 
 
-@router.get("/assemblyline/{scan_id}")
+@router.get("/{scan_id}")
 def get_assemblyline_scan_results(
     response: Response,
     scan_id: UUID,

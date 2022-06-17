@@ -21,4 +21,7 @@ laws s3api create-bucket \
     --region ca-central-1 \
     --create-bucket-configuration LocationConstraint=ca-central-1
 
+printf "Creating SNS topic..." # arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic
+laws sns create-topic --name clamav_scan-topic
+
 set +x

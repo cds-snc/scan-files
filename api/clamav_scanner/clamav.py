@@ -23,6 +23,8 @@ from .common import FRESHCLAM_PATH
 from .common import create_dir
 
 from boto3wrapper.wrapper import get_session
+from logger import log
+from models.Scan import ScanProviders, ScanVerdicts
 
 
 rd_ld = re.compile(r"SEARCH_DIR\(\"=([A-z0-9\/\-_]*)\"\)")
@@ -46,13 +48,13 @@ def update_defs_from_s3(s3_client, bucket, prefix):
             s3_time = time_from_s3(s3_client, bucket, s3_path)
 
             if s3_best_time is not None and s3_time < s3_best_time:
-                print("Not downloading older file in series: %s" % filename)
+                log.info("Not downloading older file in series: %s" % filename)
                 continue
             else:
                 s3_best_time = s3_time
 
             if os.path.exists(local_path) and md5_from_file(local_path) == s3_md5:
-                print("Not downloading %s because local md5 matches s3." % filename)
+                log.info("Not downloading %s because local md5 matches s3." % filename)
                 continue
             if s3_md5:
                 to_download[file_prefix] = {
@@ -67,13 +69,13 @@ def upload_defs_to_s3(s3_client, bucket, prefix, local_path):
         for file_suffix in AV_DEFINITION_FILE_SUFFIXES:
             filename = file_prefix + "." + file_suffix
             local_file_path = os.path.join(local_path, filename)
-            print("search for file %s" % local_file_path)
+            log.info("search for file %s" % local_file_path)
             if os.path.exists(local_file_path):
                 local_file_md5 = md5_from_file(local_file_path)
                 if local_file_md5 != md5_from_s3_tags(
                     s3_client, bucket, os.path.join(prefix, filename)
                 ):
-                    print(
+                    log.info(
                         "Uploading %s to s3://%s"
                         % (local_file_path, os.path.join(bucket, prefix, filename))
                     )
@@ -87,12 +89,12 @@ def upload_defs_to_s3(s3_client, bucket, prefix, local_path):
                         Tagging={"TagSet": [{"Key": "md5", "Value": local_file_md5}]},
                     )
                 else:
-                    print(
+                    log.info(
                         "Not uploading %s because md5 on remote matches local."
                         % filename
                     )
             else:
-                print("File does not exist: %s" % filename)
+                log.info("File does not exist: %s" % filename)
 
 
 def update_defs_from_freshclam(path, library_path=""):
@@ -103,7 +105,7 @@ def update_defs_from_freshclam(path, library_path=""):
             ":".join(current_library_search_path()),
             CLAMAVLIB_PATH,
         )
-    print("Starting freshclam with defs in %s." % path)
+    log.info("Starting freshclam with defs in %s." % path)
 
     fc_proc = subprocess.run(
         [
@@ -118,8 +120,8 @@ def update_defs_from_freshclam(path, library_path=""):
     )
 
     if fc_proc.returncode != 0:
-        print("Unexpected exit code from freshclam: %s." % fc_proc.returncode)
-    print("freshclam output:: %s" % fc_proc.stdout.decode("utf-8"))
+        log.error("Unexpected exit code from freshclam: %s." % fc_proc.returncode)
+    log.info("freshclam output:: %s" % fc_proc.stdout.decode("utf-8"))
 
     return fc_proc.returncode
 
@@ -177,15 +179,15 @@ def scan_output_to_json(output):
 def scan_file(path):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
-    print("Starting clamscan of %s." % path)
-    av_proc = subprocess.Popen(
+    log.info("Starting clamscan of %s." % path)
+    av_proc = subprocess.run(
         [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
         stderr=subprocess.STDOUT,
         stdout=subprocess.PIPE,
         env=av_env,
     )
-    output = av_proc.communicate()[0].decode()
-    print("clamscan output:\n%s" % output)
+    output = av_proc.stdout.decode("utf-8")
+    log.info("clamscan output:\n%s" % output)
 
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
@@ -196,5 +198,26 @@ def scan_file(path):
         return AV_STATUS_INFECTED, signature
     else:
         msg = "Unexpected exit code from clamscan: %s.\n" % av_proc.returncode
-        print(msg)
+        log.error(msg)
         raise Exception(msg)
+
+
+def determine_verdict(provider, value):
+    if provider is None or value is None:
+        log.error(
+            f"Provider({provider}) and Value({value}) are required to calculate scan verdicts"
+        )
+        return ScanVerdicts.ERROR.value
+
+    if provider == ScanProviders.CLAMAV.value:
+        if not isinstance(value, str):
+            return ScanVerdicts.ERROR.value
+        if value == AV_STATUS_CLEAN:
+            return ScanVerdicts.CLEAN.value
+        elif value == AV_STATUS_INFECTED:
+            return ScanVerdicts.MALICIOUS.value
+        else:
+            return ScanVerdicts.UNKNOWN.value
+    else:
+        log.error("Unsupported provider or wrong type: ", provider)
+        return ScanVerdicts.ERROR.value
