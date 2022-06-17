@@ -24,11 +24,11 @@ def test_clamav_scan(
 
     download = {}
     download["s3_path"] = "s3://bucket/prefix/definitions.json"
-    download["local_path"] = "/tmp/definitions.json"
+    download["local_path"] = "/tmp/definitions.json"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
 
     mock_update_defs_from_s3.return_value.values.return_value = [download]
     mock_scan_file.return_value = (AV_STATUS_CLEAN, AV_SIGNATURE_OK)
-    scan_verdict = launch_scan("/tmp/foo", scan.id, session)
+    scan_verdict = launch_scan("/tmp/foo", scan.id, session)  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
 
     mock_aws_session().resource().Bucket().download_file.assert_called_once_with(
         download["s3_path"],
