@@ -1,5 +1,5 @@
 from api_gateway.custom_middleware import verify_token
-from clamav_scanner.common import AV_DEFINITION_PATH
+from clamav_scanner.common import AV_DEFINITION_PATH, create_dir
 from clamav_scanner.scan import launch_scan
 from database.db import get_db_session
 from fastapi import (
@@ -32,6 +32,7 @@ def start_clamav_scan(
 ):
     try:
         save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
+        create_dir(f"{AV_DEFINITION_PATH}/quarantine")
         with open(save_path, "wb") as file_on_disk:
             file.file.seek(0)
             file_on_disk.write(file.file.read())
