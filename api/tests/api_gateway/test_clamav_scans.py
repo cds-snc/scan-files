@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from models.Scan import Scan, ScanVerdicts
 from sqlalchemy.exc import SQLAlchemyError
 from unittest.mock import patch, MagicMock
+from clamav_scanner.common import create_dir
 
 client = TestClient(api.app)
 
@@ -19,6 +20,7 @@ def load_fixture(name):
 @patch("storage.storage.get_session")
 @patch("database.db.get_db_session")
 def test_clamav_file_upload_success(mock_db_session, mock_aws_session, mock_scan_queue):
+    create_dir("/tmp/clamav/quarantine")
     filename = "tests/api_gateway/fixtures/file.txt"
 
     response = client.post(
@@ -55,6 +57,7 @@ def test_clamav_file_upload_fail_not_authorized(mock_db_session):
 @patch("api_gateway.routers.clamav.launch_scan")
 @patch("api_gateway.routers.clamav.get_db_session")
 def test_clamav_start_scan(mock_db_session, mock_launch_scan):
+    create_dir("/tmp/clamav/quarantine")
     filename = "tests/api_gateway/fixtures/file.txt"
 
     client.post(
