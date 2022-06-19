@@ -25,6 +25,8 @@ from .common import create_dir
 from boto3wrapper.wrapper import get_session
 from logger import log
 from models.Scan import ScanProviders, ScanVerdicts
+from storage.storage import get_file
+from uuid import uuid4
 
 
 rd_ld = re.compile(r"SEARCH_DIR\(\"=([A-z0-9\/\-_]*)\"\)")
@@ -180,6 +182,24 @@ def scan_file(path):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
+
+    if "s3" in path:
+        try:
+            save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
+            create_dir(f"{AV_DEFINITION_PATH}/quarantine")
+            file = get_file(path)
+            with open(save_path, "wb") as file_on_disk:
+                file.seek(0)
+                file_on_disk.write(file.read())
+            path = save_path
+        except Exception as err:
+            msg = "Error retrieving file: [%s] from s3. Reason: %s.\n" % (
+                path,
+                str(err),
+            )
+            log.error(msg)
+            raise Exception(msg)
+
     av_proc = subprocess.run(
         [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
         stderr=subprocess.STDOUT,
@@ -192,10 +212,10 @@ def scan_file(path):
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
     if av_proc.returncode == 0:
-        return AV_STATUS_CLEAN, AV_SIGNATURE_OK
+        return AV_STATUS_CLEAN, AV_SIGNATURE_OK, path
     elif av_proc.returncode == 1:
         signature = summary.get(path, AV_SIGNATURE_UNKNOWN)
-        return AV_STATUS_INFECTED, signature
+        return AV_STATUS_INFECTED, signature, path
     else:
         msg = "Unexpected exit code from clamscan: %s.\n" % av_proc.returncode
         log.error(msg)

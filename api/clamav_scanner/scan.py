@@ -8,18 +8,20 @@ from .common import AV_SIGNATURE_METADATA
 from .common import AV_STATUS_METADATA
 from .common import AV_TIMESTAMP_METADATA
 from .common import AWS_ENDPOINT_URL
+from .common import AV_SIGNATURE_UNKNOWN
 
 from boto3wrapper.wrapper import get_session
 from clamav_scanner.clamav import determine_verdict, update_defs_from_s3, scan_file
 from database.db import get_db_session
 from logger import log
-from models.Scan import Scan, ScanProviders
+from models.Scan import Scan, ScanProviders, ScanVerdicts
 
 
-def sns_scan_results(sns_client, scan, sns_arn, scan_signature):
+def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
 
     message = {
         "scan_id": scan.id,
+        "file_path": file_path,
         AV_SIGNATURE_METADATA: scan_signature,
         AV_STATUS_METADATA: scan.verdict,
         AV_TIMESTAMP_METADATA: scan.completed,
@@ -30,6 +32,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature):
         Message=json.dumps({"default": json.dumps(message, default=str)}),
         MessageStructure="json",
         MessageAttributes={
+            "av-filepath": {"DataType": "String", "StringValue": file_path},
             AV_STATUS_METADATA: {"DataType": "String", "StringValue": scan.verdict},
             AV_SIGNATURE_METADATA: {
                 "DataType": "String",
@@ -57,27 +60,30 @@ def launch_scan(file_path, scan_id, session=None, sns_arn=None):
         s3.Bucket(AV_DEFINITION_S3_BUCKET).download_file(s3_path, local_path)
         log.info("Downloading definition file %s complete!" % (local_path))
 
-    scan_result, scan_signature = scan_file(file_path)
-    log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
-
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
-    scan.completed = datetime.datetime.utcnow()
-    scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
-    scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
+    try:
+        scan_result, scan_signature, scanned_path = scan_file(file_path)
+        scan.completed = datetime.datetime.utcnow()
+        scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
+        scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
+        log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
+    except Exception as err:
+        log.error("Scan failed. Reason %s" % str(err))
+        scan.completed = datetime.datetime.utcnow()
+        scan.verdict = ScanVerdicts.ERROR.value
+        scan_signature = AV_SIGNATURE_UNKNOWN
+        scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature, "ERROR": str(err)}
+        scanned_path = ""
+
     session.commit()
 
     # Publish the scan results
     if sns_arn not in [None, ""]:
-        sns_scan_results(
-            sns_client,
-            scan,
-            sns_arn,
-            scan_signature,
-        )
+        sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path)
 
     # Delete downloaded file to free up room on re-usable lambda function container
     try:
-        os.remove(file_path)
+        os.remove(scanned_path)
     except OSError:
         pass
 
