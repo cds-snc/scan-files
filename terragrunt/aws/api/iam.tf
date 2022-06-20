@@ -125,7 +125,8 @@ data "aws_iam_policy_document" "api_policies" {
       "ssm:GetParameters",
     ]
     resources = [
-      "arn:aws:ssm:${var.region}:${var.account_id}:parameter/ENVIRONMENT_VARIABLES"
+      "arn:aws:ssm:${var.region}:${var.account_id}:parameter/ENVIRONMENT_VARIABLES",
+      aws_ssm_parameter.api_auth_token.arn
     ]
   }
 }
