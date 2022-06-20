@@ -68,7 +68,7 @@ def launch_scan(file_path, scan_id, session=None, sns_arn=None):
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
         log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
     except Exception as err:
-        log.error("Scan failed. Reason %s" % str(err))
+        log.error("Scan %s failed. Reason %s" % (str(scan.id), str(err)))
         scan.completed = datetime.datetime.utcnow()
         scan.verdict = ScanVerdicts.ERROR.value
         scan_signature = AV_SIGNATURE_UNKNOWN
