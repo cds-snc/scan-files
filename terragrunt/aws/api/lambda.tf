@@ -18,6 +18,7 @@ module "api" {
   environment_variables = {
     SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
     FILE_QUEUE_BUCKET       = module.file-queue.s3_bucket_id
+    API_AUTH_TOKEN          = var.api_auth_token
   }
 
   policies = [
