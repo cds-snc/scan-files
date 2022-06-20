@@ -142,6 +142,7 @@ def resubmit_stale_scans():
                 and_(
                     Scan.verdict == None,  # noqa
                     Scan.submitted < one_day_ago,
+                    Scan.save_path != None,  # noqa
                 )
             )
             .all()

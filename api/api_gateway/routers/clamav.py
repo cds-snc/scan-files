@@ -39,7 +39,6 @@ def start_clamav_scan(
 
         scan = Scan(
             file_name=file.filename,
-            save_path=save_path,
             scan_provider=ScanProviders.CLAMAV.value,
         )
         session.add(scan)
@@ -47,15 +46,45 @@ def start_clamav_scan(
 
         if sns_arn not in [None, ""]:
             log.info("Processing scan with sns_arn: %s" % sns_arn)
-            background_tasks.add_task(launch_scan, save_path, scan.id, sns_arn)
+            background_tasks.add_task(launch_scan, save_path, scan.id, sns_arn=sns_arn)
             return {"status": "OK", "scan_id": str(scan.id)}
         else:
-            scan_verdict = launch_scan(save_path, scan.id, sns_arn)
+            scan_verdict = launch_scan(save_path, scan.id, sns_arn=sns_arn)
             return {"status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
         return {"error": f"error scanning file [{file.filename}] with clamav"}
+
+
+@router.post("/s3")
+def start_clamav_scan_from_s3(
+    response: Response,
+    background_tasks: BackgroundTasks,
+    s3_key: str = Body(...),
+    sns_arn: str = Body(...),
+    session: Session = Depends(get_db_session),
+    _authorized: bool = Depends(verify_token),
+):
+    try:
+
+        filename = s3_key.split("/")[-1]
+
+        scan = Scan(
+            file_name=filename,
+            scan_provider=ScanProviders.CLAMAV.value,
+        )
+        session.add(scan)
+        session.commit()
+
+        background_tasks.add_task(launch_scan, s3_key, scan.id, sns_arn=sns_arn)
+        return {"status": "OK", "scan_id": str(scan.id)}
+
+    except Exception as err:
+        print(err)
+        log.error(err)
+        response.status_code = status.HTTP_502_BAD_GATEWAY
+        return {"error": f"error scanning file [{s3_key}] with clamav"}
 
 
 @router.get("/{scan_id}")
