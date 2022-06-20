@@ -42,6 +42,11 @@ else
         mkdir "$ENV_PATH"
       fi
       aws ssm get-parameters --region ca-central-1 --with-decryption --names ENVIRONMENT_VARIABLES --query 'Parameters[*].Value' --output text > "$TMP_ENV_FILE"
+      if [ -z "${API_AUTH_TOKEN_SSM_NAME}" ]; then
+        echo "API_AUTH_TOKEN_SSM_NAME is not set"
+      else
+        aws ssm get-parameters --region ca-central-1 --with-decryption --names "$API_AUTH_TOKEN_SSM_NAME" --query 'Parameters[*].Value' --output text >> "$TMP_ENV_FILE"
+      fi
     fi
     load_non_existing_envs
 
