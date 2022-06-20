@@ -1,20 +1,17 @@
 locals {
-  account_id       = "806545929748"
-  domain           = ""
-  env              = "production"
-  product_name     = "scan-files"
-  cost_center_code = "${local.product_name}-${local.env}"
+  vars = read_terragrunt_config("../env_vars.hcl")
 }
 
 # DO NOT CHANGE ANYTHING BELOW HERE UNLESS YOU KNOW WHAT YOU ARE DOING
 
 inputs = {
-  account_id                   = local.account_id
-  domain                       = local.domain
-  env                          = local.env
-  product_name                 = local.product_name
+  product_name                 = "scan-files"
+  account_id                   = "${local.vars.inputs.account_id}"
+  domain                       = "${local.vars.inputs.domain}"
+  env                          = "${local.vars.inputs.env}"
+  product_name                 = "scan-files"
   region                       = "ca-central-1"
-  billing_code                 = local.cost_center_code
+  billing_code                 = "${local.vars.inputs.cost_center_code}"
   scan_queue_statemachine_name = "assemblyline-file-scan-queue"
   locktable_name               = "scan-locktable"
   completed_scans_table_name   = "completed-scans"
@@ -41,11 +38,11 @@ remote_state {
   }
   config = {
     encrypt             = true
-    bucket              = "${local.cost_center_code}-tf"
+    bucket              = "${local.vars.inputs.cost_center_code}-tf"
     dynamodb_table      = "terraform-state-lock-dynamo"
     region              = "ca-central-1"
     key                 = "${path_relative_to_include()}/terraform.tfstate"
-    s3_bucket_tags      = { CostCentre : local.cost_center_code }
-    dynamodb_table_tags = { CostCentre : local.cost_center_code }
+    s3_bucket_tags      = { CostCentre : local.vars.inputs.cost_center_code }
+    dynamodb_table_tags = { CostCentre : local.vars.inputs.cost_center_code }
   }
 }

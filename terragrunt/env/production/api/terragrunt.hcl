@@ -18,7 +18,6 @@ dependency "hosted_zone" {
 inputs = {
   rds_username   = "databaseuser"
   hosted_zone_id = dependency.hosted_zone.outputs.hosted_zone_id
-  domain_name    = "scan-files.alpha.canada.ca"
 }
 
 include {
