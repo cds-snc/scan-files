@@ -10,9 +10,9 @@ env:
   TERRAFORM_VERSION: 1.0.3
   TERRAGRUNT_VERSION: v0.31.1
   CONFTEST_VERSION: 0.27.0
-  TF_VAR_api_auth_token: ${{ secrets.TF_VARS_API_AUTH_TOKEN }}
-  TF_VAR_aws_org_id: ${{ secrets.TF_VARS_AWS_ORG_ID }}
-  TF_VAR_rds_password: ${{ secrets.TF_VARS_RDS_PASSWORD }}
+  TF_VAR_api_auth_token: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
+  TF_VAR_aws_org_id: ${{ secrets.AWS_ORG_ID }}
+  TF_VAR_rds_password: ${{ secrets.PRODUCTION_RDS_PASSWORD }}
 
 permissions:
   id-token: write
@@ -71,6 +71,6 @@ jobs:
         with:
           comment-delete: true
           comment-title: Plan for ${{ matrix.module }}
-          directory: ./terragrunt/env/${{ matrix.module }}
+          directory: ./terragrunt/env/production/${{ matrix.module }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terragrunt: true

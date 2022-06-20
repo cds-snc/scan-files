@@ -1,5 +1,5 @@
 terraform {
-  source = "../../aws//api"
+  source = "../../../aws//api"
 }
 
 dependencies {

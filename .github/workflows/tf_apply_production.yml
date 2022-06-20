@@ -8,9 +8,9 @@ on:
 env:
   TERRAFORM_VERSION: 1.0.3
   TERRAGRUNT_VERSION: v0.31.1
-  TF_VAR_api_auth_token: ${{ secrets.TF_VARS_API_AUTH_TOKEN }}
-  TF_VAR_aws_org_id: ${{ secrets.TF_VARS_AWS_ORG_ID }}
-  TF_VAR_rds_password: ${{ secrets.TF_VARS_RDS_PASSWORD }}
+  TF_VAR_api_auth_token: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
+  TF_VAR_aws_org_id: ${{ secrets.AWS_ORG_ID }}
+  TF_VAR_rds_password: ${{ secrets.PRODUCTION_RDS_PASSWORD }}
   AWS_REGION: ca-central-1
 
 permissions:
@@ -48,13 +48,13 @@ jobs:
           filters: |
             api:
               - 'terragrunt/aws/api/**'
-              - 'terragrunt/env/api/**'
+              - 'terragrunt/env/production/api/**'
             hosted_zone:
               - 'terragrunt/aws/hosted_zone/**'
-              - 'terragrunt/env/hosted_zone/**'              
+              - 'terragrunt/env/production/hosted_zone/**'              
             scan_queue:
               - 'terragrunt/aws/scan_queue/**'
-              - 'terragrunt/env/scan_queue/**'
+              - 'terragrunt/env/production/scan_queue/**'
 
       - name: configure aws credentials using OIDC
         uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
@@ -65,18 +65,18 @@ jobs:
 
       - name: Apply hosted_zone
         if: ${{ steps.filter.outputs.hosted_zone == 'true' }}
-        working-directory: terragrunt/env/hosted_zone
+        working-directory: terragrunt/env/production/hosted_zone
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply api
         if: ${{ steps.filter.outputs.api == 'true' }}
-        working-directory: terragrunt/env/api
+        working-directory: terragrunt/env/production/api
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply scan_queue
         if: ${{ steps.filter.outputs.scan_queue == 'true' }}
-        working-directory: terragrunt/env/scan_queue
+        working-directory: terragrunt/env/production/scan_queue
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
