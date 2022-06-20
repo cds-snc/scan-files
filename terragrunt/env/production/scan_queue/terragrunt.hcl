@@ -1,5 +1,5 @@
 terraform {
-  source = "../../aws//scan_queue"
+  source = "../../../aws//scan_queue"
 }
 
 dependencies {
