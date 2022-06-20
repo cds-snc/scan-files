@@ -45,7 +45,7 @@ else
       if [ -z "${API_AUTH_TOKEN_SSM_NAME}" ]; then
         echo "API_AUTH_TOKEN_SSM_NAME is not set"
       else
-        aws ssm get-parameters --region ca-central-1 --with-decryption --names "$API_AUTH_TOKEN_SSM_NAME" --query 'Parameters[*].Value' --output text >> "$TMP_ENV_FILE"
+        aws ssm get-parameters --region ca-central-1 --with-decryption --names "$API_AUTH_TOKEN_SSM_NAME" --query 'Parameters[*].Value' --output text | sed -e 's/^/API_AUTH_TOKEN=/' >> "$TMP_ENV_FILE"
       fi
     fi
     load_non_existing_envs
