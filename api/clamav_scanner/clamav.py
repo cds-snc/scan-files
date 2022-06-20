@@ -183,7 +183,7 @@ def scan_file(path):
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
 
-    if "s3" in path:
+    if path.startswith("s3://"):
         try:
             save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
             create_dir(f"{AV_DEFINITION_PATH}/quarantine")
