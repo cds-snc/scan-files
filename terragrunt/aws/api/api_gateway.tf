@@ -14,7 +14,7 @@ resource "aws_api_gateway_rest_api" "api" {
 
 resource "aws_api_gateway_domain_name" "api" {
   regional_certificate_arn = aws_acm_certificate_validation.scan_files_certificate_validation.certificate_arn
-  domain_name              = var.domain_name
+  domain_name              = var.domain
   security_policy          = "TLS_1_2"
 
   endpoint_configuration {

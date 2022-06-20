@@ -1,6 +1,6 @@
 resource "aws_route53_record" "scan_files_A" {
   zone_id = var.hosted_zone_id
-  name    = var.domain_name
+  name    = var.domain
   type    = "A"
 
   alias {
