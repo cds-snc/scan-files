@@ -187,7 +187,7 @@ def scan_file(path, aws_account=None):
         try:
             save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
             create_dir(f"{AV_DEFINITION_PATH}/quarantine")
-            file = get_file(path, aws_account=aws_account)
+            file = get_file(path, aws_account=aws_account, ref_only=True)
             with open(save_path, "wb") as file_on_disk:
                 file.seek(0)
                 file_on_disk.write(file.read())
