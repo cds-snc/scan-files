@@ -138,7 +138,7 @@ data "aws_iam_policy_document" "api_policies" {
     resources = [
       "arn:aws:ssm:${var.region}:*:role/ScanFilesGetObjects"
     ]
-  }  
+  }
 }
 
 resource "aws_iam_policy" "api" {
