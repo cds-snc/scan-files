@@ -10,7 +10,7 @@ from .common import AV_TIMESTAMP_METADATA
 from .common import AWS_ENDPOINT_URL
 from .common import AV_SIGNATURE_UNKNOWN
 
-from boto3wrapper.wrapper import get_session
+from boto3wrapper.wrapper import get_session, get_credentials
 from clamav_scanner.clamav import determine_verdict, update_defs_from_s3, scan_file
 from database.db import get_db_session
 from logger import log
@@ -47,7 +47,9 @@ def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None
         session = next(get_db_session())
     s3 = get_session().resource("s3", endpoint_url=AWS_ENDPOINT_URL)
     s3_client = get_session().client("s3", endpoint_url=AWS_ENDPOINT_URL)
-    sns_client = get_session().client("sns", endpoint_url=AWS_ENDPOINT_URL)
+
+    credentials = get_credentials(aws_account)
+    sns_client = get_session(credentials).client("sns", endpoint_url=AWS_ENDPOINT_URL)
 
     to_download = update_defs_from_s3(
         s3_client, AV_DEFINITION_S3_BUCKET, AV_DEFINITION_S3_PREFIX

@@ -136,6 +136,8 @@ def test_clamav_start_scan_with_exception(mock_db_session, mock_launch_scan):
     assert response.status_code == 502
 
 
+@patch("boto3wrapper.wrapper.AWS_ROLE_TO_ASSUME")
+@patch("boto3wrapper.wrapper.get_session")
 @patch("clamav_scanner.clamav.get_file")
 @patch("clamav_scanner.clamav.subprocess")
 @patch("clamav_scanner.scan.update_defs_from_s3")
@@ -180,6 +182,8 @@ def test_clamav_start_scan_from_s3(
     assert response.json() == {"scan_id": ANY, "status": "OK"}
 
 
+@patch("boto3wrapper.wrapper.AWS_ROLE_TO_ASSUME")
+@patch("boto3wrapper.wrapper.get_session")
 @patch("clamav_scanner.clamav.get_file")
 @patch("clamav_scanner.clamav.subprocess")
 @patch("clamav_scanner.scan.update_defs_from_s3")
@@ -191,6 +195,8 @@ def test_clamav_start_scan_with_s3_and_exception(
     mock_update_defs_from_s3,
     mock_subprocess,
     mock_get_file,
+    mock_session,
+    mock_role,
     mock_s3_download,
     session,
 ):
@@ -198,6 +204,7 @@ def test_clamav_start_scan_with_s3_and_exception(
         "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
     )
 
+    mock_role.return_value = "foo"
     mock_update_defs_from_s3.return_value.values.return_value = [mock_s3_download]
     mock_subprocess.run.return_value.returncode = 0
     mock_subprocess.run.return_value.stdout = "scan complete".encode("utf-8")
