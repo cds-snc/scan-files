@@ -1,4 +1,4 @@
-from boto3wrapper.wrapper import get_session
+from boto3wrapper.wrapper import get_session, get_credentials
 from logger import log
 from os import environ
 from tempfile import TemporaryFile
@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 
-def get_file(save_path, ref_only=False):
+def get_file(save_path, aws_account=None, ref_only=False):
     parsed_save_path = urlparse(save_path)
     bucket = parsed_save_path.netloc
     key = parsed_save_path.path.lstrip("/")
@@ -14,7 +14,8 @@ def get_file(save_path, ref_only=False):
     if environ.get("AWS_LOCALSTACK", False):
         client = get_session().resource("s3", endpoint_url="http://localstack:4566")
     else:
-        client = get_session().resource("s3")
+        credentials = get_credentials(aws_account)
+        client = get_session(credentials).resource("s3")
 
     try:
         basename = key.split("/")[-1].strip()

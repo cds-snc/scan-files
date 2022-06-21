@@ -178,7 +178,7 @@ def scan_output_to_json(output):
     return summary
 
 
-def scan_file(path):
+def scan_file(path, aws_account=None):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
@@ -187,7 +187,7 @@ def scan_file(path):
         try:
             save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
             create_dir(f"{AV_DEFINITION_PATH}/quarantine")
-            file = get_file(path)
+            file = get_file(path, aws_account=aws_account)
             with open(save_path, "wb") as file_on_disk:
                 file.seek(0)
                 file_on_disk.write(file.read())

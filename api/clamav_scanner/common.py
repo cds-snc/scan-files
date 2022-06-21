@@ -36,6 +36,7 @@ S3_ENDPOINT = os.getenv("S3_ENDPOINT", None)
 LAMBDA_ENDPOINT = os.getenv("LAMBDA_ENDPOINT", None)
 IS_LOCALSTACK = os.environ.get("AWS_LOCALSTACK", False)
 AWS_ENDPOINT_URL = "http://localstack:4566" if IS_LOCALSTACK else None
+AWS_ROLE_TO_ASSUME = os.getenv("AWS_ROLE_TO_ASSUME", "ScanFilesGetObjects")
 
 
 def create_dir(path):

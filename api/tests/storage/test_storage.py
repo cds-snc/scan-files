@@ -43,6 +43,26 @@ def test_get_file(mock_get_session, mock_log):
 
 
 @patch("storage.storage.log")
+@patch("boto3wrapper.wrapper.AWS_ROLE_TO_ASSUME")
+@patch("boto3wrapper.wrapper.get_session")
+@patch("storage.storage.get_session")
+def test_get_file_assume_role(mock_get_session, mock_wrapper, mock_role, mock_log):
+    mock_role.return_value = "foo"
+    mock_account_id = "123456789012"
+
+    storage.get_file("s3://bucket_name/file.txt", aws_account=mock_account_id)
+
+    mock_get_session().resource().Bucket().download_fileobj.assert_called_once_with(
+        "file.txt", ANY
+    )
+    mock_log.info.assert_called_once_with("Downloaded file.txt from bucket_name")
+    mock_wrapper().client().assume_role.assert_called_once_with(
+        RoleArn=f"arn:aws:iam::{mock_account_id}:role/{mock_role}",
+        RoleSessionName="scan-files",
+    )
+
+
+@patch("storage.storage.log")
 @patch("storage.storage.get_session")
 def test_get_object_catch_exception(mock_get_session, mock_log):
     mock_object = MagicMock()

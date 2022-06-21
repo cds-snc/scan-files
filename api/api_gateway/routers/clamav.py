@@ -61,6 +61,7 @@ def start_clamav_scan(
 def start_clamav_scan_from_s3(
     response: Response,
     background_tasks: BackgroundTasks,
+    aws_account: str = Body(...),
     s3_key: str = Body(...),
     sns_arn: str = Body(...),
     session: Session = Depends(get_db_session),
@@ -77,7 +78,9 @@ def start_clamav_scan_from_s3(
         session.add(scan)
         session.commit()
 
-        background_tasks.add_task(launch_scan, s3_key, scan.id, sns_arn=sns_arn)
+        background_tasks.add_task(
+            launch_scan, s3_key, scan.id, aws_account=aws_account, sns_arn=sns_arn
+        )
         return {"status": "OK", "scan_id": str(scan.id)}
 
     except Exception as err:

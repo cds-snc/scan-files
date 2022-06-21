@@ -42,7 +42,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
     )
 
 
-def launch_scan(file_path, scan_id, session=None, sns_arn=None):
+def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None):
     if session is None:
         session = next(get_db_session())
     s3 = get_session().resource("s3", endpoint_url=AWS_ENDPOINT_URL)
@@ -62,7 +62,7 @@ def launch_scan(file_path, scan_id, session=None, sns_arn=None):
 
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
     try:
-        scan_result, scan_signature, scanned_path = scan_file(file_path)
+        scan_result, scan_signature, scanned_path = scan_file(file_path, aws_account)
         scan.completed = datetime.datetime.utcnow()
         scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
