@@ -9,7 +9,6 @@ inputs = {
   account_id                   = "${local.vars.inputs.account_id}"
   domain                       = "${local.vars.inputs.domain}"
   env                          = "${local.vars.inputs.env}"
-  product_name                 = "scan-files"
   region                       = "ca-central-1"
   billing_code                 = "${local.vars.inputs.cost_center_code}"
   scan_queue_statemachine_name = "assemblyline-file-scan-queue"
