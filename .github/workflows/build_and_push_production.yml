@@ -76,7 +76,7 @@ jobs:
         if: matrix.image == 'api'
         run: |
           aws lambda update-function-code \
-            --function-name ${{ matrix.image }} \
+            --function-name scan-files-api \
             --image-uri $REGISTRY/${{ matrix.image }}:latest  > /dev/null 2>&1
 
       - name: Migrate Database
