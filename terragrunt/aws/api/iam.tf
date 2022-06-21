@@ -138,6 +138,11 @@ data "aws_iam_policy_document" "api_policies" {
     resources = [
       "arn:aws:ssm:${var.region}:*:role/ScanFilesGetObjects"
     ]
+    condition {
+      test     = "StringEquals"
+      values   = [var.aws_org_id]
+      variable = "aws:PrincipalOrgID"
+    }
   }
 }
 
