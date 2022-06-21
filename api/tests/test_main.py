@@ -19,7 +19,7 @@ def test_handler_api_gateway_event(mock_mangum, context_fixture, capsys):
         "ColdStart"
         in metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"]
     )
-    assert metrics_output["function_name"] == "api"
+    assert metrics_output["function_name"] == "scan-files-api"
 
 
 @patch("main.log")

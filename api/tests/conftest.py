@@ -34,7 +34,7 @@ def assert_new_model_saved():
 @pytest.fixture
 def context_fixture():
     context = MagicMock()
-    context.function_name = "api"
+    context.function_name = "scan-files-api"
     return context
 
 
