@@ -14,7 +14,7 @@ function test_migrate_resp {
 
 function migrate {
   aws lambda get-function \
-    --function-name api \
+    --function-name scan-files-api \
     --region ca-central-1 \
     --query 'Configuration.[State, LastUpdateStatus]' > status
 
@@ -28,14 +28,14 @@ function migrate {
     fi
     sleep 10
     aws lambda get-function \
-      --function-name api \
+      --function-name scan-files-api \
       --region ca-central-1 \
       --query 'Configuration.[State, LastUpdateStatus]' > status
     COUNTER=$((COUNTER+1))
   done
 
   aws lambda invoke \
-    --function-name api \
+    --function-name scan-files-api \
     --cli-binary-format raw-in-base64-out \
     --payload '{ "task": "migrate" }' \
     --region ca-central-1 \

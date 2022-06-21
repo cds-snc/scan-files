@@ -1,6 +1,6 @@
 module "api" {
   source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
-  name                     = "api"
+  name                     = "${var.product_name}-api"
   billing_tag_value        = var.billing_code
   allow_api_gateway_invoke = true
   api_gateway_source_arn   = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
@@ -23,6 +23,7 @@ module "api" {
 
   policies = [
     data.aws_iam_policy_document.api_policies.json,
+    sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
   ]
 }
 
