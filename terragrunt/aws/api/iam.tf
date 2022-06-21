@@ -1,26 +1,3 @@
-data "aws_iam_policy_document" "service_principal" {
-  statement {
-    effect = "Allow"
-
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "api" {
-  name               = "${var.product_name}-api"
-  assume_role_policy = data.aws_iam_policy_document.service_principal.json
-
-  tags = {
-    CostCentre = var.billing_code
-    Terraform  = true
-  }
-}
-
 data "aws_iam_policy_document" "api_policies" {
 
   statement {
@@ -131,22 +108,6 @@ data "aws_iam_policy_document" "api_policies" {
   }
 }
 
-resource "aws_iam_policy" "api" {
-  name   = "${var.product_name}-api"
-  path   = "/"
-  policy = data.aws_iam_policy_document.api_policies.json
-
-  tags = {
-    CostCentre = var.billing_code
-    Terraform  = true
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "api" {
-  role       = aws_iam_role.api.name
-  policy_arn = aws_iam_policy.api.arn
-}
-
 #
 # Allow API to assume cross-account S3/SNS scan role
 #
@@ -165,22 +126,6 @@ data "aws_iam_policy_document" "api_assume_cross_account" {
       variable = "aws:PrincipalOrgID"
     }
   }
-}
-
-resource "aws_iam_policy" "api_assume_cross_account" {
-  name   = "${var.product_name}-api-assume-cross-account"
-  path   = "/"
-  policy = sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
-
-  tags = {
-    CostCentre = var.billing_code
-    Terraform  = true
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "api_assume_cross_account" {
-  role       = aws_iam_role.api.name
-  policy_arn = aws_iam_policy.api_assume_cross_account.arn
 }
 
 resource "aws_iam_role" "waf_log_role" {

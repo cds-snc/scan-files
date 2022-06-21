@@ -23,6 +23,7 @@ module "api" {
 
   policies = [
     data.aws_iam_policy_document.api_policies.json,
+    sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
   ]
 }
 
