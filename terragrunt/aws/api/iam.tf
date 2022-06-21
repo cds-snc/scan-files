@@ -147,6 +147,42 @@ resource "aws_iam_role_policy_attachment" "api" {
   policy_arn = aws_iam_policy.api.arn
 }
 
+#
+# Allow API to assume cross-account S3/SNS scan role
+#
+data "aws_iam_policy_document" "api_assume_cross_account" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole"
+    ]
+    resources = [
+      "arn:aws:iam::*:role/ScanFilesGetObjects"
+    ]
+    condition {
+      test     = "StringEquals"
+      values   = [var.aws_org_id]
+      variable = "aws:PrincipalOrgID"
+    }
+  }
+}
+
+resource "aws_iam_policy" "api_assume_cross_account" {
+  name   = "${var.product_name}-api-assume-cross-account"
+  path   = "/"
+  policy = sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "api_assume_cross_account" {
+  role       = aws_iam_role.api.name
+  policy_arn = aws_iam_policy.api_assume_cross_account.arn
+}
+
 resource "aws_iam_role" "waf_log_role" {
   name               = "${var.product_name}-logs"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume_role.json
