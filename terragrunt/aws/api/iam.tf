@@ -129,6 +129,16 @@ data "aws_iam_policy_document" "api_policies" {
       aws_ssm_parameter.api_auth_token.arn
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole",
+    ]
+    resources = [
+      "arn:aws:ssm:${var.region}:*:role/ScanFilesGetObjects"
+    ]
+  }  
 }
 
 resource "aws_iam_policy" "api" {
