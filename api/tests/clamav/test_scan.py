@@ -31,7 +31,7 @@ def test_clamav_scan(
     scan_verdict = launch_scan(
         "/tmp/foo",  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
         scan.id,
-        session,
+        session=session,
     )
 
     mock_aws_session().resource().Bucket().download_file.assert_called_once_with(

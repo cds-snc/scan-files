@@ -49,7 +49,7 @@ def launch_scan(execution_id, scan_id, file=None):
 
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
         if file is None:
-            file = get_file(scan.save_path, True)
+            file = get_file(scan.save_path, ref_only=True)
 
         settings = {
             "classification": "TLP:A//REL TO CDS-SNC.CA",  # classification
@@ -148,7 +148,7 @@ def resubmit_stale_scans():
             .all()
         )
         for scan in scans_in_progress:
-            status_or_file = get_file(scan.save_path, True)
+            status_or_file = get_file(scan.save_path, ref_only=True)
             if status_or_file is False:
                 log.error(
                     {

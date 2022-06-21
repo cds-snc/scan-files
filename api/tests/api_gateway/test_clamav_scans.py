@@ -160,17 +160,24 @@ def test_clamav_start_scan_from_s3(
 
     file = TemporaryFile()
     mock_get_file.return_value = file
+    mock_account_id = "123456789012"
 
-    client.post(
+    response = client.post(
         "/clamav/s3",
         json={
+            "aws_account": mock_account_id,
             "s3_key": "s3://bucket/file.txt",
             "sns_arn": "arn:aws:sns:us-east-1:123456789012:sns-topic",
         },
         headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
     )
 
-    mock_get_file.assert_called_once_with("s3://bucket/file.txt")
+    mock_get_file.assert_called_once_with(
+        "s3://bucket/file.txt", aws_account=mock_account_id
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"scan_id": ANY, "status": "OK"}
 
 
 @patch("clamav_scanner.clamav.get_file")
@@ -199,6 +206,7 @@ def test_clamav_start_scan_with_s3_and_exception(
     response = client.post(
         "/clamav/s3",
         json={
+            "aws_account": "123456789012",
             "s3_key": "s3://bucket/file.txt",
             "sns_arn": "arn:aws:sns:us-east-1:123456789012:sns-topic",
         },
