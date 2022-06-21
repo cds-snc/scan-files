@@ -3,6 +3,12 @@ variable "account_id" {
   type        = string
 }
 
+variable "aws_org_id" {
+  description = "(Required) The AWS org account ID.  Used to limit which roles the API can assume."
+  type        = string
+  sensitive   = true
+}
+
 variable "domain" {
   description = "(Required) Domain name to deploy to"
   type        = string
