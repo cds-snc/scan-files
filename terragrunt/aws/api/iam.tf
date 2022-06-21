@@ -148,15 +148,9 @@ resource "aws_iam_role_policy_attachment" "api" {
 }
 
 #
-# Allow API to assume cross-account S3/SNS role
+# Allow API to assume cross-account S3/SNS scan role
 #
 data "aws_iam_policy_document" "api_assume_cross_account" {
-  source_policy_documents = [
-    sensitive(data.aws_iam_policy_document.api_assume_scan_files_get_objects.json)
-  ]
-}
-
-data "aws_iam_policy_document" "api_assume_scan_files_get_objects" {
   statement {
     effect = "Allow"
     actions = [
@@ -176,7 +170,7 @@ data "aws_iam_policy_document" "api_assume_scan_files_get_objects" {
 resource "aws_iam_policy" "api_assume_cross_account" {
   name   = "${var.product_name}-api-assume-cross-account"
   path   = "/"
-  policy = data.aws_iam_policy_document.api_assume_cross_account.json
+  policy = sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
 
   tags = {
     CostCentre = var.billing_code
