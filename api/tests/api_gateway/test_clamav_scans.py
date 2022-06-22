@@ -174,6 +174,10 @@ def test_clamav_start_scan_from_s3(
         headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
     )
 
+    mock_get_file.assert_called_once_with(
+        "s3://bucket/file.txt", aws_account=mock_account_id, ref_only=True
+    )
+
     assert response.status_code == 200
     assert response.json() == {"scan_id": ANY, "status": "OK"}
 

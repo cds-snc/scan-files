@@ -1,6 +1,6 @@
 from api_gateway.custom_middleware import verify_token
 from clamav_scanner.common import AV_DEFINITION_PATH, create_dir
-from clamav_scanner.scan import launch_scan, launch_background_scan
+from clamav_scanner.scan import launch_scan
 from database.db import get_db_session
 from fastapi import (
     APIRouter,
@@ -58,7 +58,7 @@ def start_clamav_scan(
 
 
 @router.post("/s3")
-async def start_clamav_scan_from_s3(
+def start_clamav_scan_from_s3(
     response: Response,
     background_tasks: BackgroundTasks,
     aws_account: str = Body(...),
@@ -79,11 +79,7 @@ async def start_clamav_scan_from_s3(
         session.commit()
 
         background_tasks.add_task(
-            launch_background_scan,
-            s3_key,
-            scan.id,
-            aws_account=aws_account,
-            sns_arn=sns_arn,
+            launch_scan, s3_key, scan.id, aws_account=aws_account, sns_arn=sns_arn
         )
         return {"status": "OK", "scan_id": str(scan.id)}
 
