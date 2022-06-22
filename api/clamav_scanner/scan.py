@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import threading
 
 from .common import AV_DEFINITION_S3_BUCKET
 from .common import AV_DEFINITION_S3_PREFIX
@@ -15,6 +16,7 @@ from clamav_scanner.clamav import determine_verdict, update_defs_from_s3, scan_f
 from database.db import get_db_session
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
+from multiprocessing.context import Process
 
 
 def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
@@ -41,6 +43,19 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
             },
         },
     )
+
+
+def launch_background_scan(
+    file_path, scan_id, aws_account=None, session=None, sns_arn=None
+):
+    process = Process(
+        target=launch_scan, args=(file_path, scan_id, aws_account, session, sns_arn)
+    )
+    background = threading.Thread(
+        target=process.start(), name="clamav_scanner_scan_%s" % scan_id
+    )
+    background.start()
+    process.join()
 
 
 def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None):
