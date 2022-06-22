@@ -5,7 +5,6 @@ from clamav_scanner.scan import launch_scan
 from database.db import get_db_session
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Body,
     Depends,
     File,
@@ -25,7 +24,6 @@ router = APIRouter()
 @router.post("")
 def start_clamav_scan(
     response: Response,
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     sns_arn: str = Body(default=None),
     session: Session = Depends(get_db_session),
@@ -47,7 +45,7 @@ def start_clamav_scan(
 
         if sns_arn not in [None, ""]:
             log.info("Processing scan with sns_arn: %s" % sns_arn)
-            background_tasks.add_task(launch_scan, save_path, scan.id, sns_arn=sns_arn)
+            run_in_background(launch_scan, save_path, scan.id, session=session, sns_arn=sns_arn)
             return {"status": "OK", "scan_id": str(scan.id)}
         else:
             scan_verdict = launch_scan(save_path, scan.id, sns_arn=sns_arn)
@@ -61,7 +59,6 @@ def start_clamav_scan(
 @router.post("/s3")
 def start_clamav_scan_from_s3(
     response: Response,
-    background_tasks: BackgroundTasks,
     aws_account: str = Body(...),
     s3_key: str = Body(...),
     sns_arn: str = Body(...),
