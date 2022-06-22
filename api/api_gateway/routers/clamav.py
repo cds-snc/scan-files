@@ -1,4 +1,5 @@
 from api_gateway.custom_middleware import verify_token
+from api_gateway import run_in_background
 from clamav_scanner.common import AV_DEFINITION_PATH, create_dir
 from clamav_scanner.scan import launch_scan
 from database.db import get_db_session
@@ -78,9 +79,7 @@ def start_clamav_scan_from_s3(
         session.add(scan)
         session.commit()
 
-        background_tasks.add_task(
-            launch_scan, s3_key, scan.id, aws_account=aws_account, sns_arn=sns_arn
-        )
+        run_in_background(launch_scan, s3_key, scan.id, aws_account, session, sns_arn)
         return {"status": "OK", "scan_id": str(scan.id)}
 
     except Exception as err:
