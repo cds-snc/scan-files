@@ -20,13 +20,14 @@ from models.Scan import Scan, ScanProviders, ScanVerdicts
 def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
 
     message = {
-        "scan_id": scan.id,
+        "scan_id": str(scan.id),
         "file_path": file_path,
         AV_SIGNATURE_METADATA: scan_signature,
         AV_STATUS_METADATA: scan.verdict,
-        AV_TIMESTAMP_METADATA: scan.completed,
+        AV_TIMESTAMP_METADATA: scan.completed.isoformat(),
     }
 
+    log.info("Publishing to sns arn: %s; message: %s" % (sns_arn, str(message)))
     sns_client.publish(
         TargetArn=sns_arn,
         Message=json.dumps({"default": json.dumps(message, default=str)}),

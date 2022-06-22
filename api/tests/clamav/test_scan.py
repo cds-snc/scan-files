@@ -47,7 +47,11 @@ def test_clamav_scan(
 @patch("clamav_scanner.scan.get_session")
 @patch("clamav_scanner.scan.get_db_session")
 def test_sns_scan_results(mock_db_session, mock_aws_session, session):
-    scan = ScanFactory(verdict=ScanVerdicts.CLEAN.value, meta_data={"sid": "123"})
+    scan = ScanFactory(
+        verdict=ScanVerdicts.CLEAN.value,
+        meta_data={"sid": "123"},
+        completed="2021-12-12T17:20:03.930469Z",
+    )
     session.commit()
     mock_sns_client = MagicMock()
     sns_scan_results(
