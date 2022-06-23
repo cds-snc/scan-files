@@ -1,6 +1,7 @@
 import json
 import main
 from unittest.mock import MagicMock, patch
+from clamav_scanner.common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
 
 @patch("main.Mangum")
@@ -96,3 +97,18 @@ def test_handler_migrate_event_failed(mock_migrate_head, context_fixture):
     mock_migrate_head.side_effect = Exception()
     assert main.handler({"task": "migrate"}, context_fixture) == "Error"
     mock_migrate_head.assert_called_once()
+
+
+@patch("main.clamav_launch_scan")
+def test_handler_clamav_scan_event(mock_launch_scan, context_fixture):
+    main.handler(
+        {
+            "task": CLAMAV_LAMBDA_SCAN_TASK_NAME,
+            "file_path": 123,
+            "scan_id": "123",
+            "aws_account": "123",
+            "sns_arn": "123",
+        },
+        context_fixture,
+    )
+    mock_launch_scan.assert_called_once()
