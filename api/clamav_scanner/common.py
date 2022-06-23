@@ -37,6 +37,9 @@ LAMBDA_ENDPOINT = os.getenv("LAMBDA_ENDPOINT", None)
 IS_LOCALSTACK = os.environ.get("AWS_LOCALSTACK", False)
 AWS_ENDPOINT_URL = "http://localstack:4566" if IS_LOCALSTACK else None
 AWS_ROLE_TO_ASSUME = os.getenv("AWS_ROLE_TO_ASSUME", "ScanFilesGetObjects")
+CLAMAV_LAMBDA_SCAN_TASK_NAME = os.getenv(
+    "CLAMAV_LAMBDA_SCAN_TASK_NAME", "clamav_scan_s3"
+)
 
 
 def create_dir(path):

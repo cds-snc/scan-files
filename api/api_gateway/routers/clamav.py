@@ -1,7 +1,6 @@
 from api_gateway.custom_middleware import verify_token
-from api_gateway import run_in_background
 from clamav_scanner.common import AV_DEFINITION_PATH, create_dir
-from clamav_scanner.scan import launch_scan
+from clamav_scanner.scan import launch_scan, launch_background_scan
 from database.db import get_db_session
 from fastapi import (
     APIRouter,
@@ -25,7 +24,6 @@ router = APIRouter()
 def start_clamav_scan(
     response: Response,
     file: UploadFile = File(...),
-    sns_arn: str = Body(default=None),
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
@@ -43,13 +41,8 @@ def start_clamav_scan(
         session.add(scan)
         session.commit()
 
-        if sns_arn not in [None, ""]:
-            log.info("Processing scan with sns_arn: %s" % sns_arn)
-            run_in_background(launch_scan, save_path, scan.id, session=session, sns_arn=sns_arn)
-            return {"status": "OK", "scan_id": str(scan.id)}
-        else:
-            scan_verdict = launch_scan(save_path, scan.id, sns_arn=sns_arn)
-            return {"status": "completed", "verdict": scan_verdict}
+        scan_verdict = launch_scan(save_path, scan.id)
+        return {"status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
@@ -76,7 +69,13 @@ def start_clamav_scan_from_s3(
         session.add(scan)
         session.commit()
 
-        run_in_background(launch_scan, s3_key, scan.id, aws_account, session, sns_arn)
+        launch_background_scan(
+            s3_key,
+            scan.id,
+            session=session,
+            aws_account=aws_account,
+            sns_arn=sns_arn,
+        )
         return {"status": "OK", "scan_id": str(scan.id)}
 
     except Exception as err:

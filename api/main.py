@@ -6,6 +6,8 @@ from assemblyline.assemblyline import (
 )
 
 from clamav_scanner.update import update_virus_defs
+from clamav_scanner.common import CLAMAV_LAMBDA_SCAN_TASK_NAME
+from clamav_scanner.scan import launch_scan as clamav_launch_scan
 from aws_lambda_powertools import Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
@@ -42,6 +44,14 @@ def handler(event, context):
 
     elif event.get("task", "") == "assemblyline_resubmit_stale":
         return resubmit_stale_scans()
+
+    elif event.get("task", "") == CLAMAV_LAMBDA_SCAN_TASK_NAME:
+        return clamav_launch_scan(
+            file_path=event.get("file_path"),
+            scan_id=event.get("scan_id"),
+            aws_account=event.get("aws_account"),
+            sns_arn=event.get("sns_arn"),
+        )
 
     elif event.get("task", "") == "clamav_update_virus_defs":
         return update_virus_defs()
