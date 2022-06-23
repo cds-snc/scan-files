@@ -106,6 +106,16 @@ data "aws_iam_policy_document" "api_policies" {
       aws_ssm_parameter.api_auth_token.arn
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      module.api.function_arn
+    ]
+  }
 }
 
 #
