@@ -9,6 +9,7 @@ from .common import AV_STATUS_METADATA
 from .common import AV_TIMESTAMP_METADATA
 from .common import AWS_ENDPOINT_URL
 from .common import AV_SIGNATURE_UNKNOWN
+from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
 from boto3wrapper.wrapper import get_session, get_credentials
 from clamav_scanner.clamav import determine_verdict, update_defs_from_s3, scan_file
@@ -40,6 +41,25 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
                 "StringValue": scan_signature,
             },
         },
+    )
+
+
+def launch_background_scan(
+    file_path, scan_id, aws_account=None, session=None, sns_arn=None
+):
+    lambda_client = get_session().client("lambda", endpoint_url=AWS_ENDPOINT_URL)
+    lambda_client.invoke(
+        FunctionName=os.environ.get("AWS_LAMBDA_FUNCTION_NAME"),
+        InvocationType="Event",
+        Payload=json.dumps(
+            {
+                "task": CLAMAV_LAMBDA_SCAN_TASK_NAME,
+                "file_path": file_path,
+                "scan_id": str(scan_id),
+                "aws_account": aws_account,
+                "sns_arn": sns_arn,
+            }
+        ),
     )
 
 
