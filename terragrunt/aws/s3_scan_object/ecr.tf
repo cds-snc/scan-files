@@ -10,8 +10,8 @@ resource "aws_ecr_repository" "s3_scan_object" {
   }
 
   tags = {
-    (var.billing_tag_key) = var.billing_tag_value
-    Terraform             = "true"
+    CostCentre = var.billing_code
+    Terraform  = "true"
   }
 }
 
