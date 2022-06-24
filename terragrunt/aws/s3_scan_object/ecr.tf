@@ -25,8 +25,11 @@ resource "aws_ecr_repository_policy" "s3_scan_object" {
 }
 
 data "aws_iam_policy_document" "s3_scan_object" {
+  # While this statement does allow for the Lambda service to pull the image in any AWS account
+  # using a matching region and function name, there is no cost for ECR image pulls when
+  # the image is not leaving the AWS network.
   statement {
-    sid    = "AllowLambdaPull"
+    sid    = "AllowServicePull"
     effect = "Allow"
 
     actions = [
@@ -37,6 +40,28 @@ data "aws_iam_policy_document" "s3_scan_object" {
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringLike"
+      values   = ["arn:aws:lambda:${var.region}:*:function:s3-scan-object"]
+      variable = "aws:SourceArn"
+    }
+  }
+
+  # Allow any user principal part of our AWS org to pull the image
+  statement {
+    sid    = "AllowUserPull"
+    effect = "Allow"
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
     }
 
     condition {
