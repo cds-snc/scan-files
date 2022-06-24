@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "s3_scan_object" {
     }
 
     condition {
-      test     = "StringLike"
+      test     = "ArnLike"
       values   = ["arn:aws:lambda:${var.region}:*:function:s3-scan-object"]
       variable = "aws:SourceArn"
     }
