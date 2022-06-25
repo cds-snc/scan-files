@@ -25,9 +25,7 @@ resource "aws_ecr_repository_policy" "s3_scan_object" {
 }
 
 data "aws_iam_policy_document" "s3_scan_object" {
-  # While this statement does allow for the Lambda service to pull the image in any AWS account
-  # using a matching region and function name, there is no cost for ECR image pulls when
-  # the image is not leaving the AWS network.
+  # Allow Lambda service calls to pull the image for matching function ARNs.
   statement {
     sid    = "AllowServicePull"
     effect = "Allow"
@@ -43,8 +41,8 @@ data "aws_iam_policy_document" "s3_scan_object" {
     }
 
     condition {
-      test     = "ArnLike"
-      values   = ["arn:aws:lambda:${var.region}:*:function:s3-scan-object"]
+      test     = "StringEquals"
+      values   = ["arn:aws:lambda:${var.region}:722713121070:function:s3-scan-object"]
       variable = "aws:SourceArn"
     }
   }
