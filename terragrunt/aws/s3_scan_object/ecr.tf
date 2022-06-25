@@ -25,8 +25,9 @@ resource "aws_ecr_repository_policy" "s3_scan_object" {
 }
 
 data "aws_iam_policy_document" "s3_scan_object" {
+  # Allow Lambda service calls to pull the image for matching function ARNs.
   statement {
-    sid    = "AllowLambdaPull"
+    sid    = "AllowServicePull"
     effect = "Allow"
 
     actions = [
@@ -37,6 +38,28 @@ data "aws_iam_policy_document" "s3_scan_object" {
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = ["arn:aws:lambda:${var.region}:722713121070:function:s3-scan-object"]
+      variable = "aws:SourceArn"
+    }
+  }
+
+  # Allow any user principal part of our AWS org to pull the image
+  statement {
+    sid    = "AllowUserPull"
+    effect = "Allow"
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
     }
 
     condition {
