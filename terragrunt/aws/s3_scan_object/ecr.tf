@@ -2,7 +2,7 @@
 # S3 object scan lambda Docker image
 #
 resource "aws_ecr_repository" "s3_scan_object" {
-  name                 = "s3-scan-object"
+  name                 = "${var.product_name}/s3-scan-object"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -25,7 +25,11 @@ resource "aws_ecr_repository_policy" "s3_scan_object" {
 }
 
 data "aws_iam_policy_document" "s3_scan_object" {
-  # Allow Lambda service calls to pull the image for matching function ARNs.
+  # Allow Lambda service calls to pull the image for matching function ARNs.  Although
+  # this gives the Lambda service access to pull the image for any function with a 
+  # matching ARN, the `AllowAccountPull` statement prevents the creation of the 
+  # function unless the account is part of our Organization.  As a result, this
+  # effectively limits the Lambda service to only functions in our Organization.
   statement {
     sid    = "AllowServicePull"
     effect = "Allow"
@@ -41,15 +45,15 @@ data "aws_iam_policy_document" "s3_scan_object" {
     }
 
     condition {
-      test     = "StringEquals"
-      values   = ["arn:aws:lambda:${var.region}:722713121070:function:s3-scan-object"]
+      test     = "ArnLike"
+      values   = ["arn:aws:lambda:${var.region}:*:function:s3-scan-object"]
       variable = "aws:SourceArn"
     }
   }
 
-  # Allow any user principal part of our AWS org to pull the image
+  # Allow any principal that is part of our AWS org to pull the image
   statement {
-    sid    = "AllowUserPull"
+    sid    = "AllowAccountPull"
     effect = "Allow"
 
     actions = [
