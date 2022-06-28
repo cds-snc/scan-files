@@ -4,51 +4,15 @@ module "vpc" {
   billing_tag_value = var.billing_code
   high_availability = true
   enable_flow_log   = true
+  block_ssh         = true
+  block_rdp         = true
+
+  allow_https_request_out          = true
+  allow_https_request_out_response = true
+  allow_https_request_in           = true
+  allow_https_request_in_response  = true
 }
 
-resource "aws_network_acl_rule" "https" {
-  network_acl_id = module.vpc.main_nacl_id
-  rule_number    = 100
-  egress         = false
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 443
-  to_port        = 443
-}
-
-resource "aws_network_acl_rule" "ephemeral_ports" {
-  network_acl_id = module.vpc.main_nacl_id
-  rule_number    = 101
-  egress         = false
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 1024
-  to_port        = 65535
-}
-
-resource "aws_network_acl_rule" "https_egress" {
-  network_acl_id = module.vpc.main_nacl_id
-  rule_number    = 100
-  egress         = true
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 443
-  to_port        = 443
-}
-
-resource "aws_network_acl_rule" "ephemeral_ports_egress" {
-  network_acl_id = module.vpc.main_nacl_id
-  rule_number    = 101
-  egress         = true
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 1024
-  to_port        = 65535
-}
 
 resource "aws_security_group" "api" {
   # checkov:skip=CKV2_AWS_5: False-positive, SG is attached in lambda.tf

@@ -167,6 +167,10 @@ resource "aws_kinesis_firehose_delivery_stream" "api_waf" {
   name        = "aws-waf-logs-${var.product_name}"
   destination = "extended_s3"
 
+  server_side_encryption {
+    enabled = true
+  }
+
   extended_s3_configuration {
     role_arn   = aws_iam_role.waf_log_role.arn
     prefix     = "waf/${var.product_name}/"

@@ -24,8 +24,9 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
       }
     }
 
-    target_origin_id       = aws_lambda_function_url.scan_files_url.function_name
-    viewer_protocol_policy = "redirect-to-https"
+    target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
+    viewer_protocol_policy     = "redirect-to-https"
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
   }
 
   restrictions {
@@ -35,9 +36,9 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate_validation.scan_files_certificate_validation.certificate_arn
-    cloudfront_default_certificate = false
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = aws_acm_certificate_validation.scan_files_certificate_validation.certificate_arn
+    minimum_protocol_version = "TLSv1.2_2021"
+    ssl_support_method       = "sni-only"
   }
 
   logging_config {
@@ -49,5 +50,38 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
+  }
+}
+
+resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
+  name = "scan-files-security-headers-api"
+
+  security_headers_config {
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    content_type_options {
+      override = true
+    }
+    content_security_policy {
+      content_security_policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+      override                = true
+    }
+    referrer_policy {
+      override        = true
+      referrer_policy = "same-origin"
+    }
+    strict_transport_security {
+      override                   = true
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      preload                    = true
+    }
+    xss_protection {
+      override   = true
+      mode_block = true
+      protection = true
+    }
   }
 }
