@@ -35,6 +35,7 @@ resource "aws_route53_record" "scan_files_dns_validation" {
 }
 
 resource "aws_acm_certificate_validation" "scan_files_certificate_validation" {
+  provider                = aws.us-east-1
   certificate_arn         = aws_acm_certificate.scan_files_certificate.arn
   validation_record_fqdns = [for record in aws_route53_record.scan_files_dns_validation : record.fqdn]
 }
