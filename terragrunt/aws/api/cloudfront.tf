@@ -51,7 +51,3 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
     Terraform  = true
   }
 }
-
-resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-  comment = "Cloudfront origin access identity"
-}
