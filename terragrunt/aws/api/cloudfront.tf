@@ -55,18 +55,6 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
 
 resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
   name = "scan-files-security-headers-api"
-  security_headers_config {
-    strict_transport_security {
-      access_control_max_age_sec = "31536000"
-      include_subdomains         = true
-      preload                    = true
-      override                   = true
-    }
-  }
-}
-
-resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
-  name = "scan-files-security-headers-api"
 
   security_headers_config {
     frame_options {
