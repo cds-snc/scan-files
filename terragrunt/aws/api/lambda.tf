@@ -72,3 +72,15 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_de
   arn       = module.api.function_arn
   input     = jsonencode({ task = "clamav_update_virus_defs" })
 }
+
+resource "aws_lambda_function_url" "scan_files_url" {
+  function_name      = module.api.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_credentials = true
+    allow_origins     = ["*"]
+    allow_methods     = ["*"]
+    max_age           = 86400
+  }
+}
