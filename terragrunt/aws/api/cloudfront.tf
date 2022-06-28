@@ -35,9 +35,9 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate_validation.scan_files_certificate_validation.certificate_arn
-    cloudfront_default_certificate = false
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = aws_acm_certificate_validation.scan_files_certificate_validation.certificate_arn
+    minimum_protocol_version = "TLSv1.2_2021"
+    ssl_support_method       = "sni-only"
   }
 
   logging_config {
