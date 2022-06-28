@@ -14,13 +14,14 @@ module "api" {
   }
 
   environment_variables = {
-    SQLALCHEMY_DATABASE_URI = module.rds.proxy_connection_string_value
-    FILE_QUEUE_BUCKET       = module.file-queue.s3_bucket_id
-    API_AUTH_TOKEN_SSM_NAME = aws_ssm_parameter.api_auth_token.name
+    SQLALCHEMY_DATABASE_URI   = module.rds.proxy_connection_string_value
+    FILE_QUEUE_BUCKET         = module.file-queue.s3_bucket_id
+    API_AUTH_TOKEN_SECRET_ARN = aws_secretsmanager_secret.api_auth_token.id
   }
 
   policies = [
     data.aws_iam_policy_document.api_policies.json,
+    data.aws_iam_policy_document.api_get_secrets.json,
     sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
   ]
 }

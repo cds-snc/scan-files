@@ -102,8 +102,7 @@ data "aws_iam_policy_document" "api_policies" {
       "ssm:GetParameters",
     ]
     resources = [
-      "arn:aws:ssm:${var.region}:${var.account_id}:parameter/ENVIRONMENT_VARIABLES",
-      aws_ssm_parameter.api_auth_token.arn
+      "arn:aws:ssm:${var.region}:${var.account_id}:parameter/ENVIRONMENT_VARIABLES"
     ]
   }
 
@@ -114,6 +113,28 @@ data "aws_iam_policy_document" "api_policies" {
     ]
     resources = [
       module.api.function_arn
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "api_get_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      aws_secretsmanager_secret_version.api_auth_token.arn
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+    ]
+    resources = [
+      aws_kms_key.scan-files.arn
     ]
   }
 }
