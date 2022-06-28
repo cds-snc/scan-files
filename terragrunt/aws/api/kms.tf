@@ -39,6 +39,11 @@ data "aws_iam_policy_document" "kms_policies" {
       type        = "Service"
       identifiers = ["logs.${var.region}.amazonaws.com"]
     }
+
+    principals {
+      type        = "Service"
+      identifiers = ["secretsmanager.${var.region}.amazonaws.com"]
+    }
   }
 
   statement {
@@ -60,13 +65,46 @@ data "aws_iam_policy_document" "kms_policies" {
     }
   }
 
+  statement {
+
+    sid = "CrossAccountS3ScanObject"
+
+    effect = "Allow"
+
+    actions = [
+      "kms:Decrypt*",
+      "kms:GenerateDataKey*",
+    ]
+
+    resources = [
+      "*"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:iam::*:role/s3-scan-object-*"]
+      variable = "aws:PrincipalArn"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = [var.aws_org_id]
+      variable = "aws:PrincipalOrgID"
+    }
+  }
+
 }
 
 resource "aws_kms_key" "scan-files" {
   description         = "KMS Key"
   enable_key_rotation = true
 
-  policy = data.aws_iam_policy_document.kms_policies.json
+  policy = sensitive(data.aws_iam_policy_document.kms_policies.json)
 
   tags = {
     CostCentre = var.billing_code
