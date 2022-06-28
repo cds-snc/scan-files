@@ -41,7 +41,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
 
   logging_config {
     include_cookies = false
-    bucket          = module.log_bucket.s3_bucket_id
+    bucket          = module.log_bucket.s3_bucket_domain_name
     prefix          = "cloudfront"
   }
 
