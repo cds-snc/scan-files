@@ -1,7 +1,7 @@
 resource "aws_cloudfront_distribution" "scan_files_api" {
   enabled     = true
   price_class = "PriceClass_100"
-  web_acl_id  = aws_wafv2_web_acl.api_waf.id
+  web_acl_id  = aws_wafv2_web_acl.api_waf.arn
 
   origin {
     domain_name = split("/", aws_lambda_function_url.scan_files_url.function_url)[2]
