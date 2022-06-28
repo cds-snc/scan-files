@@ -202,10 +202,13 @@ def scan_file(session, path, aws_account=None):
             raise Exception(msg)
 
     checksum = md5_from_file(path)
+    current_time = datetime.datetime.utcnow()
+    one_day_ago = current_time - datetime.timedelta(days=1)
+
     previous_scan = (
         session.query(Scan)
         .filter(
-            Scan.checksum == checksum, Scan.scan_provider == ScanProviders.CLAMAV.value
+            Scan.checksum == checksum, Scan.scan_provider == ScanProviders.CLAMAV.value, Scan.submitted >= one_day_ago,
         )
         .one_or_none()
     )
