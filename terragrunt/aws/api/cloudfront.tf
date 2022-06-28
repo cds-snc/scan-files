@@ -24,8 +24,9 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
       }
     }
 
-    target_origin_id       = aws_lambda_function_url.scan_files_url.function_name
-    viewer_protocol_policy = "redirect-to-https"
+    target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
+    viewer_protocol_policy     = "redirect-to-https"
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
   }
 
   restrictions {
@@ -49,5 +50,17 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
+  }
+}
+
+resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
+  name = "scan-files-security-headers-api"
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = "31536000"
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
+    }
   }
 }
