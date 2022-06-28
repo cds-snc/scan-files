@@ -67,13 +67,32 @@ data "aws_iam_policy_document" "kms_policies" {
 
   statement {
 
+    sid = "APIRead"
+
+    effect = "Allow"
+
+    actions = [
+      "kms:Decrypt"
+    ]
+
+    resources = [
+      "*"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.api_role_arn]
+    }
+  }
+
+  statement {
+
     sid = "CrossAccountS3ScanObject"
 
     effect = "Allow"
 
     actions = [
-      "kms:Decrypt*",
-      "kms:GenerateDataKey*",
+      "kms:Decrypt"
     ]
 
     resources = [

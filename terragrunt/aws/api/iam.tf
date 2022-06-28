@@ -109,6 +109,18 @@ data "aws_iam_policy_document" "api_policies" {
   statement {
     effect = "Allow"
     actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      module.api.function_arn
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "api_get_secrets" {
+  statement {
+    effect = "Allow"
+    actions = [
       "secretsmanager:GetSecretValue",
     ]
     resources = [
@@ -119,10 +131,10 @@ data "aws_iam_policy_document" "api_policies" {
   statement {
     effect = "Allow"
     actions = [
-      "lambda:InvokeFunction"
+      "kms:Decrypt",
     ]
     resources = [
-      module.api.function_arn
+      aws_kms_key.scan-files.arn
     ]
   }
 }

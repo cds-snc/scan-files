@@ -23,6 +23,9 @@ resource "aws_secretsmanager_secret_policy" "api_auth_token" {
 }
 
 data "aws_iam_policy_document" "api_auth_token" {
+  # checkov:skip=CKV_AWS_108: `resources=["*"]` references the key the policy is attached to
+  # checkov:skip=CKV_AWS_109: `resources=["*"]` references the key the policy is attached to
+  # checkov:skip=CKV_AWS_111: `resources=["*"]` references the key the policy is attached to
   statement {
     sid       = "AccountOwnerFullAdmin"
     effect    = "Allow"
@@ -36,7 +39,19 @@ data "aws_iam_policy_document" "api_auth_token" {
   }
 
   statement {
-    sid       = "CrossAccountS3ScanObject"
+    sid       = "APIRead"
+    effect    = "Allow"
+    resources = ["*"]
+    actions   = ["secretsmanager:GetSecretValue"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [local.api_role_arn]
+    }
+  }
+
+  statement {
+    sid       = "CrossAccountS3ScanObjectRead"
     effect    = "Allow"
     resources = ["*"]
     actions   = ["secretsmanager:GetSecretValue"]

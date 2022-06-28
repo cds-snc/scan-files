@@ -21,6 +21,7 @@ module "api" {
 
   policies = [
     data.aws_iam_policy_document.api_policies.json,
+    data.aws_iam_policy_document.api_get_secrets.json,
     sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
   ]
 }
