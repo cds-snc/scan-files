@@ -30,8 +30,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["CA"]
+      restriction_type = "none"
     }
   }
 
