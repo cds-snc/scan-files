@@ -1,5 +1,6 @@
 resource "aws_cloudfront_distribution" "scan_files_api" {
   enabled     = true
+  aliases     = [var.domain]
   price_class = "PriceClass_100"
   web_acl_id  = aws_wafv2_web_acl.api_waf.arn
 
