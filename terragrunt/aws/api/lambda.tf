@@ -3,7 +3,6 @@ module "api" {
   name                     = "${var.product_name}-api"
   billing_tag_value        = var.billing_code
   allow_api_gateway_invoke = true
-  api_gateway_source_arn   = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
   ecr_arn                  = aws_ecr_repository.api.arn
   enable_lambda_insights   = true
   image_uri                = "${aws_ecr_repository.api.repository_url}:latest"
