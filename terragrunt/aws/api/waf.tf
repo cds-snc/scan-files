@@ -1,4 +1,6 @@
 resource "aws_wafv2_web_acl" "api_waf" {
+  provider = aws.us-east-1
+
   name        = "api_waf"
   description = "WAF for API protection"
   scope       = "REGIONAL"
@@ -164,6 +166,8 @@ resource "aws_cloudwatch_log_group" "api_waf" {
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "api_waf" {
+  provider = aws.us-east-1
+
   name        = "aws-waf-logs-${var.product_name}"
   destination = "extended_s3"
 
