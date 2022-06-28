@@ -3,7 +3,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
   name        = "api_waf"
   description = "WAF for API protection"
-  scope       = "REGIONAL"
+  scope       = "CLOUDFRONT"
 
   tags = {
     CostCentre = var.billing_code
