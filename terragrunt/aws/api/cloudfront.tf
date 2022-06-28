@@ -1,6 +1,7 @@
 resource "aws_cloudfront_distribution" "scan_files_api" {
   enabled     = true
   price_class = "PriceClass_200"
+  web_acl_id  = aws_wafv2_web_acl.api_waf.id
 
   origin {
     domain_name = split("/", aws_lambda_function_url.scan_files_url.function_url)[2]
@@ -35,7 +36,8 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = false
+    minimum_protocol_version       = "TLSv1.2_2021"
   }
 
   logging_config {
