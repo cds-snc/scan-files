@@ -72,6 +72,7 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_de
 }
 
 resource "aws_lambda_function_url" "scan_files_url" {
+  # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
   function_name      = module.api.function_name
   authorization_type = "NONE"
 
