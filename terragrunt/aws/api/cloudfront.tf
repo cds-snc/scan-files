@@ -64,3 +64,36 @@ resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" 
     }
   }
 }
+
+resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
+  name = "scan-files-security-headers-api"
+
+  security_headers_config {
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    content_type_options {
+      override = true
+    }
+    content_security_policy {
+      content_security_policy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+      override                = true
+    }
+    referrer_policy {
+      override        = true
+      referrer_policy = "same-origin"
+    }
+    strict_transport_security {
+      override                   = true
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      preload                    = true
+    }
+    xss_protection {
+      override   = true
+      mode_block = true
+      protection = true
+    }
+  }
+}
