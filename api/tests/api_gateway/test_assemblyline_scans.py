@@ -143,7 +143,7 @@ def test_get_results_completed(mock_db_session, session):
     scan = ScanFactory(
         completed="2021-12-12T17:20:03.930469Z",
         verdict=ScanVerdicts.CLEAN.value,
-        sha256="bar",
+        checksum="bar",
     )
     session.commit()
 

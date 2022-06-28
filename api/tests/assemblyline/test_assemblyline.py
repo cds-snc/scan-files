@@ -88,7 +88,7 @@ def test_get_assemblyline_results_completed(mock_client, mock_aws_session, sessi
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
 
     assert updated_scan.verdict == ScanVerdicts.CLEAN.value
-    assert updated_scan.sha256 == random_uuid
+    assert updated_scan.checksum == random_uuid
 
 
 @patch("assemblyline.assemblyline.get_session")
@@ -153,7 +153,7 @@ def test_get_assemblyline_results_upstream_malicious_file(
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
     assert updated_scan.verdict == ScanVerdicts.MALICIOUS.value
-    assert updated_scan.sha256 == random_uuid
+    assert updated_scan.checksum == random_uuid
 
 
 @patch("assemblyline.assemblyline.get_session")
@@ -164,7 +164,7 @@ def test_get_assemblyline_results_already_processed(
     scan = ScanFactory(
         completed="2021-12-12T17:20:03.930469Z",
         verdict=ScanVerdicts.CLEAN.value,
-        sha256="bar",
+        checksum="bar",
         meta_data={"sid": "123"},
     )
     session.commit()
@@ -182,7 +182,7 @@ def test_get_assemblyline_results_already_processed(
 
     updated_scan = session.query(Scan).filter(Scan.id == scan.id).one_or_none()
     assert updated_scan.verdict == ScanVerdicts.CLEAN.value
-    assert updated_scan.sha256 == "bar"
+    assert updated_scan.checksum == "bar"
 
 
 @patch("assemblyline.assemblyline.get_session")

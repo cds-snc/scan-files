@@ -11,11 +11,15 @@ from clamav_scanner.clamav import scan_output_to_json
 from clamav_scanner.clamav import md5_from_s3_tags
 from clamav_scanner.clamav import time_from_s3
 from clamav_scanner.clamav import update_defs_from_s3
+from clamav_scanner.clamav import scan_file
 from clamav_scanner.common import AV_DEFINITION_FILE_PREFIXES
 from clamav_scanner.common import AV_DEFINITION_FILE_SUFFIXES
 from clamav_scanner.common import AV_DEFINITION_S3_PREFIX
 from clamav_scanner.common import AV_SIGNATURE_OK
+from clamav_scanner.common import AV_SIGNATURE_METADATA
 
+from factories import ScanFactory
+from models.Scan import ScanProviders, ScanVerdicts
 
 s3_bucket_name = "test_bucket"
 s3_key_name = "test_key"
@@ -288,3 +292,25 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
             s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX
         )
         assert expected_to_download == to_download
+
+
+@patch("clamav_scanner.clamav.subprocess")
+def test_scan_file_already_scanned(mock_subprocess, session):
+    calculated_md5_hash = "118e0bb51e0f02e6f37937f4381b0318"
+    ScanFactory(
+        scan_provider=ScanProviders.CLAMAV.value,
+        verdict=ScanVerdicts.CLEAN.value,
+        checksum=calculated_md5_hash,
+        meta_data={AV_SIGNATURE_METADATA: AV_SIGNATURE_OK},
+    )
+    session.commit()
+
+    checksum, scan_result, scan_signature, scanned_path = scan_file(
+        session, "tests/api_gateway/fixtures/file.txt"
+    )
+    assert checksum == calculated_md5_hash
+    assert scan_result == ScanVerdicts.CLEAN.value
+    assert scan_signature == AV_SIGNATURE_OK
+    assert scanned_path == "tests/api_gateway/fixtures/file.txt"
+
+    assert mock_subprocess.call_count == 0

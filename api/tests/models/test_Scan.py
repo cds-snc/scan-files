@@ -6,7 +6,7 @@ def test_scan_model():
         file_name="file_name",
         file_size=100,
         save_path="save_path",
-        sha256="sha256",
+        checksum="checksum",
         scan_provider="scan_provider",
         submitter="submitter",
         verdict="clean",
@@ -16,7 +16,7 @@ def test_scan_model():
     assert scan.file_name == "file_name"
     assert scan.file_size == 100
     assert scan.save_path == "save_path"
-    assert scan.sha256 == "sha256"
+    assert scan.checksum == "checksum"
     assert scan.scan_provider == "scan_provider"
     assert scan.submitter == "submitter"
     assert scan.verdict == "clean"
@@ -29,7 +29,7 @@ def test_scan_model_saved(session):
         file_name="file_name",
         file_size=100,
         save_path="save_path",
-        sha256="sha256",
+        checksum="checksum",
         scan_provider="scan_provider",
         submitter="submitter",
         verdict="clean",

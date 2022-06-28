@@ -14,7 +14,7 @@ class ScanFactory(factory.alchemy.SQLAlchemyModelFactory):
     file_name = factory.Faker("file_name")
     file_size = randrange(100)
     save_path = "s3://foo.bar/baz"
-    sha256 = factory.Faker("sha256")
+    checksum = factory.Faker("sha256")
     scan_provider = factory.Faker("company")
     submitter = factory.Faker("name")
     verdict = "clean"

@@ -24,6 +24,7 @@ def test_clamav_scan(
 
     mock_update_defs_from_s3.return_value.values.return_value = [mock_s3_download]
     mock_scan_file.return_value = (
+        "123",
         AV_STATUS_CLEAN,
         AV_SIGNATURE_OK,
         "/foo/bar/file.txt",
