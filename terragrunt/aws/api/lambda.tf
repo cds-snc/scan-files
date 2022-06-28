@@ -1,14 +1,12 @@
 module "api" {
-  source                   = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
-  name                     = "${var.product_name}-api"
-  billing_tag_value        = var.billing_code
-  allow_api_gateway_invoke = true
-  api_gateway_source_arn   = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
-  ecr_arn                  = aws_ecr_repository.api.arn
-  enable_lambda_insights   = true
-  image_uri                = "${aws_ecr_repository.api.repository_url}:latest"
-  memory                   = 1536
-  timeout                  = 300
+  source                 = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
+  name                   = "${var.product_name}-api"
+  billing_tag_value      = var.billing_code
+  ecr_arn                = aws_ecr_repository.api.arn
+  enable_lambda_insights = true
+  image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
+  memory                 = 1536
+  timeout                = 300
 
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
@@ -71,4 +69,16 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_de
   target_id = "${var.product_name}-${var.env}-clamav-update-avdefs"
   arn       = module.api.function_arn
   input     = jsonencode({ task = "clamav_update_virus_defs" })
+}
+
+resource "aws_lambda_function_url" "scan_files_url" {
+  function_name      = module.api.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_credentials = true
+    allow_origins     = ["*"]
+    allow_methods     = ["*"]
+    max_age           = 86400
+  }
 }

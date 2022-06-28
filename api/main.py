@@ -27,8 +27,8 @@ else:
 
 @metrics.log_metrics(capture_cold_start_metric=True)
 def handler(event, context):
-    if "httpMethod" in event:
-        # Assume it is an API Gateway event
+    if "requestContext" in event and "http" in event["requestContext"]:
+        # Assume it is a request to the lambda function url
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
