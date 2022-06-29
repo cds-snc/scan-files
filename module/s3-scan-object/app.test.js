@@ -3,12 +3,12 @@
 const axios = require("axios");
 const { mockClient } = require("aws-sdk-client-mock");
 const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
-const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
+const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 
 const mockS3Client = mockClient(S3Client);
-const mockSSMClient = mockClient(SSMClient);
-mockSSMClient.on(GetParameterCommand).resolves({
-  Parameter: { Value: "someSuperSecretValue" },
+const mockSecretManagerClient = mockClient(SecretsManagerClient);
+mockSecretManagerClient.on(GetSecretValueCommand).resolves({
+  SecretString: "someSuperSecretValue",
 });
 
 const { handler, helpers } = require("./app.js");
@@ -36,7 +36,7 @@ beforeAll(() => {
 beforeEach(() => {
   jest.resetAllMocks();
   mockS3Client.reset();
-  mockSSMClient.reset();
+  mockSecretManagerClient.reset();
 });
 
 describe("handler", () => {
@@ -257,8 +257,8 @@ describe("getS3ObjectFromRecord", () => {
 
 describe("initConfig", () => {
   test("retrieves the config value", async () => {
-    mockSSMClient.on(GetParameterCommand).resolvesOnce({
-      Parameter: { Value: "anotherEquallySecretValue" },
+    mockSecretManagerClient.on(GetSecretValueCommand).resolvesOnce({
+      SecretString: "anotherEquallySecretValue",
     });
 
     const config = await initConfig();
@@ -266,7 +266,7 @@ describe("initConfig", () => {
   });
 
   test("throws an error on failure", async () => {
-    mockSSMClient.on(GetParameterCommand).rejectsOnce(new Error("nope"));
+    mockSecretManagerClient.on(GetSecretValueCommand).rejectsOnce(new Error("nope"));
     await expect(initConfig()).rejects.toThrow("nope");
   });
 });
