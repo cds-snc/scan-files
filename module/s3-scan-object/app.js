@@ -19,6 +19,7 @@ const SCAN_FILES_API_KEY_SECRET_ARN = process.env.SCAN_FILES_API_KEY_SECRET_ARN;
 const SCAN_IN_PROGRESS = "in_progress";
 const SCAN_FAILED_TO_START = "failed_to_start";
 const SNS_SCAN_COMPLETE_TOPIC_ARN = process.env.SNS_SCAN_COMPLETE_TOPIC_ARN;
+const EVENT_RESCAN = "custom:rescan";
 const EVENT_S3 = "aws:s3";
 const EVENT_SNS = "aws:sns";
 
@@ -69,7 +70,7 @@ exports.handler = async (event) => {
 
     // Start a scan of the new S3 object
     if (eventSource !== null && s3Object !== null) {
-      if (eventSource === EVENT_S3) {
+      if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
         const response = await startS3ObjectScan(
           `${SCAN_FILES_URL}/clamav/s3`,
           config.apiKey,
@@ -112,14 +113,16 @@ exports.handler = async (event) => {
 };
 
 /**
- * Determines the event record's source service.  This is either S3 or SNS.
+ * Determines the event record's source.
  * @param {Object} record Lambda invocation event record
  * @returns {String} Event record source service, or `null` if not valid
  */
 const getRecordEventSource = (record) => {
   let eventSource = null;
 
-  if (record.eventSource === EVENT_S3) {
+  if (record.eventSource === EVENT_RESCAN) {
+    eventSource = EVENT_RESCAN;
+  } else if (record.eventSource === EVENT_S3) {
     eventSource = EVENT_S3;
   } else if (record.EventSource === EVENT_SNS) {
     eventSource = EVENT_SNS;
@@ -137,7 +140,9 @@ const getRecordEventSource = (record) => {
 const getS3ObjectFromRecord = (eventSource, record) => {
   let s3Object = null;
 
-  if (eventSource === EVENT_S3) {
+  if (eventSource === EVENT_RESCAN) {
+    s3Object = parseS3Url(record.s3ObjectUrl);
+  } else if (eventSource === EVENT_S3) {
     s3Object = {
       Bucket: record.s3.bucket.name,
       Key: decodeURIComponent(record.s3.object.key.replace(/\+/g, " ")),

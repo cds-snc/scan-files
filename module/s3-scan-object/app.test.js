@@ -59,11 +59,15 @@ describe("handler", () => {
             },
           },
         },
+        {
+          eventSource: "custom:rescan",
+          s3ObjectUrl: "s3://boom/bing",
+        }
       ],
     };
     const expectedResponse = {
       status: 200,
-      body: "Event records processesed: 2, Errors: 0",
+      body: "Event records processesed: 3, Errors: 0",
     };
 
     axios.post.mockResolvedValue({ status: 200 });
@@ -190,6 +194,7 @@ describe("getRecordEventSource", () => {
   test("valid event sources", () => {
     expect(getRecordEventSource({ eventSource: "aws:s3" })).toBe("aws:s3");
     expect(getRecordEventSource({ EventSource: "aws:sns" })).toBe("aws:sns");
+    expect(getRecordEventSource({ eventSource: "custom:rescan" })).toBe("custom:rescan");
   });
 
   test("invalid event sources", () => {
@@ -236,6 +241,17 @@ describe("getS3ObjectFromRecord", () => {
     };
     expect(getS3ObjectFromRecord("aws:sns", record)).toEqual(expected);
   });
+
+  test("recan event", () => {
+    const record = {
+      s3ObjectUrl: "s3://samwise/gamgee",
+    };
+    const expected = {
+      Bucket: "samwise",
+      Key: "gamgee",
+    };
+    expect(getS3ObjectFromRecord("custom:rescan", record)).toEqual(expected);
+  });  
 
   test("sns event, invalid av-filepath", () => {
     const record = {
