@@ -9,13 +9,13 @@
 const axios = require("axios");
 const util = require("util");
 const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
-const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
+const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 
 const AWS_ACCOUNT_ID = process.env.AWS_ACCOUNT_ID;
 const REGION = process.env.REGION;
 const ENDPOINT_URL = process.env.AWS_SAM_LOCAL ? "http://host.docker.internal:3001" : undefined;
 const SCAN_FILES_URL = process.env.SCAN_FILES_URL;
-const SCAN_FILES_API_KEY_PARAM_NAME = process.env.SCAN_FILES_API_KEY_PARAM_NAME;
+const SCAN_FILES_API_KEY_SECRET_ARN = process.env.SCAN_FILES_API_KEY_SECRET_ARN;
 const SCAN_IN_PROGRESS = "in_progress";
 const SCAN_FAILED_TO_START = "failed_to_start";
 const SNS_SCAN_COMPLETE_TOPIC_ARN = process.env.SNS_SCAN_COMPLETE_TOPIC_ARN;
@@ -23,7 +23,7 @@ const EVENT_S3 = "aws:s3";
 const EVENT_SNS = "aws:sns";
 
 const s3Client = new S3Client({ region: REGION, endpoint: ENDPOINT_URL });
-const ssmClient = new SSMClient({ region: REGION, endpoint: ENDPOINT_URL });
+const secretsManagerClient = new SecretsManagerClient({ region: REGION, endpoint: ENDPOINT_URL });
 
 /**
  * Performs function initialization outside of the Lambda handler so that
@@ -34,14 +34,13 @@ const ssmClient = new SSMClient({ region: REGION, endpoint: ENDPOINT_URL });
 const initConfig = async () => {
   return (async () => {
     try {
-      const command = new GetParameterCommand({
-        Name: SCAN_FILES_API_KEY_PARAM_NAME,
-        WithDecryption: true,
+      const command = new GetSecretValueCommand({
+        SecretId: SCAN_FILES_API_KEY_SECRET_ARN,
       });
-      const response = await ssmClient.send(command);
-      return { apiKey: response.Parameter.Value };
+      const response = await secretsManagerClient.send(command);
+      return { apiKey: response.SecretString };
     } catch (error) {
-      console.error(`Unable to get '${SCAN_FILES_API_KEY_PARAM_NAME}' parameter: ${error}`);
+      console.error(`Unable to get '${SCAN_FILES_API_KEY_SECRET_ARN}' secret: ${error}`);
       throw error;
     }
   })();
