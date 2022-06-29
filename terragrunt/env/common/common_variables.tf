@@ -9,6 +9,11 @@ variable "aws_org_id" {
   sensitive   = true
 }
 
+variable "cbs_satellite_bucket_name" {
+  description = "(Required) Name of the Cloud Based Sensor S3 satellite bucket"
+  type        = string
+}
+
 variable "domain" {
   description = "(Required) Domain name to deploy to"
   type        = string

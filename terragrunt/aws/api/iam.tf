@@ -207,7 +207,7 @@ data "aws_iam_policy_document" "write_waf_logs" {
     ]
 
     resources = [
-      module.log_bucket.s3_bucket_arn
+      local.cbs_satellite_bucket_arn
     ]
   }
 
@@ -220,7 +220,7 @@ data "aws_iam_policy_document" "write_waf_logs" {
     ]
 
     resources = [
-      "${module.log_bucket.s3_bucket_arn}/waf/*"
+      "${local.cbs_satellite_bucket_arn}/waf_acl_logs/*"
     ]
   }
 }

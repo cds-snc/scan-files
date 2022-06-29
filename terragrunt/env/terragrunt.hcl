@@ -14,6 +14,7 @@ inputs = {
   scan_queue_statemachine_name = "assemblyline-file-scan-queue"
   locktable_name               = "scan-locktable"
   completed_scans_table_name   = "completed-scans"
+  cbs_satellite_bucket_name    = "cbs-satellite-${local.vars.inputs.account_id}"
 }
 
 generate "provider" {
