@@ -52,6 +52,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
         verdict=ScanVerdicts.CLEAN.value,
         meta_data={"sid": "123"},
         completed="2021-12-12T17:20:03.930469Z",
+        checksum="123"
     )
     session.commit()
     mock_sns_client = MagicMock()
@@ -68,6 +69,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
         MessageStructure="json",
         MessageAttributes={
             "av-filepath": {"DataType": "String", "StringValue": "/foo/bar/file.txt"},
+            "av-checksum": {"DataType": "String", "StringValue": "123"},
             "av-status": {"DataType": "String", "StringValue": "clean"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
         },
