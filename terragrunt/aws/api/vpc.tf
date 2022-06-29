@@ -3,7 +3,7 @@ module "vpc" {
   name              = var.product_name
   billing_tag_value = var.billing_code
   high_availability = true
-  enable_flow_log   = false
+  enable_flow_log   = true
   block_ssh         = true
   block_rdp         = true
 
