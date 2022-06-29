@@ -298,7 +298,9 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
 def test_scan_file_already_scanned(mock_subprocess, session):
     calculated_md5_hash = "118e0bb51e0f02e6f37937f4381b0318"
     current_time = datetime.datetime.utcnow()
-    one_day_ago = current_time - datetime.timedelta(days=1) + datetime.timedelta(minutes=10)
+    one_day_ago = (
+        current_time - datetime.timedelta(days=1) + datetime.timedelta(minutes=10)
+    )
 
     ScanFactory(
         scan_provider=ScanProviders.CLAMAV.value,

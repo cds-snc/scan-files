@@ -208,7 +208,9 @@ def scan_file(session, path, aws_account=None):
     previous_scan = (
         session.query(Scan)
         .filter(
-            Scan.checksum == checksum, Scan.scan_provider == ScanProviders.CLAMAV.value, Scan.submitted >= one_day_ago,
+            Scan.checksum == checksum,
+            Scan.scan_provider == ScanProviders.CLAMAV.value,
+            Scan.submitted >= one_day_ago,
         )
         .one_or_none()
     )
