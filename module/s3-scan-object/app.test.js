@@ -62,7 +62,7 @@ describe("handler", () => {
         {
           eventSource: "custom:rescan",
           s3ObjectUrl: "s3://boom/bing",
-        }
+        },
       ],
     };
     const expectedResponse = {
@@ -251,7 +251,7 @@ describe("getS3ObjectFromRecord", () => {
       Key: "gamgee",
     };
     expect(getS3ObjectFromRecord("custom:rescan", record)).toEqual(expected);
-  });  
+  });
 
   test("sns event, invalid av-filepath", () => {
     const record = {
