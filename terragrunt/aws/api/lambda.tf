@@ -26,6 +26,8 @@ module "api" {
   ]
 }
 
+# Rescan stale files every 24 hours
+
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
@@ -34,7 +36,6 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   source_arn    = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.arn
 }
 
-# Rescan stale files every 24 hours
 resource "aws_cloudwatch_event_rule" "assemblyline_rescan_every_24_hours" {
   name                = "retry-stale-scans-${var.env}"
   description         = "Fires every 24 hours"
@@ -54,6 +55,15 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
 }
 
 # Update ClamAV virus database every 2 hours
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda_for_update_clamav" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = module.api.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.clamav_update_avdefs.arn
+}
+
 resource "aws_cloudwatch_event_rule" "clamav_update_avdefs" {
   name                = "clamav-update-avdefs-${var.env}"
   description         = "Updates ClamAV virus database every 2 hours"
