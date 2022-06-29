@@ -224,6 +224,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
 }
 
 resource "aws_wafv2_regex_pattern_set" "body_exclusions" {
+  provider    = aws.us-east-1
   name        = "RequestBodyExclusions"
   description = "Regex to match request urls with bodies that will trigger rulesets"
   scope       = "CLOUDFRONT"
