@@ -32,7 +32,7 @@ class Scan(Base):
     submitter = Column(String, nullable=True)
     file_size = Column(Numeric, nullable=True)
     save_path = Column(String, nullable=True)
-    sha256 = Column(String, nullable=True)
+    checksum = Column(String, nullable=True)
     verdict = Column(String, nullable=True)
     quarantine_path = Column(String, nullable=True)
     meta_data = Column(JSONB, nullable=True)

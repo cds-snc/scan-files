@@ -85,9 +85,12 @@ def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None
 
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
     try:
-        scan_result, scan_signature, scanned_path = scan_file(file_path, aws_account)
+        checksum, scan_result, scan_signature, scanned_path = scan_file(
+            session, file_path, aws_account
+        )
         scan.completed = datetime.datetime.utcnow()
         scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
+        scan.checksum = checksum
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
         log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
     except Exception as err:

@@ -15,6 +15,7 @@ from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
 from .common import AV_SIGNATURE_OK
 from .common import AV_SIGNATURE_UNKNOWN
+from .common import AV_SIGNATURE_METADATA
 from .common import AV_STATUS_CLEAN
 from .common import AV_STATUS_INFECTED
 from .common import CLAMAVLIB_PATH
@@ -24,7 +25,7 @@ from .common import create_dir
 
 from boto3wrapper.wrapper import get_session
 from logger import log
-from models.Scan import ScanProviders, ScanVerdicts
+from models.Scan import Scan, ScanProviders, ScanVerdicts
 from storage.storage import get_file
 from uuid import uuid4
 
@@ -178,7 +179,7 @@ def scan_output_to_json(output):
     return summary
 
 
-def scan_file(path, aws_account=None):
+def scan_file(session, path, aws_account=None):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
@@ -200,22 +201,44 @@ def scan_file(path, aws_account=None):
             log.error(msg)
             raise Exception(msg)
 
-    av_proc = subprocess.run(
-        [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE,
-        env=av_env,
+    checksum = md5_from_file(path)
+    current_time = datetime.datetime.utcnow()
+    one_day_ago = current_time - datetime.timedelta(days=1)
+
+    previous_scan = (
+        session.query(Scan)
+        .filter(
+            Scan.checksum == checksum,
+            Scan.scan_provider == ScanProviders.CLAMAV.value,
+            Scan.submitted >= one_day_ago,
+        )
+        .one_or_none()
     )
-    output = av_proc.stdout.decode("utf-8")
-    log.info("clamscan output:\n%s" % output)
+
+    if previous_scan:
+        return (
+            checksum,
+            previous_scan.verdict,
+            previous_scan.meta_data[AV_SIGNATURE_METADATA],
+            path,
+        )
+    else:
+        av_proc = subprocess.run(
+            [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
+            stderr=subprocess.STDOUT,
+            stdout=subprocess.PIPE,
+            env=av_env,
+        )
+        output = av_proc.stdout.decode("utf-8")
+        log.info("clamscan output:\n%s" % output)
 
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
     if av_proc.returncode == 0:
-        return AV_STATUS_CLEAN, AV_SIGNATURE_OK, path
+        return checksum, AV_STATUS_CLEAN, AV_SIGNATURE_OK, path
     elif av_proc.returncode == 1:
         signature = summary.get(path, AV_SIGNATURE_UNKNOWN)
-        return AV_STATUS_INFECTED, signature, path
+        return checksum, AV_STATUS_INFECTED, signature, path
     else:
         msg = "Unexpected exit code from clamscan: %s.\n" % av_proc.returncode
         log.error(msg)

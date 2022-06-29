@@ -113,7 +113,7 @@ def poll_for_results(scan_id):
                 )
                 scan.completed = submission_details["times"]["completed"]
                 scan.file_size = submission_details["files"][0]["size"]
-                scan.sha256 = submission_details["files"][0]["sha256"]
+                scan.checksum = submission_details["files"][0]["sha256"]
                 scan.verdict = verdict
                 scan.meta_data = submission_details
                 session.commit()
