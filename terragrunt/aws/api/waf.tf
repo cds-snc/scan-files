@@ -88,12 +88,15 @@ resource "aws_wafv2_web_acl" "api_waf" {
                   }
                 }
                 statement {
-                  byte_match_tuples {
-                    text_transformation   = "LOWERCASE"
-                    target_string         = "post"
+                  byte_match_statement {
+                    search_string         = "post"
                     positional_constraint = "EXACTLY"
                     field_to_match {
                       type = "METHOD"
+                    }
+                    text_transformation {
+                      type     = "LOWERCASE"
+                      priority = 1
                     }
                   }
                 }
@@ -141,12 +144,15 @@ resource "aws_wafv2_web_acl" "api_waf" {
                   }
                 }
                 statement {
-                  byte_match_tuples {
-                    text_transformation   = "LOWERCASE"
-                    target_string         = "post"
+                  byte_match_statement {
+                    search_string         = "post"
                     positional_constraint = "EXACTLY"
                     field_to_match {
                       type = "METHOD"
+                    }
+                    text_transformation {
+                      type     = "LOWERCASE"
+                      priority = 1
                     }
                   }
                 }
