@@ -212,7 +212,7 @@ def scan_file(session, path, aws_account=None):
             Scan.scan_provider == ScanProviders.CLAMAV.value,
             Scan.submitted >= one_day_ago,
         )
-        .one_or_none()
+        .first()
     )
 
     if previous_scan:
