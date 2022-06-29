@@ -70,6 +70,37 @@ resource "aws_wafv2_web_acl" "api_waf" {
       managed_rule_group_statement {
         name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
+
+        scope_down_statement {
+          not_statement {
+            statement {
+              and_statement {
+                statement {
+                  regex_pattern_set_reference_statement {
+                    arn = aws_wafv2_regex_pattern_set.body_exclusions.arn
+                    field_to_match {
+                      uri_path {}
+                    }
+                    text_transformation {
+                      type     = "LOWERCASE"
+                      priority = 1
+                    }
+                  }
+                }
+                statement {
+                  byte_match_tuples {
+                    text_transformation   = "LOWERCASE"
+                    target_string         = "post"
+                    positional_constraint = "EXACTLY"
+                    field_to_match {
+                      type = "METHOD"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -92,6 +123,37 @@ resource "aws_wafv2_web_acl" "api_waf" {
       managed_rule_group_statement {
         name        = "AWSManagedRulesKnownBadInputsRuleSet"
         vendor_name = "AWS"
+
+        scope_down_statement {
+          not_statement {
+            statement {
+              and_statement {
+                statement {
+                  regex_pattern_set_reference_statement {
+                    arn = aws_wafv2_regex_pattern_set.body_exclusions.arn
+                    field_to_match {
+                      uri_path {}
+                    }
+                    text_transformation {
+                      type     = "LOWERCASE"
+                      priority = 1
+                    }
+                  }
+                }
+                statement {
+                  byte_match_tuples {
+                    text_transformation   = "LOWERCASE"
+                    target_string         = "post"
+                    positional_constraint = "EXACTLY"
+                    field_to_match {
+                      type = "METHOD"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -152,6 +214,16 @@ resource "aws_wafv2_web_acl" "api_waf" {
     cloudwatch_metrics_enabled = true
     metric_name                = "api"
     sampled_requests_enabled   = false
+  }
+}
+
+resource "aws_wafv2_regex_pattern_set" "body_exclusions" {
+  name        = "RequestBodyExclusions"
+  description = "Regex to match request urls with bodies that will trigger rulesets"
+  scope       = "CLOUDFRONT"
+
+  regular_expression {
+    regex_string = "^/(clamav|assemblyline)(/s3)?$"
   }
 }
 
