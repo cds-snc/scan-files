@@ -92,7 +92,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
                     search_string         = "post"
                     positional_constraint = "EXACTLY"
                     field_to_match {
-                      type = "METHOD"
+                      method {}
                     }
                     text_transformation {
                       type     = "LOWERCASE"
@@ -148,7 +148,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
                     search_string         = "post"
                     positional_constraint = "EXACTLY"
                     field_to_match {
-                      type = "METHOD"
+                      method {}
                     }
                     text_transformation {
                       type     = "LOWERCASE"
