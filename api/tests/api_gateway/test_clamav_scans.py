@@ -103,13 +103,11 @@ def test_clamav_start_scan_with_exception(mock_db_session, mock_launch_scan):
 @patch("boto3wrapper.wrapper.get_session")
 @patch("clamav_scanner.clamav.get_file")
 @patch("clamav_scanner.clamav.subprocess")
-@patch("clamav_scanner.scan.update_defs_from_s3")
 @patch("clamav_scanner.scan.get_session")
 @patch("api_gateway.routers.clamav.get_db_session")
 def test_clamav_start_scan_from_s3(
     mock_db_session,
     mock_aws_session,
-    mock_update_defs_from_s3,
     mock_subprocess,
     mock_get_file,
     mock_s3_download,
@@ -119,7 +117,6 @@ def test_clamav_start_scan_from_s3(
         "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
     )
 
-    mock_update_defs_from_s3.return_value.values.return_value = [mock_s3_download]
     mock_subprocess.run.return_value.returncode = 0
     mock_subprocess.run.return_value.stdout = "scan complete".encode("utf-8")
 
@@ -157,13 +154,11 @@ def test_clamav_start_scan_from_s3(
 @patch("boto3wrapper.wrapper.get_session")
 @patch("clamav_scanner.clamav.get_file")
 @patch("clamav_scanner.clamav.subprocess")
-@patch("clamav_scanner.scan.update_defs_from_s3")
 @patch("clamav_scanner.scan.get_session")
 @patch("api_gateway.routers.clamav.get_db_session")
 def test_clamav_start_scan_with_s3_and_exception(
     mock_db_session,
     mock_aws_session,
-    mock_update_defs_from_s3,
     mock_subprocess,
     mock_get_file,
     mock_session,
@@ -176,7 +171,6 @@ def test_clamav_start_scan_with_s3_and_exception(
     )
 
     mock_role.return_value = "foo"
-    mock_update_defs_from_s3.return_value.values.return_value = [mock_s3_download]
     mock_subprocess.run.return_value.returncode = 0
     mock_subprocess.run.return_value.stdout = "scan complete".encode("utf-8")
 
