@@ -45,6 +45,7 @@ def start_clamav_scan(
         return {"status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
+        print(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
         return {"error": f"error scanning file [{file.filename}] with clamav"}
 
