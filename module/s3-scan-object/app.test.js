@@ -56,6 +56,7 @@ describe("handler", () => {
             MessageAttributes: {
               "av-filepath": { Value: "s3://bam/baz" },
               "av-status": { Value: "SPIFY" },
+              "av-checksum": { Value: "42" },
             },
           },
         },
@@ -94,6 +95,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "SPIFY" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "av-checksum", Value: "42" },
         ],
       },
     });
@@ -194,13 +196,14 @@ describe("getRecordEventSource", () => {
   test("valid event sources", () => {
     expect(getRecordEventSource({ eventSource: "aws:s3" })).toBe("aws:s3");
     expect(getRecordEventSource({ EventSource: "aws:sns" })).toBe("aws:sns");
-    expect(getRecordEventSource({ eventSource: "custom:rescan" })).toBe("custom:rescan");
+    expect(getRecordEventSource({ EventSource: "custom:rescan" })).toBe("custom:rescan");
   });
 
   test("invalid event sources", () => {
     expect(getRecordEventSource({ eventSource: "aws:s3:ca-central-1" })).toBe(null);
-    expect(getRecordEventSource({ EventSource: "aws:s3" })).toBe(null);
-    expect(getRecordEventSource({ eventSource: "aws:sns" })).toBe(null);
+    expect(getRecordEventSource({ EventSource: "aws:ec2" })).toBe(null);
+    expect(getRecordEventSource({ eventSource: null })).toBe(null);
+    expect(getRecordEventSource({ eventSource: undefined })).toBe(null);
     expect(getRecordEventSource({ eventSource: "pohtaytoes" })).toBe(null);
     expect(getRecordEventSource({})).toBe(null);
   });
