@@ -7,10 +7,12 @@ This repository is for a file scanning product for CDS Platform applications.
 ## API docs
 - https://scan-files.alpha.canada.ca/docs
 
-
 ## Supported scanners:
 - [Assemblyline](https://cybercentrecanada.github.io/assemblyline4_docs/)
 - [ClamAV](https://www.clamav.net/)
+
+## Modules
+- [S3 scan object](./module/s3-scan-object/)
 
 # Development
 Recommended: `devcontainer` extension for VSCode
