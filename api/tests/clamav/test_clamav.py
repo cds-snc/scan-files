@@ -157,15 +157,15 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav/bytecode.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": "/clamav/bytecode.cvd",
             "s3_path": "clamav_defs/bytecode.cvd",
         },
         "daily": {
-            "local_path": "/tmp/clamav/daily.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": "/clamav/daily.cvd",
             "s3_path": "clamav_defs/daily.cvd",
         },
         "main": {
-            "local_path": "/tmp/clamav/main.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": "/clamav/main.cvd",
             "s3_path": "clamav_defs/main.cvd",
         },
     }
