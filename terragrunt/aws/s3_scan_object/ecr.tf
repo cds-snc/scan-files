@@ -73,23 +73,3 @@ data "aws_iam_policy_document" "s3_scan_object" {
     }
   }
 }
-
-resource "aws_ecr_lifecycle_policy" "s3_scan_object_exire_untagged" {
-  repository = aws_ecr_repository.s3_scan_object.name
-  policy = jsonencode({
-    "rules" : [
-      {
-        "rulePriority" : 1,
-        "description" : "Keep last 20 images",
-        "selection" : {
-          "tagStatus" : "any",
-          "countType" : "imageCountMoreThan",
-          "countNumber" : 20
-        },
-        "action" : {
-          "type" : "expire"
-        }
-      }
-    ]
-  })
-}
