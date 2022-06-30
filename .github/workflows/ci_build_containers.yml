@@ -7,6 +7,7 @@ on:
 env:
   GITHUB_SHA: ${{ github.sha }}
   REGISTRY: 806545929748.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+  S3_BUCKET: scan-files-production-clamav-defs
 
 permissions:
   id-token: write
