@@ -1,4 +1,4 @@
-# S3 scan object
+# S3 scan object :floppy_disk: :microscope:
 
 Lambda function that triggers a ClamAV scan of newly created S3 objects and updates the object with the scan results. The scan process and verdict is communicated via S3 object tags.
 
@@ -43,8 +43,8 @@ The infrastructure required can be built using the [S3_scan_object](https://gith
 ## Development
 
 ```sh
-yarn install       # Install dependencies
-yarn test          # Run unit tests (Jest)
-yarn lint          # Lint the code (eslint)
-yarn format:write  # Format the code (prettier)
+make install       # Install dependencies
+make test          # Run unit tests (Jest)
+make lint          # Lint the code (eslint)
+make fmt           # Format the code (prettier)
 ```

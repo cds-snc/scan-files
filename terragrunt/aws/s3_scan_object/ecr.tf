@@ -90,6 +90,18 @@ resource "aws_ecr_lifecycle_policy" "s3_scan_object_exire_untagged" {
         "action" : {
           "type" : "expire"
         }
+      },
+      {
+        "rulePriority" : 2,
+        "description" : "Keep last 20 tagged images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "countType" : "imageCountMoreThan",
+          "countNumber" : 20
+        },
+        "action" : {
+          "type" : "expire"
+        }
       }
     ]
   })
