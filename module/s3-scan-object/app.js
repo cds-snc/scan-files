@@ -63,6 +63,7 @@ exports.handler = async (event) => {
 
   // Process all event records
   for (const record of event.Records) {
+    let scanChecksum = null;
     let scanStatus = null;
     let isObjectTagged = false;
     let eventSource = getRecordEventSource(record);
@@ -85,6 +86,7 @@ exports.handler = async (event) => {
 
         // Get the scan status for an existing S3 object
       } else if (eventSource === EVENT_SNS) {
+        scanChecksum = record.Sns.MessageAttributes["av-checksum"].Value;
         scanStatus = record.Sns.MessageAttributes["av-status"].Value;
       }
     } else {
@@ -93,11 +95,17 @@ exports.handler = async (event) => {
 
     // Tag the S3 object if we've got a scan status
     if (scanStatus !== null) {
-      isObjectTagged = await tagS3Object(s3Client, s3Object, [
+      let tags = [
         { Key: "av-scanner", Value: "clamav" },
         { Key: "av-status", Value: scanStatus },
         { Key: "av-timestamp", Value: new Date().getTime() },
-      ]);
+      ];
+
+      if (scanChecksum !== null) {
+        tags.push({ Key: "av-checksum", Value: scanChecksum });
+      }
+
+      isObjectTagged = await tagS3Object(s3Client, s3Object, tags);
     }
 
     // Track if there were any errors processing this record
@@ -118,17 +126,9 @@ exports.handler = async (event) => {
  * @returns {String} Event record source service, or `null` if not valid
  */
 const getRecordEventSource = (record) => {
-  let eventSource = null;
-
-  if (record.eventSource === EVENT_RESCAN) {
-    eventSource = EVENT_RESCAN;
-  } else if (record.eventSource === EVENT_S3) {
-    eventSource = EVENT_S3;
-  } else if (record.EventSource === EVENT_SNS) {
-    eventSource = EVENT_SNS;
-  }
-
-  return eventSource;
+  let eventSource = record.eventSource || record.EventSource;
+  const validSources = [EVENT_S3, EVENT_SNS, EVENT_RESCAN];
+  return validSources.includes(eventSource) ? eventSource : null;
 };
 
 /**
