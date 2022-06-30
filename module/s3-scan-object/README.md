@@ -2,6 +2,15 @@
 
 Lambda function that triggers a ClamAV scan of newly created S3 objects and updates the object with the scan results. The scan process and verdict is communicated via S3 object tags.
 
+# Tags
+
+The following S3 object tags are used to communicate the scan results:
+
+- `av-checksum`: Checksum of the file that was scanned.
+- `av-result`: The scan result verdict from ClamAV.
+- `av-status`: The status of the scan (in_progress, failed_to_start, complete).
+- `av-timestamp`: Epoch timestamp of when the tags were set.
+
 # Events
 
 The function can be invoked by S3, SNS and custom events.
