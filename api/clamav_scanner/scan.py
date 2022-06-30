@@ -2,8 +2,6 @@ import datetime
 import json
 import os
 
-from .common import AV_DEFINITION_S3_BUCKET
-from .common import AV_DEFINITION_S3_PREFIX
 from .common import AV_SIGNATURE_METADATA
 from .common import AV_STATUS_METADATA
 from .common import AV_TIMESTAMP_METADATA
@@ -12,7 +10,7 @@ from .common import AV_SIGNATURE_UNKNOWN
 from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
 from boto3wrapper.wrapper import get_session, get_credentials
-from clamav_scanner.clamav import determine_verdict, update_defs_from_s3, scan_file
+from clamav_scanner.clamav import determine_verdict, scan_file
 from database.db import get_db_session
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
