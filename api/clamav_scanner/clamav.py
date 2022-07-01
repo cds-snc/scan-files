@@ -13,6 +13,7 @@ from .common import AV_DEFINITION_S3_PREFIX
 from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
+from .common import AV_SCAN_USE_CACHE
 from .common import AV_SIGNATURE_OK
 from .common import AV_SIGNATURE_UNKNOWN
 from .common import AV_SIGNATURE_METADATA
@@ -202,18 +203,22 @@ def scan_file(session, path, aws_account=None):
             raise Exception(msg)
 
     checksum = md5_from_file(path)
-    current_time = datetime.datetime.utcnow()
-    one_day_ago = current_time - datetime.timedelta(days=1)
 
-    previous_scan = (
-        session.query(Scan)
-        .filter(
-            Scan.checksum == checksum,
-            Scan.scan_provider == ScanProviders.CLAMAV.value,
-            Scan.submitted >= one_day_ago,
+    # Check for previously cached scan results
+    previous_scan = None
+    if AV_SCAN_USE_CACHE:
+        current_time = datetime.datetime.utcnow()
+        one_day_ago = current_time - datetime.timedelta(days=1)
+
+        previous_scan = (
+            session.query(Scan)
+            .filter(
+                Scan.checksum == checksum,
+                Scan.scan_provider == ScanProviders.CLAMAV.value,
+                Scan.submitted >= one_day_ago,
+            )
+            .first()
         )
-        .first()
-    )
 
     if previous_scan:
         return (

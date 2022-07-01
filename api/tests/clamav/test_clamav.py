@@ -294,8 +294,8 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
         assert expected_to_download == to_download
 
 
-@patch("clamav_scanner.clamav.subprocess")
-def test_scan_file_already_scanned(mock_subprocess, session):
+@patch("clamav_scanner.clamav.subprocess.run")
+def test_scan_file_already_scanned(mock_subprocess_run, session):
     calculated_md5_hash = "118e0bb51e0f02e6f37937f4381b0318"
     current_time = datetime.datetime.utcnow()
     one_day_ago = (
@@ -319,4 +319,14 @@ def test_scan_file_already_scanned(mock_subprocess, session):
     assert scan_signature == AV_SIGNATURE_OK
     assert scanned_path == "tests/api_gateway/fixtures/file.txt"
 
-    assert mock_subprocess.call_count == 0
+    assert mock_subprocess_run.call_count == 0
+
+
+@patch(
+    "clamav_scanner.clamav.subprocess.run",
+    return_value=MagicMock(stdout=MagicMock(), returncode=0),
+)
+@patch("clamav_scanner.clamav.AV_SCAN_USE_CACHE", False)
+def test_scan_file_no_cache(mock_subprocess_run, session):
+    scan_file(session, "tests/api_gateway/fixtures/file.txt")
+    assert mock_subprocess_run.call_count == 1
