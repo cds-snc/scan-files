@@ -327,6 +327,8 @@ def test_scan_file_already_scanned(mock_subprocess_run, session):
     return_value=MagicMock(stdout=MagicMock(), returncode=0),
 )
 @patch("clamav_scanner.clamav.AV_SCAN_USE_CACHE", False)
-def test_scan_file_no_cache(mock_subprocess_run, session):
-    scan_file(session, "tests/api_gateway/fixtures/file.txt")
+def test_scan_file_no_cache(mock_subprocess_run):
+    mock_session = MagicMock()
+    scan_file(mock_session, "tests/api_gateway/fixtures/file.txt")
+    assert mock_session.query.call_count == 0
     assert mock_subprocess_run.call_count == 1
