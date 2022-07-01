@@ -8,6 +8,7 @@ x-api_envs: &api_envs
   AWS_LOCALSTACK: "True"
   OPENAPI_URL: "/openapi.json"
   AV_DEFINITION_PATH: "/clamav"
+  AV_WRITE_PATH: "/tmp/clamav"
   AV_DEFINITION_S3_BUCKET: "clamav-defs"
   CLAMAVLIB_PATH: "/etc/clamav"
   CLAMSCAN_PATH: "/usr/bin/clamscan"

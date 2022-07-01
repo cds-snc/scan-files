@@ -61,7 +61,7 @@
       "terragrunt": "0.31.1"
     },
     "aws-cli": {
-      "version": "2.2.29"
+      "version": "2.7.12"
     }
   },
   // Add the IDs of extensions you want installed when the container is created.
