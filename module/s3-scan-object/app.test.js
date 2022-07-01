@@ -109,7 +109,7 @@ describe("handler", () => {
           { Key: "av-timestamp", Value: TEST_TIME },
         ],
       },
-    });    
+    });
   });
 
   test("records failed, failed to start", async () => {
