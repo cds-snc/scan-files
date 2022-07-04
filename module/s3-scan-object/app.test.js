@@ -99,6 +99,17 @@ describe("handler", () => {
         ],
       },
     });
+    expect(mockS3Client).toHaveReceivedNthCommandWith(3, PutObjectTaggingCommand, {
+      Bucket: "boom",
+      Key: "bing",
+      Tagging: {
+        TagSet: [
+          { Key: "av-scanner", Value: "clamav" },
+          { Key: "av-status", Value: "in_progress" },
+          { Key: "av-timestamp", Value: TEST_TIME },
+        ],
+      },
+    });
   });
 
   test("records failed, failed to start", async () => {
