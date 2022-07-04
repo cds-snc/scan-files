@@ -11,7 +11,7 @@ x-api_envs: &api_envs
   AV_WRITE_PATH: "/tmp/clamav"
   AV_DEFINITION_S3_BUCKET: "clamav-defs"
   CLAMAVLIB_PATH: "/etc/clamav"
-  CLAMSCAN_PATH: "/usr/bin/clamscan"
+  CLAMDSCAN_PATH: "/usr/bin/clamscan"
   FRESHCLAM_PATH: "/usr/bin/freshclam"
 
 services:

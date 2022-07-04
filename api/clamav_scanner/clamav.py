@@ -10,7 +10,6 @@ from pytz import utc
 
 from .common import AWS_ENDPOINT_URL
 from .common import AV_DEFINITION_S3_PREFIX
-from .common import AV_DEFINITION_PATH
 from .common import AV_WRITE_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
@@ -21,7 +20,7 @@ from .common import AV_SIGNATURE_METADATA
 from .common import AV_STATUS_CLEAN
 from .common import AV_STATUS_INFECTED
 from .common import CLAMAVLIB_PATH
-from .common import CLAMSCAN_PATH
+from .common import CLAMDSCAN_PATH
 from .common import FRESHCLAM_PATH
 from .common import create_dir
 
@@ -230,7 +229,14 @@ def scan_file(session, path, aws_account=None):
         )
     else:
         av_proc = subprocess.run(
-            [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
+            [
+                CLAMDSCAN_PATH,
+                "-v",
+                "--stdout",
+                "--config-file",
+                "%s/clamd.conf" % CLAMAVLIB_PATH,
+                path,
+            ],
             stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE,
             env=av_env,

@@ -4,6 +4,9 @@
 ENV_PATH="/tmp/scanfiles"
 TMP_ENV_FILE="$ENV_PATH/.env"
 
+# Start ClamAV daemon
+service clamav-daemon start
+
 var_expand() {
   if [ -z "${1-}" ] || [ $# -ne 1 ]; then
     printf 'var_expand: expected one argument\n' >&2;
