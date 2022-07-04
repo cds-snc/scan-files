@@ -66,8 +66,9 @@ RUN chown -R vscode:vscode /home/vscode/.aws
 
 # Setup ClamAV
 RUN mkdir -p /tmp/clamav \
+ && mkdir -p /clamav \
  && mkdir -p /tmp/clamav/quarantine \
- && chown -R vscode:vscode /tmp/clamav /var/log/clamav \
+ && chown -R vscode:vscode /clamav /tmp/clamav /var/log/clamav \
  && sed -i 's/User clamav/User vscode/g' /etc/clamav/clamd.conf \
  && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
  && sed -i 's/DatabaseOwner clamav/DatabaseOwner vscode/g' /etc/clamav/freshclam.conf \

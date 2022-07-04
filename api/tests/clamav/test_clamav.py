@@ -17,6 +17,7 @@ from clamav_scanner.common import AV_DEFINITION_FILE_SUFFIXES
 from clamav_scanner.common import AV_DEFINITION_S3_PREFIX
 from clamav_scanner.common import AV_SIGNATURE_OK
 from clamav_scanner.common import AV_SIGNATURE_METADATA
+from clamav_scanner.common import AV_DEFINITION_PATH
 
 from factories import ScanFactory
 from models.Scan import ScanProviders, ScanVerdicts
@@ -157,15 +158,15 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav/bytecode.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/bytecode.cvd",
             "s3_path": "clamav_defs/bytecode.cvd",
         },
         "daily": {
-            "local_path": "/tmp/clamav/daily.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/daily.cvd",
             "s3_path": "clamav_defs/daily.cvd",
         },
         "main": {
-            "local_path": "/tmp/clamav/main.cvd",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/main.cvd",
             "s3_path": "clamav_defs/main.cvd",
         },
     }
@@ -173,6 +174,7 @@ def test_update_defs_from_s3(mock_exists, mock_md5_from_file):
     to_download = update_defs_from_s3(
         mock_s3_client, s3_bucket_name, AV_DEFINITION_S3_PREFIX
     )
+
     assert expected_to_download == to_download
 
 
@@ -275,15 +277,15 @@ def test_update_defs_from_s3_old_files(mock_exists, mock_md5_from_file):
 
     expected_to_download = {
         "bytecode": {
-            "local_path": "/tmp/clamav/bytecode.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/bytecode.cld",
             "s3_path": "clamav_defs/bytecode.cld",
         },
         "daily": {
-            "local_path": "/tmp/clamav/daily.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/daily.cld",
             "s3_path": "clamav_defs/daily.cld",
         },
         "main": {
-            "local_path": "/tmp/clamav/main.cld",  # nosec - [B108:hardcoded_tmp_directory] Lambdas can only write to the /tmp folder
+            "local_path": f"{AV_DEFINITION_PATH}/main.cld",
             "s3_path": "clamav_defs/main.cld",
         },
     }

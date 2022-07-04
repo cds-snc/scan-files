@@ -232,6 +232,11 @@ resource "aws_wafv2_regex_pattern_set" "body_exclusions" {
   regular_expression {
     regex_string = "^/(clamav|assemblyline)(/s3)?$"
   }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
 }
 
 resource "aws_cloudwatch_log_group" "api_waf" {

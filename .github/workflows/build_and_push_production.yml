@@ -8,6 +8,7 @@ on:
 env:
   GITHUB_SHA: ${{ github.sha }}
   REGISTRY: 806545929748.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+  S3_BUCKET: scan-files-production-clamav-defs
 
 permissions:
   id-token: write
@@ -46,6 +47,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
+        with:
+          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
+          role-session-name: ECRPush
+          aws-region: ca-central-1
+
+      - name: Setup clamav defs directory
+        working-directory: ./api
+        run: |
+          mkdir -p clamav_defs
+
+      - name: Download antivirus definitions
+        working-directory: ./api
+        run: |
+          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/bytecode.cvd clamav_defs/bytecode.cvd > /dev/null 2>&1
+          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/daily.cld clamav_defs/daily.cld > /dev/null 2>&1
+          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/daily.cvd clamav_defs/daily.cvd > /dev/null 2>&1
+          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/main.cvd clamav_defs/main.cvd > /dev/null 2>&1
+
       - name: Build container
         working-directory: ./${{ matrix.image }}
         run: |
@@ -53,13 +74,6 @@ jobs:
           --build-arg git_sha=$GITHUB_SHA \
           -t $REGISTRY/${{ matrix.image }}:$GITHUB_SHA \
           -t $REGISTRY/${{ matrix.image }}:latest .
-
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
-        with:
-          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
-          role-session-name: ECRPush
-          aws-region: ca-central-1
 
       - name: Login to ECR
         id: login-ecr
