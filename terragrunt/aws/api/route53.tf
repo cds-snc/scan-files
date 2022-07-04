@@ -16,7 +16,7 @@ resource "aws_route53_health_check" "scan_files_A" {
   type              = "HTTPS"
   resource_path     = "/healthcheck"
   failure_threshold = "5"
-  request_interval  = "60"
+  request_interval  = "30"
 
   tags = {
     CostCentre = var.billing_code
