@@ -43,6 +43,7 @@ resource "aws_ecr_lifecycle_policy" "scan_files_exire_untagged" {
         "description" : "Keep last 20 tagged images",
         "selection" : {
           "tagStatus" : "tagged",
+          "tagPrefixList" : ["latest"],
           "countType" : "imageCountMoreThan",
           "countNumber" : 20
         },
