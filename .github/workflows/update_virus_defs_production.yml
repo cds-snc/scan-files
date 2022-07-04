@@ -79,7 +79,7 @@ jobs:
               if [ "$CURRENT_BYTECODE_CVD" != "$S3_BYTECODE_CVD" ] || \
                 [ "$CURRENT_DAILY_CLD" != "$S3_DAILY_CLD" ] || \
                 [ "$CURRENT_DAILY_CVD" != "$S3_DAILY_CVD" ] || \
-                [ "$CURRENT_MAIN_CVD" != "$S3_MAIN_CVD" ] ||
+                [ "$CURRENT_MAIN_CVD" != "$S3_MAIN_CVD" ]
               then
                 UPDATE_AVDEFS=true
               fi
