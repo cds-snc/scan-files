@@ -10,7 +10,6 @@ from pytz import utc
 
 from .common import AWS_ENDPOINT_URL
 from .common import AV_DEFINITION_S3_PREFIX
-from .common import AV_DEFINITION_PATH
 from .common import AV_WRITE_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
