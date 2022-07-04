@@ -57,7 +57,6 @@ RUN chown -R python:python ${FUNCTION_DIR}
 
 # Setup ClamAV
 RUN mkdir -p /clamav \
- && mkdir -p /tmp/clamav \
  && mkdir -p /tmp/clamav/quarantine \
  && chown -R python:python /clamav /tmp/clamav /var/log/clamav \
  && mv clamav_defs/* /clamav \
