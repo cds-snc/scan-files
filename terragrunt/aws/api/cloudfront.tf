@@ -18,6 +18,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   default_cache_behavior {
     allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods  = ["GET", "HEAD"]
+
     forwarded_values {
       query_string = true
       headers      = ["Authorization"]
@@ -29,6 +30,29 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
     target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
     viewer_protocol_policy     = "redirect-to-https"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
+  }
+
+  # Prevent caching of healthcheck calls
+  ordered_cache_behavior {
+    path_pattern    = "/healthcheck"
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+
+    forwarded_values {
+      query_string = true
+      cookies {
+        forward = "none"
+      }
+    }
+
+    target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
+    viewer_protocol_policy     = "redirect-to-https"
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
+
+    min_ttl     = 0
+    default_ttl = 0
+    max_ttl     = 0
+    compress    = true
   }
 
   restrictions {
