@@ -20,6 +20,7 @@ def random_file():
 
 class APIUser(HttpUser):
     "Submit files for scanning"
+
     @task
     def run_flow(self):
         attach = random_file()
