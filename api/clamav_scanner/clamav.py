@@ -230,7 +230,14 @@ def scan_file(session, path, aws_account=None):
         )
     else:
         av_proc = subprocess.run(
-            [CLAMDSCAN_PATH, "-v", "--stdout", "--config-file", "%s/clamd.conf" % CLAMAVLIB_PATH, path],
+            [
+                CLAMDSCAN_PATH,
+                "-v",
+                "--stdout",
+                "--config-file",
+                "%s/clamd.conf" % CLAMAVLIB_PATH,
+                path,
+            ],
             stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE,
             env=av_env,
