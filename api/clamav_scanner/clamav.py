@@ -12,8 +12,9 @@ from pytz import utc
 
 from .common import AWS_ENDPOINT_URL
 from .common import CLAMD_PATH
+from .common import AV_DEFINITION_S3_BUCKET
 from .common import AV_DEFINITION_S3_PREFIX
-from .common import AV_WRITE_PATH
+from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
 from .common import AV_SCAN_USE_CACHE
@@ -44,14 +45,14 @@ def current_library_search_path():
 
 
 def update_defs_from_s3(s3_client, bucket, prefix):
-    create_dir(AV_WRITE_PATH)
+    create_dir(AV_DEFINITION_PATH)
     to_download = {}
     for file_prefix in AV_DEFINITION_FILE_PREFIXES:
         s3_best_time = None
         for file_suffix in AV_DEFINITION_FILE_SUFFIXES:
             filename = file_prefix + "." + file_suffix
             s3_path = os.path.join(AV_DEFINITION_S3_PREFIX, filename)
-            local_path = os.path.join(AV_WRITE_PATH, filename)
+            local_path = os.path.join(AV_DEFINITION_PATH, filename)
             s3_md5 = md5_from_s3_tags(s3_client, bucket, s3_path)
             s3_time = time_from_s3(s3_client, bucket, s3_path)
 
@@ -191,8 +192,8 @@ def scan_file(session, path, aws_account=None):
 
     if path.startswith("s3://"):
         try:
-            save_path = f"{AV_WRITE_PATH}/quarantine/{str(uuid4())}"
-            create_dir(f"{AV_WRITE_PATH}/quarantine")
+            save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
+            create_dir(f"{AV_DEFINITION_PATH}/quarantine")
             file = get_file(path, aws_account=aws_account, ref_only=True)
             with open(save_path, "wb") as file_on_disk:
                 file.seek(0)
@@ -304,6 +305,20 @@ def is_clamd_running():
 
 
 def start_clamd_daemon():
+    s3 = get_session().resource("s3", endpoint_url=AWS_ENDPOINT_URL)
+    s3_client = get_session().client("s3", endpoint_url=AWS_ENDPOINT_URL)
+
+    to_download = update_defs_from_s3(
+        s3_client, AV_DEFINITION_S3_BUCKET, AV_DEFINITION_S3_PREFIX
+    )
+
+    for download in to_download.values():
+        s3_path = download["s3_path"]
+        local_path = download["local_path"]
+        print("Downloading definition file %s from s3://%s" % (local_path, s3_path))
+        s3.Bucket(AV_DEFINITION_S3_BUCKET).download_file(s3_path, local_path)
+        print("Downloading definition file %s complete!" % (local_path))
+
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
 

@@ -30,7 +30,7 @@ else:
 def handler(event, context):
     global clamd_pid
 
-    if not is_clamd_running():
+    if environ.get("CI") is None and not is_clamd_running():
         if clamd_pid is not None:
             kill_process_by_pid(clamd_pid)
 
