@@ -18,13 +18,11 @@ def get_file(save_path, aws_account=None, ref_only=False):
         client = get_session(credentials).resource("s3")
 
     try:
-        basename = key.split("/")[-1].strip()
-
         file = TemporaryFile()
         if ref_only:
-            client.Bucket(bucket).download_fileobj(basename, file)
+            client.Bucket(bucket).download_fileobj(key, file)
         else:
-            client.Bucket(bucket).download_fileobj(basename, file)
+            client.Bucket(bucket).download_fileobj(key, file)
             file.seek(0)
             file = file.read()
 
