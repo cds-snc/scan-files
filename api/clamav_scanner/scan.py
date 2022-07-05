@@ -21,7 +21,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
     message = {
         "scan_id": str(scan.id),
         "file_path": file_path,
-        "checksum": scan.checksum if scan.checksum else "",
+        "checksum": scan.checksum if scan.checksum else "None",
         AV_SIGNATURE_METADATA: scan_signature,
         AV_STATUS_METADATA: scan.verdict,
         AV_TIMESTAMP_METADATA: scan.completed.isoformat(),
@@ -36,7 +36,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
             "av-filepath": {"DataType": "String", "StringValue": file_path},
             "av-checksum": {
                 "DataType": "String",
-                "StringValue": scan.checksum if scan.checksum else "",
+                "StringValue": message["checksum"],
             },
             AV_STATUS_METADATA: {"DataType": "String", "StringValue": scan.verdict},
             AV_SIGNATURE_METADATA: {

@@ -65,3 +65,34 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
             "av-signature": {"DataType": "String", "StringValue": "OK"},
         },
     )
+
+
+@patch("clamav_scanner.scan.get_session")
+@patch("clamav_scanner.scan.get_db_session")
+def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
+    scan = ScanFactory(
+        verdict=ScanVerdicts.ERROR.value,
+        meta_data={"sid": "123"},
+        completed="2021-12-12T17:20:03.930469Z",
+        checksum="",
+    )
+    session.commit()
+    mock_sns_client = MagicMock()
+    sns_scan_results(
+        mock_sns_client,
+        scan,
+        "arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
+        AV_SIGNATURE_OK,
+        "/foo/bar/file.txt",
+    )
+    mock_sns_client.publish.assert_called_once_with(
+        TargetArn="arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
+        Message=ANY,
+        MessageStructure="json",
+        MessageAttributes={
+            "av-filepath": {"DataType": "String", "StringValue": "/foo/bar/file.txt"},
+            "av-checksum": {"DataType": "String", "StringValue": "None"},
+            "av-status": {"DataType": "String", "StringValue": "error"},
+            "av-signature": {"DataType": "String", "StringValue": "OK"},
+        },
+    )
