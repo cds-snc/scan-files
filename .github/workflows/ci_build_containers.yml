@@ -7,7 +7,6 @@ on:
 env:
   GITHUB_SHA: ${{ github.sha }}
   REGISTRY: 806545929748.dkr.ecr.ca-central-1.amazonaws.com/scan-files
-  S3_BUCKET: scan-files-production-clamav-defs
 
 permissions:
   id-token: write
@@ -52,19 +51,6 @@ jobs:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
           role-session-name: ECRPush
           aws-region: ca-central-1
-
-      - name: Setup clamav defs directory
-        working-directory: ./api
-        run: |
-          mkdir -p clamav_defs
-
-      - name: Download antivirus definitions
-        working-directory: ./api
-        run: |
-          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/bytecode.cvd clamav_defs/bytecode.cvd > /dev/null 2>&1
-          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/daily.cld clamav_defs/daily.cld > /dev/null 2>&1
-          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/daily.cvd clamav_defs/daily.cvd > /dev/null 2>&1
-          aws s3api get-object --bucket $S3_BUCKET --key clamav_defs/main.cvd clamav_defs/main.cvd > /dev/null 2>&1
 
       - name: Build container
         working-directory: ./${{ matrix.image }}
