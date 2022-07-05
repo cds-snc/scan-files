@@ -1,13 +1,12 @@
 import errno
 import datetime
 import os
-import os.path
+import signal
 
 AV_DEFINITION_S3_BUCKET = os.getenv("AV_DEFINITION_S3_BUCKET")
 AV_DEFINITION_S3_PREFIX = os.getenv("AV_DEFINITION_S3_PREFIX", "clamav_defs")
-AV_DEFINITION_PATH = os.getenv("AV_DEFINITION_PATH", "/clamav")
-AV_WRITE_PATH = os.getenv(
-    "AV_WRITE_PATH",
+AV_DEFINITION_PATH = os.getenv(
+    "AV_DEFINITION_PATH",
     "/tmp/clamav",  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
 )
 AV_SCAN_USE_CACHE = os.getenv("AV_SCAN_USE_CACHE", "True") in ("True", "true")
@@ -24,8 +23,14 @@ AV_STATUS_SNS_PUBLISH_CLEAN = os.getenv("AV_STATUS_SNS_PUBLISH_CLEAN", "True")
 AV_STATUS_SNS_PUBLISH_INFECTED = os.getenv("AV_STATUS_SNS_PUBLISH_INFECTED", "True")
 AV_TIMESTAMP_METADATA = os.getenv("AV_TIMESTAMP_METADATA", "av-timestamp")
 CLAMAVLIB_PATH = os.getenv("CLAMAVLIB_PATH", "/etc/clamav")
+CLAMD_PATH = os.getenv("CLAMD_PATH", "/usr/sbin/clamd")
 CLAMDSCAN_PATH = os.getenv("CLAMDSCAN_PATH", "/usr/bin/clamdscan")
 FRESHCLAM_PATH = os.getenv("FRESHCLAM_PATH", "/usr/bin/freshclam")
+CLAMDSCAN_TIMEOUT = os.getenv("CLAMDSCAN_TIMEOUT", 240)
+CLAMD_SOCKET = os.getenv(
+    "CLAMD_SOCKET",
+    "/tmp/clamd.sock",  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
+)
 AV_PROCESS_ORIGINAL_VERSION_ONLY = os.getenv(
     "AV_PROCESS_ORIGINAL_VERSION_ONLY", "False"
 )
@@ -57,3 +62,18 @@ def create_dir(path):
 
 def get_timestamp():
     return datetime.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S UTC")
+
+
+def kill_process_by_pid(pid):
+    # Check if process is running on PID
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return
+
+    print("Killing the process by PID %s" % pid)
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        os.kill(pid, signal.SIGKILL)

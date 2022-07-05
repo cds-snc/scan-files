@@ -6,15 +6,6 @@ resource "aws_ecr_repository" "api" {
     scan_on_push = true
   }
 
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes to tags since tags are being updated by Github workflow
-      # to track virus definition hashes.
-      tags,
-    ]
-    prevent_destroy = true
-  }
-
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
