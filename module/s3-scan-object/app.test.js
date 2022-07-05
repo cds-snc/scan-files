@@ -57,7 +57,7 @@ describe("handler", () => {
             bucket: { name: "smaug" },
             object: { key: "gold/" },
           },
-        },        
+        },
         {
           EventSource: "aws:sns",
           Sns: {

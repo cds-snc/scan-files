@@ -168,7 +168,7 @@ const getS3ObjectFromRecord = (eventSource, record) => {
  * @returns Boolean True if the S3 object key is a folder
  */
 const isS3Folder = (s3Object) => {
-  return !!s3Object && typeof s3Object.Key == "string" && s3Object.Key.endsWith("/");
+  return !!s3Object && typeof s3Object.Key === "string" && s3Object.Key.endsWith("/");
 };
 
 /**
