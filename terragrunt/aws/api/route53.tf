@@ -9,3 +9,17 @@ resource "aws_route53_record" "scan_files_A" {
     evaluate_target_health = false
   }
 }
+
+resource "aws_route53_health_check" "scan_files_A" {
+  fqdn              = aws_route53_record.scan_files_A.fqdn
+  port              = 443
+  type              = "HTTPS"
+  resource_path     = "/healthcheck"
+  failure_threshold = "5"
+  request_interval  = "30"
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
