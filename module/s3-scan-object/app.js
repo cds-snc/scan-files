@@ -101,7 +101,7 @@ exports.handler = async (event) => {
         { Key: "av-timestamp", Value: new Date().getTime() },
       ];
 
-      if (scanChecksum) {
+      if (scanChecksum && scanChecksum !== "None") {
         tags.push({ Key: "av-checksum", Value: scanChecksum });
       }
 
