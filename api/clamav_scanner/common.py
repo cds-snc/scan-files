@@ -27,7 +27,10 @@ CLAMD_PATH = os.getenv("CLAMD_PATH", "/usr/sbin/clamd")
 CLAMDSCAN_PATH = os.getenv("CLAMDSCAN_PATH", "/usr/bin/clamdscan")
 FRESHCLAM_PATH = os.getenv("FRESHCLAM_PATH", "/usr/bin/freshclam")
 CLAMDSCAN_TIMEOUT = os.getenv("CLAMDSCAN_TIMEOUT", 240)
-CLAMD_SOCKET = os.getenv("CLAMD_SOCKET", "/tmp/clamd.sock")
+CLAMD_SOCKET = os.getenv(
+    "CLAMD_SOCKET",
+    "/tmp/clamd.sock",  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
+)
 AV_PROCESS_ORIGINAL_VERSION_ONLY = os.getenv(
     "AV_PROCESS_ORIGINAL_VERSION_ONLY", "False"
 )

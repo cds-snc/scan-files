@@ -339,6 +339,8 @@ def start_clamd_daemon():
 
     clamd_proc.wait()
 
-    clamd_log_file = open("/tmp/clamav.log")
+    clamd_log_file = open(
+        "/tmp/clamav.log"  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
+    )
     log.info(clamd_log_file.read())
     return clamd_proc.pid
