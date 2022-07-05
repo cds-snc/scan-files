@@ -69,6 +69,11 @@ exports.handler = async (event) => {
     let eventSource = getRecordEventSource(record);
     let s3Object = getS3ObjectFromRecord(eventSource, record);
 
+    // Do not scan S3 folder objects
+    if (isS3Folder(s3Object)) {
+      continue;
+    }
+
     // Start a scan of the new S3 object
     if (eventSource !== null && s3Object !== null) {
       if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
@@ -158,6 +163,15 @@ const getS3ObjectFromRecord = (eventSource, record) => {
 };
 
 /**
+ * Checks if an S3 object represents a folder, which have keys ending with a forward slash `/`.
+ * @param {{Bucket: string, Key: string}} s3Object S3 bucket and key
+ * @returns Boolean True if the S3 object key is a folder
+ */
+const isS3Folder = (s3Object) => {
+  return !!s3Object && typeof s3Object.Key == "string" && s3Object.Key.endsWith("/");
+};
+
+/**
  * Given an S3 object URL, parses the URL and returns the S3 object's bucket and key.
  * @param {String} url S3 object URL in format `s3://bucket/key`
  * @returns {{Bucket: string, Key: string}} S3 object bucket and key or null
@@ -241,6 +255,7 @@ exports.helpers = {
   getRecordEventSource,
   getS3ObjectFromRecord,
   initConfig,
+  isS3Folder,
   parseS3Url,
   startS3ObjectScan,
   tagS3Object,
