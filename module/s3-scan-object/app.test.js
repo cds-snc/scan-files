@@ -64,11 +64,21 @@ describe("handler", () => {
           eventSource: "custom:rescan",
           s3ObjectUrl: "s3://boom/bing",
         },
+        {
+          EventSource: "aws:sns",
+          Sns: {
+            MessageAttributes: {
+              "av-filepath": { Value: "s3://frodo/bagginsssis" },
+              "av-status": { Value: "error" },
+              "av-checksum": { Value: "None" },
+            },
+          },
+        },
       ],
     };
     const expectedResponse = {
       status: 200,
-      body: "Event records processesed: 3, Errors: 0",
+      body: "Event records processesed: 4, Errors: 0",
     };
 
     axios.post.mockResolvedValue({ status: 200 });
@@ -106,6 +116,17 @@ describe("handler", () => {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "in_progress" },
+          { Key: "av-timestamp", Value: TEST_TIME },
+        ],
+      },
+    });
+    expect(mockS3Client).toHaveReceivedNthCommandWith(4, PutObjectTaggingCommand, {
+      Bucket: "frodo",
+      Key: "bagginsssis",
+      Tagging: {
+        TagSet: [
+          { Key: "av-scanner", Value: "clamav" },
+          { Key: "av-status", Value: "error" },
           { Key: "av-timestamp", Value: TEST_TIME },
         ],
       },
