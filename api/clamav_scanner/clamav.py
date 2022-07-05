@@ -185,7 +185,7 @@ def scan_output_to_json(output):
     return summary
 
 
-def scan_file(session, path, aws_account=None):
+def scan_file(session, path, ignore_cache=False, aws_account=None):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
@@ -211,7 +211,7 @@ def scan_file(session, path, aws_account=None):
 
     # Check for previously cached scan results
     previous_scan = None
-    if AV_SCAN_USE_CACHE:
+    if AV_SCAN_USE_CACHE and not ignore_cache:
         current_time = datetime.datetime.utcnow()
         one_day_ago = current_time - datetime.timedelta(days=1)
 

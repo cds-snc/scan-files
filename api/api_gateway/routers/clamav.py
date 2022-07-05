@@ -7,6 +7,7 @@ from fastapi import (
     Body,
     Depends,
     File,
+    Query,
     Response,
     status,
     UploadFile,
@@ -15,6 +16,7 @@ from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from typing import Optional
 from uuid import UUID, uuid4
 
 router = APIRouter()
@@ -24,6 +26,7 @@ router = APIRouter()
 def start_clamav_scan(
     response: Response,
     file: UploadFile = File(...),
+    ignore_cache: Optional[bool] = Query(False),
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
@@ -41,7 +44,7 @@ def start_clamav_scan(
         session.add(scan)
         session.commit()
 
-        scan_verdict = launch_scan(save_path, scan.id)
+        scan_verdict = launch_scan(save_path, scan.id, ignore_cache=ignore_cache)
         return {"status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
