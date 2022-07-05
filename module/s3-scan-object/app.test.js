@@ -16,6 +16,7 @@ const {
   getRecordEventSource,
   getS3ObjectFromRecord,
   initConfig,
+  isS3Folder,
   parseS3Url,
   startS3ObjectScan,
   tagS3Object,
@@ -51,6 +52,13 @@ describe("handler", () => {
           },
         },
         {
+          eventSource: "aws:s3",
+          s3: {
+            bucket: { name: "smaug" },
+            object: { key: "gold/" },
+          },
+        },
+        {
           EventSource: "aws:sns",
           Sns: {
             MessageAttributes: {
@@ -78,7 +86,7 @@ describe("handler", () => {
     };
     const expectedResponse = {
       status: 200,
-      body: "Event records processesed: 4, Errors: 0",
+      body: "Event records processesed: 5, Errors: 0",
     };
 
     axios.post.mockResolvedValue({ status: 200 });
@@ -319,6 +327,24 @@ describe("initConfig", () => {
   test("throws an error on failure", async () => {
     mockSecretManagerClient.on(GetSecretValueCommand).rejectsOnce(new Error("nope"));
     await expect(initConfig()).rejects.toThrow("nope");
+  });
+});
+
+describe("isS3Folder", () => {
+  test("identifies folders", () => {
+    expect(isS3Folder({ Key: "foobar/" })).toBe(true);
+    expect(isS3Folder({ Key: "bam/baz/boom/" })).toBe(true);
+  });
+
+  test("identifies things that are not folders", () => {
+    expect(isS3Folder(null)).toBe(false);
+    expect(isS3Folder(undefined)).toBe(false);
+    expect(isS3Folder({ Key: "most-certainly-not-a-folder.png" })).toBe(false);
+    expect(isS3Folder({ Key: null })).toBe(false);
+    expect(isS3Folder({ Key: undefined })).toBe(false);
+    expect(isS3Folder({})).toBe(false);
+    expect(isS3Folder({ Key: "" })).toBe(false);
+    expect(isS3Folder({ Key: "some/nested/path/with/a/file.txt" })).toBe(false);
   });
 });
 
