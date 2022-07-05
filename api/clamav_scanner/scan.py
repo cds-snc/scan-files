@@ -66,7 +66,9 @@ def launch_background_scan(
     )
 
 
-def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None):
+def launch_scan(
+    file_path, scan_id, ignore_cache=False, aws_account=None, session=None, sns_arn=None
+):
     if session is None:
         session = next(get_db_session())
 
@@ -76,7 +78,7 @@ def launch_scan(file_path, scan_id, aws_account=None, session=None, sns_arn=None
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
     try:
         checksum, scan_result, scan_signature, scanned_path = scan_file(
-            session, file_path, aws_account
+            session, file_path, ignore_cache, aws_account
         )
         scan.completed = datetime.datetime.utcnow()
         scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)

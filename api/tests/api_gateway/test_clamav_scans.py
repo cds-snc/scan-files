@@ -1,13 +1,17 @@
+import datetime
 import os
 
 from api_gateway import api
 from factories import ScanFactory
 from fastapi.testclient import TestClient
-from models.Scan import Scan, ScanVerdicts
+from models.Scan import Scan, ScanProviders, ScanVerdicts
 from sqlalchemy.exc import SQLAlchemyError
 from unittest.mock import ANY, patch, MagicMock
 from clamav_scanner.common import create_dir
 from tempfile import TemporaryFile
+
+from clamav_scanner.common import AV_SIGNATURE_OK
+from clamav_scanner.common import AV_SIGNATURE_METADATA
 
 client = TestClient(api.app)
 
@@ -38,6 +42,92 @@ def test_clamav_file_upload_success(mock_db_session, mock_aws_session, mock_scan
     )
 
     assert response.status_code == 200
+
+
+@patch("clamav_scanner.clamav.subprocess.run")
+@patch("clamav_scanner.scan.get_session")
+@patch("storage.storage.get_session")
+@patch("database.db.get_db_session")
+def test_clamav_file_upload_success_cached(
+    mock_db_session,
+    mock_aws_session,
+    mock_scan_get_session,
+    mock_subprocess_run,
+    session,
+):
+    calculated_md5_hash = "118e0bb51e0f02e6f37937f4381b0318"
+    current_time = datetime.datetime.utcnow()
+    one_day_ago = (
+        current_time - datetime.timedelta(days=1) + datetime.timedelta(minutes=10)
+    )
+
+    ScanFactory(
+        scan_provider=ScanProviders.CLAMAV.value,
+        verdict=ScanVerdicts.CLEAN.value,
+        submitted=one_day_ago,
+        checksum=calculated_md5_hash,
+        meta_data={AV_SIGNATURE_METADATA: AV_SIGNATURE_OK},
+    )
+    session.commit()
+    create_dir(
+        "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    )
+    filename = "tests/api_gateway/fixtures/file.txt"
+
+    mock_subprocess_run.return_value.returncode = 0
+    mock_subprocess_run.return_value.stdout = "scan complete".encode("utf-8")
+
+    response = client.post(
+        "/clamav",
+        files={"file": ("random_file", open(filename, "rb"), "text/plain")},
+        headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
+    )
+
+    assert response.status_code == 200
+    assert mock_subprocess_run.call_count == 0
+
+
+@patch("clamav_scanner.clamav.subprocess.run")
+@patch("clamav_scanner.scan.get_session")
+@patch("storage.storage.get_session")
+@patch("database.db.get_db_session")
+def test_clamav_file_upload_success_ignore_cache(
+    mock_db_session,
+    mock_aws_session,
+    mock_scan_get_session,
+    mock_subprocess_run,
+    session,
+):
+    calculated_md5_hash = "118e0bb51e0f02e6f37937f4381b0318"
+    current_time = datetime.datetime.utcnow()
+    one_day_ago = (
+        current_time - datetime.timedelta(days=1) + datetime.timedelta(minutes=10)
+    )
+
+    ScanFactory(
+        scan_provider=ScanProviders.CLAMAV.value,
+        verdict=ScanVerdicts.CLEAN.value,
+        submitted=one_day_ago,
+        checksum=calculated_md5_hash,
+        meta_data={AV_SIGNATURE_METADATA: AV_SIGNATURE_OK},
+    )
+    session.commit()
+    create_dir(
+        "/tmp/clamav/quarantine"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    )
+    filename = "tests/api_gateway/fixtures/file.txt"
+
+    mock_subprocess_run.return_value.returncode = 0
+    mock_subprocess_run.return_value.stdout = "scan complete".encode("utf-8")
+
+    response = client.post(
+        "/clamav?ignore_cache=true",
+        files={"file": ("random_file", open(filename, "rb"), "text/plain")},
+        headers={"Authorization": os.environ["API_AUTH_TOKEN"]},
+    )
+
+    assert response.status_code == 200
+    assert mock_subprocess_run.call_count == 1
 
 
 @patch("database.db.get_db_session")
