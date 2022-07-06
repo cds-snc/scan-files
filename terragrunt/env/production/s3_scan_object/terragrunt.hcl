@@ -10,6 +10,7 @@ dependency "api" {
   config_path = "../api"
 
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
     function_role_arn                = ""
     scan_files_api_key_kms_arn       = ""
