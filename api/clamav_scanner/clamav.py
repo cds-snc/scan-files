@@ -23,13 +23,15 @@ from .common import AV_SIGNATURE_UNKNOWN
 from .common import AV_SIGNATURE_METADATA
 from .common import AV_STATUS_CLEAN
 from .common import AV_STATUS_INFECTED
+from .common import CLAMD_STARTUP_LOCK
 from .common import CLAMD_SOCKET
 from .common import CLAMAVLIB_PATH
 from .common import CLAMDSCAN_PATH
 from .common import FRESHCLAM_PATH
-from .common import create_dir
+from .common import create_dir, kill_process_by_pid
 
 from boto3wrapper.wrapper import get_session
+from filelock import FileLock
 from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from storage.storage import get_file
@@ -283,6 +285,20 @@ def determine_verdict(provider, value):
         return ScanVerdicts.ERROR.value
 
 
+def get_clamd_pid():
+    try:
+        clamd_pid = subprocess.check_output(["pidof", "clamd"]).decode("utf-8").strip()
+        return int(clamd_pid)
+    except ValueError:
+        log.error("Failed to convert PID: %s into an integer" % clamd_pid)
+        pass
+    except Exception:
+        log.error("Failed to get PID of clamd")
+        pass
+
+    return None
+
+
 def is_clamd_running():
     log.info("Checking if clamd is running on %s" % CLAMD_SOCKET)
 
@@ -302,6 +318,28 @@ def is_clamd_running():
 
     log.error("Clamd is not running on %s" % CLAMD_SOCKET)
     return False
+
+
+def setup_clamd_daemon():
+    clamd_pid = get_clamd_pid()
+    lock = FileLock(CLAMD_STARTUP_LOCK, timeout=120)
+    lock.acquire(poll_interval=5)
+    try:
+        if not is_clamd_running():
+            if clamd_pid is not None:
+                kill_process_by_pid(clamd_pid)
+
+            clamd_pid = start_clamd_daemon()
+            log.info("Clamd PID: %s" % clamd_pid)
+        else:
+            clamd_pid = get_clamd_pid()
+    except Exception as e:
+        log.error("Failed to start clamd daemon: %s" % e)
+        raise e
+    finally:
+        lock.release()
+
+    return clamd_pid
 
 
 def start_clamd_daemon():

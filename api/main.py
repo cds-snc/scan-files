@@ -6,9 +6,9 @@ from assemblyline.assemblyline import (
 )
 
 from clamav_scanner.update import update_virus_defs
-from clamav_scanner.common import CLAMAV_LAMBDA_SCAN_TASK_NAME, kill_process_by_pid
+from clamav_scanner.common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 from clamav_scanner.scan import launch_scan as clamav_launch_scan
-from clamav_scanner.clamav import is_clamd_running, start_clamd_daemon
+from clamav_scanner.clamav import is_clamd_running, setup_clamd_daemon
 from aws_lambda_powertools import Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
@@ -16,7 +16,6 @@ from logger import log
 from mangum import Mangum
 from os import environ
 
-clamd_pid = None
 app = api.app
 metrics = Metrics(namespace="ScanFiles", service="api")
 
@@ -24,22 +23,19 @@ if environ.get("CI"):
     connection_string = environ.get("SQLALCHEMY_DATABASE_TEST_URI")
 else:
     connection_string = environ.get("SQLALCHEMY_DATABASE_URI")
+    setup_clamd_daemon()
 
 
 @metrics.log_metrics(capture_cold_start_metric=True)
 def handler(event, context):
-    global clamd_pid
 
     if environ.get("CI") is None and not is_clamd_running():
-        if clamd_pid is not None:
-            kill_process_by_pid(clamd_pid)
+        setup_clamd_daemon()
 
-        clamd_pid = start_clamd_daemon()
-        log.info("Clamd PID: %s" % clamd_pid)
-
-    if "requestContext" in event and "http" in event["requestContext"]:
+    if "httpMethod" in event or (
+        "requestContext" in event and "http" in event["requestContext"]
+    ):
         # Assume it is a request to the lambda function url
-
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response

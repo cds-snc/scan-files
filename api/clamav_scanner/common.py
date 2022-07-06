@@ -31,6 +31,7 @@ CLAMD_SOCKET = os.getenv(
     "CLAMD_SOCKET",
     "/tmp/clamd.sock",  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
 )
+CLAMD_STARTUP_LOCK = "/tmp/clamd_startup.lock"  # nosec - [B108:hardcoded_tmp_directory] Lambda only allows write to /tmp
 AV_PROCESS_ORIGINAL_VERSION_ONLY = os.getenv(
     "AV_PROCESS_ORIGINAL_VERSION_ONLY", "False"
 )
