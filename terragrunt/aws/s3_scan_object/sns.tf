@@ -74,6 +74,8 @@ resource "aws_kms_key" "sns_lambda" {
 }
 
 data "aws_iam_policy_document" "sns_lambda" {
+  #checkov:skip=CKV_AWS_109: KMS IAM resource key policy '*' refers to self
+  #checkov:skip=CKV_AWS_111: KMS IAM resource key policy '*' refers to self
   statement {
     effect    = "Allow"
     resources = ["*"]
