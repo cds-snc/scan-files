@@ -84,26 +84,6 @@ data "aws_iam_policy_document" "kms_policies" {
       identifiers = [local.api_role_arn]
     }
   }
-
-  statement {
-
-    sid = "S3ScanObject"
-
-    effect = "Allow"
-
-    actions = [
-      "kms:Decrypt"
-    ]
-
-    resources = [
-      "*"
-    ]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.account_id}:role/s3-scan-object"]
-    }
-  }
 }
 
 resource "aws_kms_key" "scan-files" {
