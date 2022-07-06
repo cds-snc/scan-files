@@ -2,7 +2,7 @@ module "s3_scan_object" {
   source = "github.com/cds-snc/terraform-modules?ref=v3.0.6//lambda"
 
   name      = "s3-scan-object"
-  image_uri = aws_ecr_repository.s3_scan_object.repository_url
+  image_uri = "${aws_ecr_repository.s3_scan_object.repository_url}:latest"
   ecr_arn   = aws_ecr_repository.s3_scan_object.arn
   memory    = 512
   timeout   = 15
