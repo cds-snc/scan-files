@@ -45,7 +45,7 @@ def start_clamav_scan(
         session.commit()
 
         scan_verdict = launch_scan(save_path, scan.id, ignore_cache=ignore_cache)
-        return {"status": "completed", "verdict": scan_verdict}
+        return {"scan_id": str(scan.id), "status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
         print(err)
