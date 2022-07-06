@@ -83,6 +83,11 @@ data "aws_iam_policy_document" "kms_policies" {
       type        = "AWS"
       identifiers = [local.api_role_arn]
     }
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${var.account_id}:role/s3-scan-object"]
+    }    
   }
 }
 
