@@ -321,7 +321,7 @@ def is_clamd_running():
 
 
 def setup_clamd_daemon():
-    clamd_pid = get_clamd_pid
+    clamd_pid = get_clamd_pid()
     lock = FileLock(CLAMD_STARTUP_LOCK, timeout=120)
     lock.acquire(poll_interval=5)
     try:

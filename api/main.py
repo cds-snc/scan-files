@@ -23,6 +23,7 @@ if environ.get("CI"):
     connection_string = environ.get("SQLALCHEMY_DATABASE_TEST_URI")
 else:
     connection_string = environ.get("SQLALCHEMY_DATABASE_URI")
+    setup_clamd_daemon()
 
 
 @metrics.log_metrics(capture_cold_start_metric=True)
