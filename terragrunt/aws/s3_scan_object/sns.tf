@@ -113,7 +113,7 @@ data "aws_iam_policy_document" "sns_lambda" {
 }
 
 resource "aws_lambda_permission" "scan_complete" {
-  statement_id  = "S3ScanObjectSNSInvoke="
+  statement_id  = "S3ScanObjectSNSInvoke"
   action        = "lambda:InvokeFunction"
   function_name = module.s3_scan_object.function_name
   principal     = "sns.amazonaws.com"
