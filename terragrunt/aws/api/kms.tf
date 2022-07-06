@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "kms_policies" {
 
   statement {
 
-    sid = "CrossAccountS3ScanObject"
+    sid = "S3ScanObject"
 
     effect = "Allow"
 
@@ -101,29 +101,16 @@ data "aws_iam_policy_document" "kms_policies" {
 
     principals {
       type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    condition {
-      test     = "ArnLike"
-      values   = ["arn:aws:iam::*:role/s3-scan-object-*"]
-      variable = "aws:PrincipalArn"
-    }
-
-    condition {
-      test     = "StringEquals"
-      values   = [var.aws_org_id]
-      variable = "aws:PrincipalOrgID"
+      identifiers = ["arn:aws:iam::${var.account_id}:role/s3-scan-object"]
     }
   }
-
 }
 
 resource "aws_kms_key" "scan-files" {
   description         = "KMS Key"
   enable_key_rotation = true
 
-  policy = sensitive(data.aws_iam_policy_document.kms_policies.json)
+  policy = data.aws_iam_policy_document.kms_policies.json
 
   tags = {
     CostCentre = var.billing_code
