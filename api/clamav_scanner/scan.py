@@ -9,7 +9,7 @@ from .common import AWS_ENDPOINT_URL
 from .common import AV_SIGNATURE_UNKNOWN
 from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
-from boto3wrapper.wrapper import get_session, get_credentials
+from boto3wrapper.wrapper import get_session
 from clamav_scanner.clamav import determine_verdict, scan_file
 from database.db import get_db_session
 from logger import log
@@ -74,8 +74,7 @@ def launch_scan(
     if session is None:
         session = next(get_db_session())
 
-    credentials = get_credentials(aws_account)
-    sns_client = get_session(credentials).client("sns", endpoint_url=AWS_ENDPOINT_URL)
+    sns_client = get_session().client("sns", endpoint_url=AWS_ENDPOINT_URL)
 
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
     try:
