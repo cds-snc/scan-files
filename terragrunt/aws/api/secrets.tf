@@ -1,6 +1,6 @@
 resource "aws_secretsmanager_secret" "api_auth_token" {
   name       = "/scan-files/api_auth_token"
-  kms_key_id = "aws/secretsmanager"
+  kms_key_id = "alias/aws/secretsmanager"
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
