@@ -16,7 +16,7 @@ from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 
 
-def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
+def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_account):
 
     message = {
         "scan_id": str(scan.id),
@@ -25,6 +25,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
         AV_SIGNATURE_METADATA: scan_signature,
         AV_STATUS_METADATA: scan.verdict,
         AV_TIMESTAMP_METADATA: scan.completed.isoformat(),
+        "aws_account": aws_account,
     }
 
     log.info("Publishing to sns arn: %s; message: %s" % (sns_arn, str(message)))
@@ -43,6 +44,7 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path):
                 "DataType": "String",
                 "StringValue": scan_signature,
             },
+            "aws-account": {"DataType": "String", "StringValue": aws_account},
         },
     )
 
@@ -97,7 +99,9 @@ def launch_scan(
 
     # Publish the scan results
     if sns_arn not in [None, ""]:
-        sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path)
+        sns_scan_results(
+            sns_client, scan, sns_arn, scan_signature, file_path, aws_account
+        )
 
     # Delete downloaded file to free up room on re-usable lambda function container
     try:

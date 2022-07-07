@@ -4,17 +4,22 @@ const axios = require("axios");
 const { mockClient } = require("aws-sdk-client-mock");
 const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
 const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
+const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
 
 const mockS3Client = mockClient(S3Client);
 const mockSecretManagerClient = mockClient(SecretsManagerClient);
+const mockSTSClient = mockClient(STSClient);
 mockSecretManagerClient.on(GetSecretValueCommand).resolves({
   SecretString: "someSuperSecretValue",
 });
 
 const { handler, helpers } = require("./app.js");
 const {
+  getAwsAccountId,
   getRecordEventSource,
+  getRoleCredentials,
   getS3ObjectFromRecord,
+  getS3Client,
   initConfig,
   isS3Folder,
   parseS3Url,
@@ -38,11 +43,13 @@ beforeEach(() => {
   jest.resetAllMocks();
   mockS3Client.reset();
   mockSecretManagerClient.reset();
+  mockSTSClient.reset();
 });
 
 describe("handler", () => {
   test("records success", async () => {
     const event = {
+      AccountId: "123456789012",
       Records: [
         {
           eventSource: "aws:s3",
@@ -65,6 +72,7 @@ describe("handler", () => {
               "av-filepath": { Value: "s3://bam/baz" },
               "av-status": { Value: "SPIFY" },
               "av-checksum": { Value: "42" },
+              "aws-account": { Value: "123456789012" },
             },
           },
         },
@@ -79,6 +87,7 @@ describe("handler", () => {
               "av-filepath": { Value: "s3://frodo/bagginsssis" },
               "av-status": { Value: "error" },
               "av-checksum": { Value: "None" },
+              "aws-account": { Value: "210987654321" },
             },
           },
         },
@@ -91,6 +100,7 @@ describe("handler", () => {
 
     axios.post.mockResolvedValue({ status: 200 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
+    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
     const response = await handler(event);
     expect(response).toEqual(expectedResponse);
@@ -139,10 +149,19 @@ describe("handler", () => {
         ],
       },
     });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
+      RoleArn: "arn:aws:iam::123456789012:role/ScanFilesGetObjects",
+      RoleSessionName: "s3-scan-object",
+    });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(2, AssumeRoleCommand, {
+      RoleArn: "arn:aws:iam::210987654321:role/ScanFilesGetObjects",
+      RoleSessionName: "s3-scan-object",
+    });
   });
 
   test("records failed, failed to start", async () => {
     const event = {
+      AccountId: "123456789012",
       Records: [
         {
           eventSource: "aws:s3",
@@ -160,6 +179,7 @@ describe("handler", () => {
 
     axios.post.mockResolvedValue({ status: 500 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
+    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
     const response = await handler(event);
     expect(response).toEqual(expectedResponse);
@@ -174,10 +194,15 @@ describe("handler", () => {
         ],
       },
     });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
+      RoleArn: "arn:aws:iam::123456789012:role/ScanFilesGetObjects",
+      RoleSessionName: "s3-scan-object",
+    });
   });
 
   test("records failed, undefined reponse", async () => {
     const event = {
+      AccountId: "654321789012",
       Records: [
         {
           eventSource: "aws:s3",
@@ -195,6 +220,7 @@ describe("handler", () => {
 
     axios.post.mockResolvedValue(undefined);
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
+    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
     const response = await handler(event);
     expect(response).toEqual(expectedResponse);
@@ -208,6 +234,10 @@ describe("handler", () => {
           { Key: "av-timestamp", Value: TEST_TIME },
         ],
       },
+    });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
+      RoleArn: "arn:aws:iam::654321789012:role/ScanFilesGetObjects",
+      RoleSessionName: "s3-scan-object",
     });
   });
 
@@ -232,6 +262,35 @@ describe("handler", () => {
   });
 });
 
+describe("getAwsAccountId", () => {
+  test("account ID exists", () => {
+    const record = {
+      Sns: {
+        MessageAttributes: {
+          "aws-account": { Value: "654321789012" },
+        },
+      },
+    };
+    expect(getAwsAccountId("aws:s3", { AccountId: "123456789012" }, null)).toBe("123456789012");
+    expect(getAwsAccountId("aws:sns", null, record)).toBe("654321789012");
+    expect(getAwsAccountId("custom:rescan", { AccountId: "210987654321" }, null)).toBe(
+      "210987654321"
+    );
+  });
+
+  test("account ID does not exist", () => {
+    const record = {
+      Sns: {
+        MessageAttributes: {},
+      },
+    };
+    expect(getAwsAccountId("foo", { AccountId: "123456789012" }, null)).toBe(null);
+    expect(getAwsAccountId("aws:s3", {}, null)).toBe(null);
+    expect(getAwsAccountId("aws:sns", {}, record)).toBe(null);
+    expect(getAwsAccountId("custom:rescan", {}, null)).toBe(null);
+  });
+});
+
 describe("getRecordEventSource", () => {
   test("valid event sources", () => {
     expect(getRecordEventSource({ eventSource: "aws:s3" })).toBe("aws:s3");
@@ -246,6 +305,43 @@ describe("getRecordEventSource", () => {
     expect(getRecordEventSource({ eventSource: undefined })).toBe(null);
     expect(getRecordEventSource({ eventSource: "pohtaytoes" })).toBe(null);
     expect(getRecordEventSource({})).toBe(null);
+  });
+});
+
+describe("getRoleCredentials", () => {
+  test("successfully assumes role", async () => {
+    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: { foo: "bar" } });
+    const credentials = await getRoleCredentials(mockSTSClient, "foo");
+
+    expect(credentials).toEqual({ foo: "bar" });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
+      RoleArn: "foo",
+      RoleSessionName: "s3-scan-object",
+    });
+  });
+
+  test("fails to assume role", async () => {
+    mockSTSClient.on(AssumeRoleCommand).rejects(new Error("nope"));
+    const credentials = await getRoleCredentials(mockSTSClient, "foo");
+    expect(credentials).toBe(null);
+  });
+});
+
+describe("getS3Client", () => {
+  test("successfully gets new client", async () => {
+    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: { foo: "bar" } });
+    const s3Client = await getS3Client(null, mockSTSClient, "bar");
+    expect(s3Client).toBeInstanceOf(S3Client);
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
+      RoleArn: "bar",
+      RoleSessionName: "s3-scan-object",
+    });
+  });
+
+  test("successfully returns cached client", async () => {
+    const s3Client = await getS3Client("mellow", mockSTSClient, "bar");
+    expect(s3Client).toBe("mellow");
+    expect(mockSTSClient.calls().length).toBe(0);
   });
 });
 

@@ -53,6 +53,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
         "arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
         AV_SIGNATURE_OK,
         "/foo/bar/file.txt",
+        "123456789012",
     )
     mock_sns_client.publish.assert_called_once_with(
         TargetArn="arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
@@ -63,6 +64,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
             "av-checksum": {"DataType": "String", "StringValue": "123"},
             "av-status": {"DataType": "String", "StringValue": "clean"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
+            "aws-account": {"DataType": "String", "StringValue": "123456789012"},
         },
     )
 
@@ -84,6 +86,7 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
         "arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
         AV_SIGNATURE_OK,
         "/foo/bar/file.txt",
+        "210987654321",
     )
     mock_sns_client.publish.assert_called_once_with(
         TargetArn="arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
@@ -94,5 +97,6 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
             "av-checksum": {"DataType": "String", "StringValue": "None"},
             "av-status": {"DataType": "String", "StringValue": "error"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
+            "aws-account": {"DataType": "String", "StringValue": "210987654321"},
         },
     )

@@ -32,7 +32,8 @@ This custom event is used to trigger a ClamAV scan of an existing S3 object and 
     "Records": [{
         "eventSource": "custom:rescan",
         "s3ObjectUrl": "s3://your-bucket-name/the-file.png"
-    }]
+    }],
+    "AccountId": "123456789012"
 }
 ```
 
