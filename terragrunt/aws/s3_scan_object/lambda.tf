@@ -36,16 +36,6 @@ data "aws_iam_policy_document" "s3_scan_object" {
       var.scan_files_api_key_secret_arn
     ]
   }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt"
-    ]
-    resources = [
-      var.scan_files_api_key_kms_arn
-    ]
-  }
 }
 
 data "aws_iam_policy_document" "assume_cross_account" {
@@ -66,10 +56,9 @@ data "aws_iam_policy_document" "assume_cross_account" {
 }
 
 resource "aws_lambda_permission" "s3_scan_object_org_account_execute" {
-  statement_id  = "AllowExecutionFromOrgAccounts"
-  action        = "lambda:InvokeFunction"
-  function_name = module.s3_scan_object.function_name
-
+  statement_id     = "AllowExecutionFromOrgAccounts"
+  action           = "lambda:InvokeFunction"
+  function_name    = module.s3_scan_object.function_name
   principal        = "*"
   principal_org_id = var.aws_org_id
 }
