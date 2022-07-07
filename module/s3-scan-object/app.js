@@ -10,8 +10,11 @@ const axios = require("axios");
 const util = require("util");
 const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
 const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
+const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
 
-const AWS_ACCOUNT_ID = process.env.AWS_ACCOUNT_ID;
+const AWS_ROLE_TO_ASSUME = process.env.AWS_ROLE_TO_ASSUME
+  ? process.env.AWS_ROLE_TO_ASSUME
+  : "ScanFilesGetObjects";
 const REGION = process.env.REGION;
 const ENDPOINT_URL = process.env.AWS_SAM_LOCAL ? "http://host.docker.internal:3001" : undefined;
 const SCAN_FILES_URL = process.env.SCAN_FILES_URL;
@@ -23,7 +26,7 @@ const EVENT_RESCAN = "custom:rescan";
 const EVENT_S3 = "aws:s3";
 const EVENT_SNS = "aws:sns";
 
-const s3Client = new S3Client({ region: REGION, endpoint: ENDPOINT_URL });
+const stsClient = new STSClient({ region: REGION, endpoint: ENDPOINT_URL });
 const secretsManagerClient = new SecretsManagerClient({ region: REGION, endpoint: ENDPOINT_URL });
 
 /**
@@ -59,15 +62,18 @@ const configPromise = initConfig();
  */
 exports.handler = async (event) => {
   const config = await configPromise;
+  const s3Clients = {};
   let errorCount = 0;
 
   // Process all event records
   for (const record of event.Records) {
+    let roleArn = null;
     let scanChecksum = null;
     let scanStatus = null;
     let isObjectTagged = false;
     let eventSource = getRecordEventSource(record);
     let s3Object = getS3ObjectFromRecord(eventSource, record);
+    let awsAccountId = getAwsAccountId(eventSource, event, record);
 
     // Do not scan S3 folder objects
     if (isS3Folder(s3Object)) {
@@ -75,13 +81,13 @@ exports.handler = async (event) => {
     }
 
     // Start a scan of the new S3 object
-    if (eventSource !== null && s3Object !== null) {
+    if (awsAccountId != null && eventSource !== null && s3Object !== null) {
       if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
         const response = await startS3ObjectScan(
           `${SCAN_FILES_URL}/clamav/s3`,
           config.apiKey,
           s3Object,
-          AWS_ACCOUNT_ID,
+          awsAccountId,
           SNS_SCAN_COMPLETE_TOPIC_ARN
         );
         scanStatus =
@@ -110,7 +116,9 @@ exports.handler = async (event) => {
         tags.push({ Key: "av-checksum", Value: scanChecksum });
       }
 
-      isObjectTagged = await tagS3Object(s3Client, s3Object, tags);
+      roleArn = `arn:aws:iam::${awsAccountId}:role/${AWS_ROLE_TO_ASSUME}`;
+      s3Clients[awsAccountId] = await getS3Client(s3Clients[awsAccountId], stsClient, roleArn);
+      isObjectTagged = await tagS3Object(s3Clients[awsAccountId], s3Object, tags);
     }
 
     // Track if there were any errors processing this record
@@ -126,6 +134,27 @@ exports.handler = async (event) => {
 };
 
 /**
+ * Given a valid event source, returns the AWS account ID of the event or record.
+ * @param {string} eventSource Source of the event
+ * @param {Object} event The event payload
+ * @param {Object} record The event record payload
+ * @returns string AWS account ID
+ */
+const getAwsAccountId = (eventSource, event, record) => {
+  let awsAccountId = null;
+
+  if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
+    awsAccountId = event.AccountId ? event.AccountId : null;
+  } else if (eventSource === EVENT_SNS) {
+    awsAccountId = record.Sns.MessageAttributes["aws-account"]
+      ? record.Sns.MessageAttributes["aws-account"].Value
+      : null;
+  }
+
+  return awsAccountId;
+};
+
+/**
  * Determines the event record's source.
  * @param {Object} record Lambda invocation event record
  * @returns {String} Event record source service, or `null` if not valid
@@ -134,6 +163,48 @@ const getRecordEventSource = (record) => {
   let eventSource = record.eventSource || record.EventSource;
   const validSources = [EVENT_S3, EVENT_SNS, EVENT_RESCAN];
   return validSources.includes(eventSource) ? eventSource : null;
+};
+
+/**
+ * Assumes a role given by its ARN and returns the Creditentials object that can
+ * be used by other SDK clients.
+ * @param {STSClient} stsClient AWS SDK STS client used to assume the role
+ * @param {string} roleArn ARN of the role to assume
+ * @returns Credentials object for the role
+ */
+const getRoleCredentials = async (stsClient, roleArn) => {
+  let credentials = null;
+
+  try {
+    const command = new AssumeRoleCommand({ RoleArn: roleArn, RoleSessionName: "s3-scan-object" });
+    const response = await stsClient.send(command);
+    credentials = response.Credentials;
+  } catch (error) {
+    console.error(`Failed to assume role ${roleArn}: ${error}`);
+  }
+
+  return credentials;
+};
+
+/**
+ * Returns an S3 client if the passed in S3 client has not been initialized.  The S3 client
+ * will be initialized using the temporary credentials provided by assuming the given role.
+ * @param {S3Client} s3Client Initialized S3 client or null
+ * @param {STSClient} stsClient STS client used to assume the role
+ * @param {string} roleArn ARN of the role to assume to get tempoary credentials
+ * @returns S3 client
+ */
+const getS3Client = async (s3Client, stsClient, roleArn) => {
+  if (!s3Client) {
+    const credentials = await getRoleCredentials(stsClient, roleArn);
+    return new S3Client({
+      region: REGION,
+      endpoint: ENDPOINT_URL,
+      credentials: credentials,
+    });
+  } else {
+    return s3Client;
+  }
 };
 
 /**
@@ -252,7 +323,10 @@ const tagS3Object = async (s3Client, s3Object, tags) => {
 
 // Helpers for testing
 exports.helpers = {
+  getAwsAccountId,
   getRecordEventSource,
+  getRoleCredentials,
+  getS3Client,
   getS3ObjectFromRecord,
   initConfig,
   isS3Folder,
