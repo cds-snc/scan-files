@@ -1,7 +1,5 @@
 resource "aws_secretsmanager_secret" "api_auth_token" {
-  name       = "/scan-files/api_auth_token"
-  kms_key_id = aws_kms_key.scan-files.arn
-
+  name = "/scan-files/api_auth_token"
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
