@@ -310,10 +310,21 @@ describe("getRecordEventSource", () => {
 
 describe("getRoleCredentials", () => {
   test("successfully assumes role", async () => {
-    mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: { foo: "bar" } });
+    const response = {
+      Credentials: {
+        AccessKeyId: "why",
+        SecretAccessKey: "aws",
+        SessionToken: "whyyyyy",
+      },
+    };
+    mockSTSClient.on(AssumeRoleCommand).resolves(response);
     const credentials = await getRoleCredentials(mockSTSClient, "foo");
 
-    expect(credentials).toEqual({ foo: "bar" });
+    expect(credentials).toEqual({
+      accessKeyId: "why",
+      secretAccessKey: "aws",
+      sessionToken: "whyyyyy",
+    });
     expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
       RoleArn: "foo",
       RoleSessionName: "s3-scan-object",

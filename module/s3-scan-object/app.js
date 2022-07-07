@@ -178,7 +178,12 @@ const getRoleCredentials = async (stsClient, roleArn) => {
   try {
     const command = new AssumeRoleCommand({ RoleArn: roleArn, RoleSessionName: "s3-scan-object" });
     const response = await stsClient.send(command);
-    credentials = response.Credentials;
+    // Submitted, without comment or judgement
+    credentials = {
+      accessKeyId: response.Credentials.AccessKeyId,
+      secretAccessKey: response.Credentials.SecretAccessKey,
+      sessionToken: response.Credentials.SessionToken,
+    };
   } catch (error) {
     console.error(`Failed to assume role ${roleArn}: ${error}`);
   }

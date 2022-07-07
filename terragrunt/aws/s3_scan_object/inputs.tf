@@ -1,3 +1,8 @@
+variable "scan_files_api_function_role_name" {
+  description = "Name of the Scan Files API function role"
+  type        = string
+}
+
 variable "scan_files_api_function_role_arn" {
   description = "ARN of the Scan Files API function role"
   type        = string
