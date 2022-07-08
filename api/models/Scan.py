@@ -20,6 +20,7 @@ class ScanVerdicts(Enum):
     MALICIOUS = "malicious"
     ERROR = "error"
     UNKNOWN = "unknown"
+    UNABLE_TO_SCAN = "unable_to_scan"
 
 
 class Scan(Base):

@@ -1,5 +1,5 @@
 from unittest.mock import patch, ANY, MagicMock
-from clamav_scanner.common import AV_SIGNATURE_OK, AV_STATUS_CLEAN
+from clamav_scanner.common import AV_SIGNATURE_OK
 from clamav_scanner.scan import launch_scan, sns_scan_results
 from factories import ScanFactory
 from models.Scan import ScanVerdicts
@@ -21,7 +21,7 @@ def test_clamav_scan(
 
     mock_scan_file.return_value = (
         "123",
-        AV_STATUS_CLEAN,
+        ScanVerdicts.CLEAN.value,
         AV_SIGNATURE_OK,
         "/foo/bar/file.txt",
     )

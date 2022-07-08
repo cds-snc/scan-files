@@ -10,10 +10,10 @@ from .common import AV_SIGNATURE_UNKNOWN
 from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
 from boto3wrapper.wrapper import get_session
-from clamav_scanner.clamav import determine_verdict, scan_file
+from clamav_scanner.clamav import scan_file
 from database.db import get_db_session
 from logger import log
-from models.Scan import Scan, ScanProviders, ScanVerdicts
+from models.Scan import Scan, ScanVerdicts
 
 
 def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_account):
@@ -82,7 +82,7 @@ def launch_scan(
             session, file_path, ignore_cache, aws_account
         )
         scan.completed = datetime.datetime.utcnow()
-        scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
+        scan.verdict = scan_result
         scan.checksum = checksum
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
         log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))

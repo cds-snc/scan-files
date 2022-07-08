@@ -18,11 +18,8 @@ from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
 from .common import AV_SCAN_USE_CACHE
-from .common import AV_SIGNATURE_OK
 from .common import AV_SIGNATURE_UNKNOWN
 from .common import AV_SIGNATURE_METADATA
-from .common import AV_STATUS_CLEAN
-from .common import AV_STATUS_INFECTED
 from .common import CLAMD_STARTUP_LOCK
 from .common import CLAMD_SOCKET
 from .common import CLAMAVLIB_PATH
@@ -253,36 +250,37 @@ def scan_file(session, path, ignore_cache=False, aws_account=None):
 
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
-    if av_proc.returncode == 0:
-        return checksum, AV_STATUS_CLEAN, AV_SIGNATURE_OK, path
-    elif av_proc.returncode == 1:
-        signature = summary.get(path, AV_SIGNATURE_UNKNOWN)
-        return checksum, AV_STATUS_INFECTED, signature, path
-    else:
-        msg = "Unexpected exit code from clamscan: %s.\n" % av_proc.returncode
-        log.error(msg)
-        raise Exception(msg)
+    verdict, signature = determine_verdict(
+        ScanProviders.CLAMAV.value, path, summary, av_proc
+    )
+    return checksum, verdict, signature, path
 
 
-def determine_verdict(provider, value):
-    if provider is None or value is None:
+def determine_verdict(provider, path, summary, av_proc):
+    if None in (provider, path, summary, av_proc):
         log.error(
-            f"Provider({provider}) and Value({value}) are required to calculate scan verdicts"
+            f"determine_verdict called with missing arguments: {provider}, {path}, {summary}, {av_proc}"
         )
-        return ScanVerdicts.ERROR.value
+        return ScanVerdicts.ERROR.value, AV_SIGNATURE_UNKNOWN
 
+    signature = summary.get(path, AV_SIGNATURE_UNKNOWN)
     if provider == ScanProviders.CLAMAV.value:
-        if not isinstance(value, str):
-            return ScanVerdicts.ERROR.value
-        if value == AV_STATUS_CLEAN:
-            return ScanVerdicts.CLEAN.value
-        elif value == AV_STATUS_INFECTED:
-            return ScanVerdicts.MALICIOUS.value
+        # ClamAV will return a OK verdict even if it did not scan the file due to file limits
+        # We need to check the scan time to determine if the file was scanned
+        if "0.000" in summary.get("Time", "").strip():
+            log.error("Unable to scan file: %s" % path)
+            return ScanVerdicts.UNABLE_TO_SCAN.value, AV_SIGNATURE_UNKNOWN
+
+        if av_proc.returncode == 0:
+            return ScanVerdicts.CLEAN.value, signature
+        elif av_proc.returncode == 1:
+            return ScanVerdicts.MALICIOUS.value, signature
         else:
-            return ScanVerdicts.UNKNOWN.value
+            log.error("Unexpected exit code from clamscan: %s.\n" % av_proc.returncode)
+            return ScanVerdicts.ERROR.value, AV_SIGNATURE_UNKNOWN
     else:
         log.error("Unsupported provider or wrong type: ", provider)
-        return ScanVerdicts.ERROR.value
+        return ScanVerdicts.ERROR.value, AV_SIGNATURE_UNKNOWN
 
 
 def get_clamd_pid():

@@ -12,10 +12,12 @@ from clamav_scanner.clamav import md5_from_s3_tags
 from clamav_scanner.clamav import time_from_s3
 from clamav_scanner.clamav import update_defs_from_s3
 from clamav_scanner.clamav import scan_file
+from clamav_scanner.clamav import determine_verdict
 from clamav_scanner.common import AV_DEFINITION_FILE_PREFIXES
 from clamav_scanner.common import AV_DEFINITION_FILE_SUFFIXES
 from clamav_scanner.common import AV_DEFINITION_S3_PREFIX
 from clamav_scanner.common import AV_SIGNATURE_OK
+from clamav_scanner.clamav import AV_SIGNATURE_UNKNOWN
 from clamav_scanner.common import AV_SIGNATURE_METADATA
 from clamav_scanner.common import AV_DEFINITION_PATH
 
@@ -334,3 +336,79 @@ def test_scan_file_no_cache(mock_subprocess_run):
     scan_file(mock_session, "tests/api_gateway/fixtures/file.txt")
     assert mock_session.query.call_count == 0
     assert mock_subprocess_run.call_count == 1
+
+
+def test_clamav_output_to_verdict():
+    file_path = "/clamav/eicar.com.txt"
+    ok_output = textwrap.dedent(
+        """\
+  Scanning {0}
+  {0}: {1}
+  ----------- SCAN SUMMARY -----------
+  Known viruses: 6305127
+  Engine version: 0.101.4
+  Scanned directories: 0
+  Scanned files: 1
+  Infected files: 0
+  Data scanned: 0.00 MB
+  Data read: 0.00 MB (ratio 0.00:1)
+  Time: 80.299 sec (1 m 20 s)
+  """.format(
+            file_path, AV_SIGNATURE_OK
+        )
+    )
+
+    infected_output = textwrap.dedent(
+        """\
+  Scanning {0}
+  {0}: {1}
+  {0}!(0): {1}
+  ----------- SCAN SUMMARY -----------
+  Known viruses: 6305127
+  Engine version: 0.101.4
+  Scanned directories: 0
+  Scanned files: 1
+  Infected files: 1
+  Data scanned: 0.00 MB
+  Data read: 0.00 MB (ratio 0.00:1)
+  Time: 80.299 sec (1 m 20 s)
+  """.format(
+            file_path, "Eicar-Test-Signature FOUND"
+        )
+    )
+
+    ok_summary = scan_output_to_json(ok_output)
+    av_proc = MagicMock()
+    av_proc.returncode = 0
+    assert determine_verdict(
+        ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
+    ) == (ScanVerdicts.CLEAN.value, AV_SIGNATURE_OK)
+
+    infected_summary = scan_output_to_json(infected_output)
+    av_proc.returncode = 1
+    assert determine_verdict(
+        ScanProviders.CLAMAV.value, file_path, infected_summary, av_proc
+    ) == (ScanVerdicts.MALICIOUS.value, "Eicar-Test-Signature FOUND")
+
+    timeout_summary = scan_output_to_json(ok_output)
+    timeout_summary["Time"] = "0.000 sec (0 m 0 s)"
+    av_proc.returncode = 0
+    assert determine_verdict(
+        ScanProviders.CLAMAV.value, file_path, timeout_summary, av_proc
+    ) == (ScanVerdicts.UNABLE_TO_SCAN.value, AV_SIGNATURE_UNKNOWN)
+
+    # Test for error conditions
+    assert determine_verdict("foo", "bar", None, None) == (
+        ScanVerdicts.ERROR.value,
+        AV_SIGNATURE_UNKNOWN,
+    )
+
+    assert determine_verdict("foo", file_path, ok_summary, av_proc) == (
+        ScanVerdicts.ERROR.value,
+        AV_SIGNATURE_UNKNOWN,
+    )
+
+    av_proc.returncode = 2
+    assert determine_verdict(
+        ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
+    ) == (ScanVerdicts.ERROR.value, AV_SIGNATURE_UNKNOWN)
