@@ -1,0 +1,78 @@
+name: Deploy Lambda Docker images to production
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/manifests/lambda_api_version
+      - .github/manifests/lambda_s3_scan_object_version
+      - .github/workflows/deploy_lambda_production.yml
+
+env:
+  REGISTRY: 806545929748.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - function: scan-files-api
+            image: api
+            version: .github/manifests/lambda_api_version
+
+          - function: s3-scan-object
+            image: module/s3-scan-object
+            version: .github/manifests/lambda_s3_scan_object_version
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
+        id: filter
+        with:
+          filters: |
+            changes: '${{ matrix.version }}'
+
+      - name: Configure AWS credentials using OIDC
+        if: steps.filter.outputs.changes == 'true'
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
+        with:
+          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
+          role-session-name: DeployLambda
+          aws-region: ca-central-1
+
+      - name: Deploy lambda
+        if: steps.filter.outputs.changes == 'true'
+        run: |
+          VERSION="$(cat ${{ matrix.version }})"
+          aws lambda update-function-code \
+            --function-name ${{ matrix.function }} \
+            --image-uri $REGISTRY/${{ matrix.image }}:$VERSION  > /dev/null 2>&1
+
+      - name: Migrate database
+        if: steps.filter.outputs.changes == 'true' && matrix.function == 'scan-files-api'
+        run: |
+          aws lambda wait function-active --function-name ${{ matrix.function }}
+          source .github/workflows/scripts/migrate.sh
+          migrate
+
+      - name: API healthcheck
+        if: steps.filter.outputs.changes == 'true'
+        uses: jtalk/url-health-check-action@d6ec9590f0f1bd173fa43aeac8b75c2270e9069d # renovate: tag=v2
+        with:
+          url: https://scan-files.alpha.canada.ca/version
+          max-attempts: 3
+          retry-delay: 5s

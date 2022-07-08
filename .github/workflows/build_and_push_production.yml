@@ -1,4 +1,4 @@
-name: Build and Push Container to ECR, deploy to lambda
+name: Build and Push Container to ECR
 
 on:
   workflow_dispatch:
@@ -73,19 +73,6 @@ jobs:
       - name: Logout of Amazon ECR
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
 
-      - name: Deploy lambda
-        if: matrix.image == 'api'
-        run: |
-          aws lambda update-function-code \
-            --function-name scan-files-api \
-            --image-uri $REGISTRY/${{ matrix.image }}:latest  > /dev/null 2>&1
-
-      - name: Migrate Database
-        if: matrix.image == 'api'
-        run: |
-          source .github/workflows/scripts/migrate.sh
-          migrate
-
       - name: Generate ${{ matrix.image }}/docker SBOM
         uses: cds-snc/security-tools/.github/actions/generate-sbom@4c6b386722985552f3f008d04279a3f01402cc35 # tag=v1
         with:
@@ -93,10 +80,3 @@ jobs:
           docker_image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
           project_name: scan-files/${{ matrix.image }}/docker
           project_type: docker
-
-      - name: scan-files API healthcheck
-        uses: jtalk/url-health-check-action@d6ec9590f0f1bd173fa43aeac8b75c2270e9069d # renovate: tag=v2
-        with:
-          url: https://scan-files.alpha.canada.ca/version
-          max-attempts: 3
-          retry-delay: 5s
