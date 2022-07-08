@@ -82,7 +82,7 @@ def launch_scan(
             session, file_path, ignore_cache, aws_account
         )
         scan.completed = datetime.datetime.utcnow()
-        scan.verdict = determine_verdict(ScanProviders.CLAMAV.value, scan_result)
+        scan.verdict = scan_result
         scan.checksum = checksum
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
         log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
