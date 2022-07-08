@@ -18,11 +18,8 @@ from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
 from .common import AV_SCAN_USE_CACHE
-from .common import AV_SIGNATURE_OK
 from .common import AV_SIGNATURE_UNKNOWN
 from .common import AV_SIGNATURE_METADATA
-from .common import AV_STATUS_CLEAN
-from .common import AV_STATUS_INFECTED
 from .common import CLAMD_STARTUP_LOCK
 from .common import CLAMD_SOCKET
 from .common import CLAMAVLIB_PATH

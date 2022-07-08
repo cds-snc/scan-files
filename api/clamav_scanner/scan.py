@@ -10,10 +10,10 @@ from .common import AV_SIGNATURE_UNKNOWN
 from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 
 from boto3wrapper.wrapper import get_session
-from clamav_scanner.clamav import determine_verdict, scan_file
+from clamav_scanner.clamav import scan_file
 from database.db import get_db_session
 from logger import log
-from models.Scan import Scan, ScanProviders, ScanVerdicts
+from models.Scan import Scan, ScanVerdicts
 
 
 def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_account):
