@@ -44,13 +44,19 @@ jobs:
       - name: Async test - wait for scan
         run: |
           COUNTER=0
-          until aws s3api get-object-tagging --bucket ${{ env.BUCKET_NAME }} --key ${{ env.FILENAME }} --output text | grep "av-checksum" > /dev/null; do
-            sleep 5
-            ((COUNTER++))
+          while true; do
+            CHECKSUM="$(aws s3api get-object-tagging --bucket ${{ env.BUCKET_NAME }} --key ${{ env.FILENAME }} --output text | grep 'av-checksum' || true)"
+            if [ "$CHECKSUM" != "" ]; then
+              break
+            fi
+            
+            COUNTER=$((COUNTER+1))
             if [ $COUNTER -gt 10 ]; then
-              echo "💩 Async scan failed"
+              echo "💩 Async scan timed out"
               exit 1
             fi
+
+            sleep 5
           done
 
       - name: Async test - expected verdict
@@ -79,7 +85,7 @@ jobs:
       - name: Slack message on failure
         if: failure()
         run: |
-          json='{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":red: Integration test failed: <https://github.com/cds-snc/notification-terraform/actions/workflows/integration_test_production.yml|Integration test production>"}}]}'
+          json='{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":red: Integration test failed: <https://github.com/cds-snc/scan-files/actions/workflows/integration_test_production.yml|Integration test production>"}}]}'
           curl -X POST -H 'Content-type: application/json' --data "$json" ${{ secrets.SCAN_FILES_PROD_OPS_WEBHOOK }}
 
       - name: Remove test file
