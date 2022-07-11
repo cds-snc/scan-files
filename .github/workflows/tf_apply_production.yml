@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "terragrunt/**"
-      - ".github/workflows/tf_apply_production.yml"      
+      - ".github/workflows/tf_apply_production.yml"
 
 env:
   TERRAFORM_VERSION: 1.0.3
@@ -14,6 +14,7 @@ env:
   TF_VAR_api_auth_token: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
   TF_VAR_aws_org_id: ${{ secrets.AWS_ORG_ID }}
   TF_VAR_rds_password: ${{ secrets.PRODUCTION_RDS_PASSWORD }}
+  TF_VAR_slack_webhook_url: ${{ secrets.SCAN_FILES_PROD_OPS_WEBHOOK }}
   AWS_REGION: ca-central-1
 
 permissions:
@@ -39,6 +40,9 @@ jobs:
         id: filter
         with:
           filters: |
+            alarms:
+              - 'terragrunt/aws/alarms/**'
+              - 'terragrunt/env/production/alarms/**'
             api:
               - 'terragrunt/aws/api/**'
               - 'terragrunt/env/production/api/**'
@@ -47,10 +51,10 @@ jobs:
               - 'terragrunt/env/production/hosted_zone/**'
             integration_test:
               - 'terragrunt/aws/integration_test/**'
-              - 'terragrunt/env/production/integration_test/**'              
+              - 'terragrunt/env/production/integration_test/**'
             s3_scan_object:
               - 'terragrunt/aws/s3_scan_object/**'
-              - 'terragrunt/env/production/s3_scan_object/**'                           
+              - 'terragrunt/env/production/s3_scan_object/**'
             scan_queue:
               - 'terragrunt/aws/scan_queue/**'
               - 'terragrunt/env/production/scan_queue/**'
@@ -84,10 +88,16 @@ jobs:
         if: ${{ steps.filter.outputs.s3_scan_object == 'true' }}
         working-directory: terragrunt/env/production/s3_scan_object
         run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve 
+          terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply scan_queue
         if: ${{ steps.filter.outputs.scan_queue == 'true' }}
         working-directory: terragrunt/env/production/scan_queue
         run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve         
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply alarms
+        if: ${{ steps.filter.outputs.alarms == 'true' }}
+        working-directory: terragrunt/env/production/alarms
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve

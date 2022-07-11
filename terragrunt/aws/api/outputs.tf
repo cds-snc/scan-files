@@ -26,6 +26,10 @@ output "invoke_arn" {
   value = module.api.invoke_arn
 }
 
+output "route53_health_check_api_id" {
+  value = aws_route53_health_check.scan_files_A.id
+}
+
 output "scan_files_api_key_secret_arn" {
   value = aws_secretsmanager_secret.api_auth_token.arn
 }

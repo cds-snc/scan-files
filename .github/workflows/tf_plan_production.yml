@@ -13,6 +13,7 @@ env:
   TF_VAR_api_auth_token: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
   TF_VAR_aws_org_id: ${{ secrets.AWS_ORG_ID }}
   TF_VAR_rds_password: ${{ secrets.PRODUCTION_RDS_PASSWORD }}
+  TF_VAR_slack_webhook_url: ${{ secrets.SCAN_FILES_PROD_OPS_WEBHOOK }}
 
 permissions:
   id-token: write
@@ -28,6 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - module: alarms
           - module: api
           - module: hosted_zone
           - module: integration_test
