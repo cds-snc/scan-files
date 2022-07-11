@@ -30,6 +30,7 @@ jobs:
         include:
           - module: api
           - module: hosted_zone
+          - module: integration_test
           - module: s3_scan_object
           - module: scan_queue
 
