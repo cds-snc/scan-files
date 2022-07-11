@@ -21,7 +21,7 @@ permissions:
   statuses: write
 
 jobs:
-  deploy-lambda:
+  integration-test-production:
     runs-on: ubuntu-latest
 
     steps:
