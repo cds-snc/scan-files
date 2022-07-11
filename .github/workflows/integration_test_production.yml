@@ -36,7 +36,7 @@ jobs:
           aws-region: ca-central-1
 
       - name: Generate unique filename
-        run: echo "FILENAME="scan.$(uuidgen).json" >> $GITHUB_ENV
+        run: echo "FILENAME=scan.$(uuidgen).json" >> $GITHUB_ENV
 
       - name: Async test - upload test file
         run: aws s3 cp .github/workflows/assets/scan.json s3://${{ env.BUCKET_NAME }}/${{ env.FILENAME }}
