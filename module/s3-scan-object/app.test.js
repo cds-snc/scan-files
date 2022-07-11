@@ -15,7 +15,7 @@ mockSecretManagerClient.on(GetSecretValueCommand).resolves({
 
 const { handler, helpers } = require("./app.js");
 const {
-  getAwsAccountId,
+  getEventAttribute,
   getRecordEventSource,
   getRoleCredentials,
   getS3ObjectFromRecord,
@@ -50,6 +50,7 @@ describe("handler", () => {
   test("records success", async () => {
     const event = {
       AccountId: "123456789012",
+      RequestId: "1234asdf",
       Records: [
         {
           eventSource: "aws:s3",
@@ -84,6 +85,7 @@ describe("handler", () => {
           EventSource: "aws:sns",
           Sns: {
             MessageAttributes: {
+              "request-id": { Value: "poiu0987" },
               "av-filepath": { Value: "s3://frodo/bagginsssis" },
               "av-status": { Value: "error" },
               "av-checksum": { Value: "None" },
@@ -112,6 +114,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "1234asdf" },
         ],
       },
     });
@@ -135,6 +138,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "1234asdf" },
         ],
       },
     });
@@ -146,6 +150,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "error" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "poiu0987" },
         ],
       },
     });
@@ -162,6 +167,7 @@ describe("handler", () => {
   test("records failed, failed to start", async () => {
     const event = {
       AccountId: "123456789012",
+      RequestId: "qwer7890",
       Records: [
         {
           eventSource: "aws:s3",
@@ -191,6 +197,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "failed_to_start" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "qwer7890" },
         ],
       },
     });
@@ -203,6 +210,7 @@ describe("handler", () => {
   test("records failed, undefined reponse", async () => {
     const event = {
       AccountId: "654321789012",
+      RequestId: "zxcv5678",
       Records: [
         {
           eventSource: "aws:s3",
@@ -232,6 +240,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "failed_to_start" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "zxcv5678" },
         ],
       },
     });
@@ -262,32 +271,36 @@ describe("handler", () => {
   });
 });
 
-describe("getAwsAccountId", () => {
-  test("account ID exists", () => {
+describe("getEventAttribute", () => {
+  test("attribute exists", () => {
     const record = {
       Sns: {
         MessageAttributes: {
           "aws-account": { Value: "654321789012" },
+          "request-id": { Value: "qwer7890" },
         },
       },
     };
-    expect(getAwsAccountId("aws:s3", { AccountId: "123456789012" }, null)).toBe("123456789012");
-    expect(getAwsAccountId("aws:sns", null, record)).toBe("654321789012");
-    expect(getAwsAccountId("custom:rescan", { AccountId: "210987654321" }, null)).toBe(
+    expect(getEventAttribute("aws:s3", { AccountId: "123456789012" }, null, { root: "AccountId" })).toBe(
+      "123456789012"
+    );
+    expect(getEventAttribute("aws:sns", null, record, { sns: "aws-account" })).toBe("654321789012");
+    expect(getEventAttribute("aws:sns", null, record, { sns: "request-id" })).toBe("qwer7890");
+    expect(getEventAttribute("custom:rescan", { RequestId: "210987654321" }, null, { root: "RequestId" })).toBe(
       "210987654321"
     );
   });
 
-  test("account ID does not exist", () => {
+  test("attribute does not exist", () => {
     const record = {
       Sns: {
         MessageAttributes: {},
       },
     };
-    expect(getAwsAccountId("foo", { AccountId: "123456789012" }, null)).toBe(null);
-    expect(getAwsAccountId("aws:s3", {}, null)).toBe(null);
-    expect(getAwsAccountId("aws:sns", {}, record)).toBe(null);
-    expect(getAwsAccountId("custom:rescan", {}, null)).toBe(null);
+    expect(getEventAttribute("foo", { AccountId: "123456789012" }, null, { root: "AccountId" })).toBe(null);
+    expect(getEventAttribute("aws:s3", {}, null, { root: "AccountId" })).toBe(null);
+    expect(getEventAttribute("aws:sns", {}, record, { sns: "aws-account" })).toBe(null);
+    expect(getEventAttribute("custom:rescan", {}, null, { root: "FooBar" })).toBe(null);
   });
 });
 
@@ -318,7 +331,7 @@ describe("getRoleCredentials", () => {
       },
     };
     mockSTSClient.on(AssumeRoleCommand).resolves(response);
-    const credentials = await getRoleCredentials(mockSTSClient, "foo");
+    const credentials = await getRoleCredentials(mockSTSClient, "foo", "123");
 
     expect(credentials).toEqual({
       accessKeyId: "why",
@@ -333,7 +346,7 @@ describe("getRoleCredentials", () => {
 
   test("fails to assume role", async () => {
     mockSTSClient.on(AssumeRoleCommand).rejects(new Error("nope"));
-    const credentials = await getRoleCredentials(mockSTSClient, "foo");
+    const credentials = await getRoleCredentials(mockSTSClient, "foo", "123");
     expect(credentials).toBe(null);
   });
 });
@@ -341,7 +354,7 @@ describe("getRoleCredentials", () => {
 describe("getS3Client", () => {
   test("successfully gets new client", async () => {
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: { foo: "bar" } });
-    const s3Client = await getS3Client(null, mockSTSClient, "bar");
+    const s3Client = await getS3Client(null, mockSTSClient, "bar", "bam");
     expect(s3Client).toBeInstanceOf(S3Client);
     expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
       RoleArn: "bar",
@@ -350,7 +363,7 @@ describe("getS3Client", () => {
   });
 
   test("successfully returns cached client", async () => {
-    const s3Client = await getS3Client("mellow", mockSTSClient, "bar");
+    const s3Client = await getS3Client("mellow", mockSTSClient, "bar", "baz");
     expect(s3Client).toBe("mellow");
     expect(mockSTSClient.calls().length).toBe(0);
   });
@@ -483,7 +496,8 @@ describe("startS3ObjectScan", () => {
         Key: "bar",
       },
       "123456789012",
-      "someSnsTopicArn"
+      "someSnsTopicArn",
+      "mmmmRequestId"
     );
     expect(response).toEqual({ status: 200 });
     expect(axios.post.mock.calls[0]).toEqual([
@@ -497,6 +511,7 @@ describe("startS3ObjectScan", () => {
         headers: {
           Accept: "application/json",
           Authorization: "someSuperSecretValue",
+          "X-Scanning-Request-Id": "mmmmRequestId",
         },
       },
     ]);
@@ -528,16 +543,19 @@ describe("tagS3Object", () => {
         TagSet: [{ Key: "some-tag", Value: "some-value" }],
       },
     };
-    const response = await tagS3Object(mockS3Client, { Bucket: "foo", Key: "bar" }, [
-      { Key: "some-tag", Value: "some-value" },
-    ]);
+    const response = await tagS3Object(
+      mockS3Client,
+      { Bucket: "foo", Key: "bar" },
+      [{ Key: "some-tag", Value: "some-value" }],
+      "foo"
+    );
     expect(response).toBe(true);
     expect(mockS3Client).toHaveReceivedCommandWith(PutObjectTaggingCommand, input);
   });
 
   test("fails to tag", async () => {
     mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({});
-    const response = await tagS3Object(mockS3Client, {}, []);
+    const response = await tagS3Object(mockS3Client, {}, [], null);
     expect(response).toBe(false);
   });
 });
