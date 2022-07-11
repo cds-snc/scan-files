@@ -45,6 +45,9 @@ jobs:
             hosted_zone:
               - 'terragrunt/aws/hosted_zone/**'
               - 'terragrunt/env/production/hosted_zone/**'
+            integration_test:
+              - 'terragrunt/aws/integration_test/**'
+              - 'terragrunt/env/production/integration_test/**'              
             s3_scan_object:
               - 'terragrunt/aws/s3_scan_object/**'
               - 'terragrunt/env/production/s3_scan_object/**'                           
@@ -62,6 +65,12 @@ jobs:
       - name: Apply hosted_zone
         if: ${{ steps.filter.outputs.hosted_zone == 'true' }}
         working-directory: terragrunt/env/production/hosted_zone
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply integration_test
+        if: ${{ steps.filter.outputs.integration_test == 'true' }}
+        working-directory: terragrunt/env/production/integration_test
         run: |
           terragrunt apply --terragrunt-non-interactive -auto-approve
 
