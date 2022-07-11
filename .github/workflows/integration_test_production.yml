@@ -1,0 +1,87 @@
+name: Integration test production
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy Lambda Docker images to production"]
+    types:
+      - completed
+
+env:
+  API_TOKEN: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
+  API_URL: https://scan-files.alpha.canada.ca
+  BUCKET_NAME: scan-files-production-integration-test
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
+        with:
+          role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
+          role-session-name: IntegrationTest
+          aws-region: ca-central-1
+
+      - name: Generate unique filename
+        run: echo "FILENAME=scan.$(uuidgen).json" >> $GITHUB_ENV
+
+      - name: Async test - upload test file
+        run: aws s3 cp .github/workflows/assets/scan.json s3://${{ env.BUCKET_NAME }}/${{ env.FILENAME }}
+
+      - name: Async test - wait for scan
+        run: |
+          COUNTER=0
+          until aws s3api get-object-tagging --bucket ${{ env.BUCKET_NAME }} --key ${{ env.FILENAME }} --output text | grep "av-checksum" > /dev/null; do
+            sleep 5
+            ((COUNTER++))
+            if [ $COUNTER -gt 10 ]; then
+              echo "💩 Async scan failed"
+              exit 1
+            fi
+          done
+
+      - name: Async test - expected verdict
+        run: |
+          VERDICT=$(aws s3api get-object-tagging \
+            --bucket ${{ env.BUCKET_NAME }} \
+            --key ${{ env.FILENAME }} \
+            --query "TagSet[?Key=='av-status']" | jq -r '.[0].Value')
+          if [ "$VERDICT" != "clean" ]; then
+            echo "💩 Async unexpected verdict: $VERDICT"
+            exit 1
+          fi
+
+      - name: Sync test - expected verdict
+        run: |
+          VERDICT=$(curl --silent --request POST "${{ env.API_URL }}/clamav" \
+            --header "Authorization: ${{ env.API_TOKEN }}" \
+            --header "Content-Type: multipart/form-data" \
+            --form "ignore_cache=True" \
+            --form "file=@.github/workflows/assets/scan.json" | jq -r .verdict)
+          if [ "$VERDICT" != "clean" ]; then
+            echo "💩 Sync unexpected verdict: $VERDICT"
+            exit 1
+          fi
+
+      - name: Slack message on failure
+        if: failure()
+        run: |
+          json='{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":red: Integration test failed: <https://github.com/cds-snc/notification-terraform/actions/workflows/integration_test_production.yml|Integration test production>"}}]}'
+          curl -X POST -H 'Content-type: application/json' --data "$json" ${{ secrets.SCAN_FILES_PROD_OPS_WEBHOOK }}
+
+      - name: Remove test file
+        if: always()
+        run: aws s3 rm s3://${{ env.BUCKET_NAME }}/${{ env.FILENAME }}
