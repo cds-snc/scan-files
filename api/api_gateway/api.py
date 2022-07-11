@@ -5,7 +5,7 @@ from pydantic import BaseSettings
 from starlette.middleware.base import BaseHTTPMiddleware
 from uuid import uuid4
 
-from .custom_middleware import add_security_headers
+from .custom_middleware import add_security_headers, log_requests
 from .routers import ops, assemblyline, clamav
 
 
@@ -33,9 +33,7 @@ app = FastAPI(
 app.include_router(ops.router)
 app.include_router(assemblyline.router, prefix="/assemblyline", tags=["assemblyline"])
 app.include_router(clamav.router, prefix="/clamav", tags=["clamav"])
-
-# https://github.com/tiangolo/fastapi/issues/1472; can't include custom middlware when running tests
-if environ.get("CI") is None:
-    app.add_middleware(BaseHTTPMiddleware, dispatch=add_security_headers)
+app.add_middleware(BaseHTTPMiddleware, dispatch=log_requests)
+app.add_middleware(BaseHTTPMiddleware, dispatch=add_security_headers)
 
 metrics = Metrics(namespace="ScanFiles", service="api")

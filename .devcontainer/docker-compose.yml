@@ -10,7 +10,7 @@ x-api_envs: &api_envs
   AV_DEFINITION_PATH: "/tmp/clamav"
   AV_DEFINITION_S3_BUCKET: "clamav-defs"
   CLAMAVLIB_PATH: "/etc/clamav"
-  CLAMDSCAN_PATH: "/usr/bin/clamscan"
+  CLAMDSCAN_PATH: "/usr/bin/clamdscan"
   FRESHCLAM_PATH: "/usr/bin/freshclam"
 
 services:
@@ -42,7 +42,7 @@ services:
     image: postgres:11.16
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
-    restart: always
+    restart: unless-stopped
     command:
       - "postgres"
       - "-c"
@@ -61,7 +61,7 @@ services:
     image: postgres:11.16
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
-    restart: always
+    restart: unless-stopped
     command:
       - "postgres"
       - "-c"

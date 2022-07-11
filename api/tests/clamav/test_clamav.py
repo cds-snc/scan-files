@@ -314,9 +314,9 @@ def test_scan_file_already_scanned(mock_subprocess_run, session):
         meta_data={AV_SIGNATURE_METADATA: AV_SIGNATURE_OK},
     )
     session.commit()
-
+    mock_logger = MagicMock()
     checksum, scan_result, scan_signature, scanned_path = scan_file(
-        session, "tests/api_gateway/fixtures/file.txt"
+        mock_logger, session, "tests/api_gateway/fixtures/file.txt"
     )
     assert checksum == calculated_md5_hash
     assert scan_result == ScanVerdicts.CLEAN.value
@@ -333,7 +333,8 @@ def test_scan_file_already_scanned(mock_subprocess_run, session):
 @patch("clamav_scanner.clamav.AV_SCAN_USE_CACHE", False)
 def test_scan_file_no_cache(mock_subprocess_run):
     mock_session = MagicMock()
-    scan_file(mock_session, "tests/api_gateway/fixtures/file.txt")
+    mock_logger = MagicMock()
+    scan_file(mock_logger, mock_session, "tests/api_gateway/fixtures/file.txt")
     assert mock_session.query.call_count == 0
     assert mock_subprocess_run.call_count == 1
 
@@ -379,36 +380,37 @@ def test_clamav_output_to_verdict():
 
     ok_summary = scan_output_to_json(ok_output)
     av_proc = MagicMock()
+    mock_logger = MagicMock()
     av_proc.returncode = 0
     assert determine_verdict(
-        ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
+        mock_logger, ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
     ) == (ScanVerdicts.CLEAN.value, AV_SIGNATURE_OK)
 
     infected_summary = scan_output_to_json(infected_output)
     av_proc.returncode = 1
     assert determine_verdict(
-        ScanProviders.CLAMAV.value, file_path, infected_summary, av_proc
+        mock_logger, ScanProviders.CLAMAV.value, file_path, infected_summary, av_proc
     ) == (ScanVerdicts.MALICIOUS.value, "Eicar-Test-Signature FOUND")
 
     timeout_summary = scan_output_to_json(ok_output)
     timeout_summary["Time"] = "0.000 sec (0 m 0 s)"
     av_proc.returncode = 0
     assert determine_verdict(
-        ScanProviders.CLAMAV.value, file_path, timeout_summary, av_proc
+        mock_logger, ScanProviders.CLAMAV.value, file_path, timeout_summary, av_proc
     ) == (ScanVerdicts.UNABLE_TO_SCAN.value, AV_SIGNATURE_UNKNOWN)
 
     # Test for error conditions
-    assert determine_verdict("foo", "bar", None, None) == (
+    assert determine_verdict(mock_logger, "foo", "bar", None, None) == (
         ScanVerdicts.ERROR.value,
         AV_SIGNATURE_UNKNOWN,
     )
 
-    assert determine_verdict("foo", file_path, ok_summary, av_proc) == (
+    assert determine_verdict(mock_logger, "foo", file_path, ok_summary, av_proc) == (
         ScanVerdicts.ERROR.value,
         AV_SIGNATURE_UNKNOWN,
     )
 
     av_proc.returncode = 2
     assert determine_verdict(
-        ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
+        mock_logger, ScanProviders.CLAMAV.value, file_path, ok_summary, av_proc
     ) == (ScanVerdicts.ERROR.value, AV_SIGNATURE_UNKNOWN)
