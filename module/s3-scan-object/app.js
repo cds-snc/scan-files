@@ -12,9 +12,7 @@ const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
 const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
 
-const AWS_ROLE_TO_ASSUME = process.env.AWS_ROLE_TO_ASSUME
-  ? process.env.AWS_ROLE_TO_ASSUME
-  : "ScanFilesGetObjects";
+const AWS_ROLE_TO_ASSUME = process.env.AWS_ROLE_TO_ASSUME ? process.env.AWS_ROLE_TO_ASSUME : "ScanFilesGetObjects";
 const REGION = process.env.REGION;
 const ENDPOINT_URL = process.env.AWS_SAM_LOCAL ? "http://host.docker.internal:3001" : undefined;
 const SCAN_FILES_URL = process.env.SCAN_FILES_URL;
@@ -73,7 +71,14 @@ exports.handler = async (event) => {
     let isObjectTagged = false;
     let eventSource = getRecordEventSource(record);
     let s3Object = getS3ObjectFromRecord(eventSource, record);
-    let awsAccountId = getAwsAccountId(eventSource, event, record);
+    let awsAccountId = getEventAttribute(eventSource, event, record, {
+      root: "AccountId",
+      sns: "aws-account",
+    });
+    let requestId = getEventAttribute(eventSource, event, record, {
+      root: "RequestId",
+      sns: "request-id",
+    });
 
     // Do not scan S3 folder objects
     if (isS3Folder(s3Object)) {
@@ -88,12 +93,10 @@ exports.handler = async (event) => {
           config.apiKey,
           s3Object,
           awsAccountId,
-          SNS_SCAN_COMPLETE_TOPIC_ARN
+          SNS_SCAN_COMPLETE_TOPIC_ARN,
+          requestId
         );
-        scanStatus =
-          response !== undefined && response.status === 200
-            ? SCAN_IN_PROGRESS
-            : SCAN_FAILED_TO_START;
+        scanStatus = response !== undefined && response.status === 200 ? SCAN_IN_PROGRESS : SCAN_FAILED_TO_START;
 
         // Get the scan status for an existing S3 object
       } else if (eventSource === EVENT_SNS) {
@@ -101,7 +104,7 @@ exports.handler = async (event) => {
         scanStatus = record.Sns.MessageAttributes["av-status"].Value;
       }
     } else {
-      console.error(`Unsupported event record: ${util.inspect(record)}`);
+      console.error(`[${requestId}] Unsupported event record: ${util.inspect(record)}`);
     }
 
     // Tag the S3 object if we've got a scan status
@@ -116,9 +119,13 @@ exports.handler = async (event) => {
         tags.push({ Key: "av-checksum", Value: scanChecksum });
       }
 
+      if (requestId) {
+        tags.push({ Key: "request-id", Value: requestId });
+      }
+
       roleArn = `arn:aws:iam::${awsAccountId}:role/${AWS_ROLE_TO_ASSUME}`;
-      s3Clients[awsAccountId] = await getS3Client(s3Clients[awsAccountId], stsClient, roleArn);
-      isObjectTagged = await tagS3Object(s3Clients[awsAccountId], s3Object, tags);
+      s3Clients[awsAccountId] = await getS3Client(s3Clients[awsAccountId], stsClient, roleArn, requestId);
+      isObjectTagged = await tagS3Object(s3Clients[awsAccountId], s3Object, tags, requestId);
     }
 
     // Track if there were any errors processing this record
@@ -134,24 +141,23 @@ exports.handler = async (event) => {
 };
 
 /**
- * Given a valid event source, returns the AWS account ID of the event or record.
+ * Given a valid event source, returns the the request attribute
  * @param {string} eventSource Source of the event
  * @param {Object} event The event payload
  * @param {Object} record The event record payload
- * @returns string AWS account ID
+ * @param {{root: string, sns: string}} attribute The event attribute names
+ * @returns string request ID
  */
-const getAwsAccountId = (eventSource, event, record) => {
-  let awsAccountId = null;
+const getEventAttribute = (eventSource, event, record, attribute) => {
+  let value = null;
 
-  if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
-    awsAccountId = event.AccountId ? event.AccountId : null;
+  if (eventSource === EVENT_S3 || eventSource === EVENT_RESCAN) {
+    value = event[attribute.root] ? event[attribute.root] : null;
   } else if (eventSource === EVENT_SNS) {
-    awsAccountId = record.Sns.MessageAttributes["aws-account"]
-      ? record.Sns.MessageAttributes["aws-account"].Value
-      : null;
+    value = record.Sns.MessageAttributes[attribute.sns] ? record.Sns.MessageAttributes[attribute.sns].Value : null;
   }
 
-  return awsAccountId;
+  return value;
 };
 
 /**
@@ -170,9 +176,10 @@ const getRecordEventSource = (record) => {
  * be used by other SDK clients.
  * @param {STSClient} stsClient AWS SDK STS client used to assume the role
  * @param {string} roleArn ARN of the role to assume
+ * @param {string} requestId Request ID of the scan
  * @returns Credentials object for the role
  */
-const getRoleCredentials = async (stsClient, roleArn) => {
+const getRoleCredentials = async (stsClient, roleArn, requestId) => {
   let credentials = null;
 
   try {
@@ -185,7 +192,7 @@ const getRoleCredentials = async (stsClient, roleArn) => {
       sessionToken: response.Credentials.SessionToken,
     };
   } catch (error) {
-    console.error(`Failed to assume role ${roleArn}: ${error}`);
+    console.error(`[${requestId}] Failed to assume role ${roleArn}: ${error}`);
   }
 
   return credentials;
@@ -197,11 +204,12 @@ const getRoleCredentials = async (stsClient, roleArn) => {
  * @param {S3Client} s3Client Initialized S3 client or null
  * @param {STSClient} stsClient STS client used to assume the role
  * @param {string} roleArn ARN of the role to assume to get tempoary credentials
+ * @param {string} requestId Request ID of the scan
  * @returns S3 client
  */
-const getS3Client = async (s3Client, stsClient, roleArn) => {
+const getS3Client = async (s3Client, stsClient, roleArn, requestId) => {
   if (!s3Client) {
-    const credentials = await getRoleCredentials(stsClient, roleArn);
+    const credentials = await getRoleCredentials(stsClient, roleArn, requestId);
     return new S3Client({
       region: REGION,
       endpoint: ENDPOINT_URL,
@@ -214,7 +222,7 @@ const getS3Client = async (s3Client, stsClient, roleArn) => {
 
 /**
  * Retrieves the S3 object's Bucket and key from the Lambda invocation event.
- * @param {String} eventSource The source of the event record
+ * @param {string} eventSource The source of the event record
  * @param {Object} record Lambda invocation event record
  * @returns {{Bucket: string, Key: string}} S3 object bucket and key
  */
@@ -249,7 +257,7 @@ const isS3Folder = (s3Object) => {
 
 /**
  * Given an S3 object URL, parses the URL and returns the S3 object's bucket and key.
- * @param {String} url S3 object URL in format `s3://bucket/key`
+ * @param {string} url S3 object URL in format `s3://bucket/key`
  * @returns {{Bucket: string, Key: string}} S3 object bucket and key or null
  */
 const parseS3Url = (url) => {
@@ -268,14 +276,15 @@ const parseS3Url = (url) => {
 
 /**
  * Starts a scan of the S3 object using the provided URL endpoint and API key.
- * @param {String} apiEndpoint API endpoint to use for the scan
- * @param {String} apiKey API authorization key to use for the scan
+ * @param {string} apiEndpoint API endpoint to use for the scan
+ * @param {string} apiKey API authorization key to use for the scan
  * @param {{Bucket: string, Key: string}} s3Object S3 object to tag
- * @param {String} awsAccountId AWS account ID to use for the scan
- * @param {String} snsArn ARN of the SNS topic to publish scan results to
+ * @param {string} awsAccountId AWS account ID to use for the scan
+ * @param {string} snsArn ARN of the SNS topic to publish scan results to
+ * @param {string} requestId Request ID of the scan
  * @returns {Response} Axios response from the scan request
  */
-const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, snsArn) => {
+const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, snsArn, requestId) => {
   try {
     const response = await axios.post(
       apiEndpoint,
@@ -288,15 +297,14 @@ const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, sn
         headers: {
           Accept: "application/json",
           Authorization: apiKey,
+          "X-Scanning-Request-Id": requestId,
         },
       }
     );
-    console.info(`Scan response ${response.status}: ${util.inspect(response.data)}`);
+    console.info(`[${requestId}] Scan response ${response.status}: ${util.inspect(response.data)}`);
     return response;
   } catch (error) {
-    console.error(
-      `Could not start scan for ${util.inspect(s3Object)}: ${util.inspect(error.response)}`
-    );
+    console.error(`[${requestId}] Could not start scan for ${util.inspect(s3Object)}: ${util.inspect(error.response)}`);
     return error.response;
   }
 };
@@ -306,8 +314,9 @@ const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, sn
  * @param {S3Client} s3Client AWS SDK S3 client used to tag the object
  * @param {{Bucket: string, Key: string}} s3Object S3 object to tag
  * @param {Array<{Key: string, Value: string}>} tags Array of Key/Value pairs to tag the S3 object with
+ * @param {string} requestId Request ID of the scan
  */
-const tagS3Object = async (s3Client, s3Object, tags) => {
+const tagS3Object = async (s3Client, s3Object, tags, requestId) => {
   const tagging = {
     Tagging: {
       TagSet: tags,
@@ -320,7 +329,7 @@ const tagS3Object = async (s3Client, s3Object, tags) => {
     const response = await s3Client.send(command);
     isSuccess = response.VersionId !== undefined;
   } catch (error) {
-    console.error(`Failed to tag S3 object: ${error}`);
+    console.error(`[${requestId}] Failed to tag S3 object: ${error}`);
   }
 
   return isSuccess;
@@ -328,7 +337,7 @@ const tagS3Object = async (s3Client, s3Object, tags) => {
 
 // Helpers for testing
 exports.helpers = {
-  getAwsAccountId,
+  getEventAttribute,
   getRecordEventSource,
   getRoleCredentials,
   getS3Client,
