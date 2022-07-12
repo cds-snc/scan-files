@@ -55,7 +55,7 @@ jobs:
         uses: cds-snc/terraform-plan@dce0ba2ac808e5c2b3499c8073adef25aaa559f3 # tag=v2.0.8
         with:
           comment-delete: true
-          comment-title: Plan for ${{ matrix.module }}
+          comment-title: Staging Plan for ${{ matrix.module }}
           directory: ./terragrunt/env/staging/${{ matrix.module }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terragrunt: true
