@@ -1,5 +1,6 @@
 import logging
 import re
+from os import environ
 from uuid import uuid4
 from pythonjsonlogger import jsonlogger
 
@@ -23,9 +24,8 @@ class CustomLogger:
 
         logging.setLogRecordFactory(self.record_factory)
         logger = logging.getLogger(name)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(environ.get("LOG_LEVEL", logging.INFO))
         handler = logging.StreamHandler()
-        handler.setLevel(logging.INFO)
         formatter = jsonlogger.JsonFormatter(CUSTOM_FORMAT)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -36,7 +36,7 @@ class CustomLogger:
 
 
 log = logging.getLogger("scan-files")
-log.setLevel(logging.INFO)
+log.setLevel(environ.get("LOG_LEVEL", logging.INFO))
 logHandler = logging.StreamHandler()
 formatter = jsonlogger.JsonFormatter()
 logHandler.setFormatter(formatter)
