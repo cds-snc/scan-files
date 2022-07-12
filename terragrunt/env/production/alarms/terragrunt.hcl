@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../aws//alarms"
+  source = "git::https://github.com/cds-snc/scan-files//terragrunt/aws/alarms?ref=${get_env("INFRASTRUCTURE_VERSION")}"
 }
 
 dependencies {

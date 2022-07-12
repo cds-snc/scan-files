@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../aws//hosted_zone"
+  source = "git::https://github.com/cds-snc/scan-files//terragrunt/aws/hosted_zone?ref=${get_env("INFRASTRUCTURE_VERSION")}"
 }
 
 include {

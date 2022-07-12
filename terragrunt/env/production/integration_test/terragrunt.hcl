@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../aws//integration_test"
+  source = "git::https://github.com/cds-snc/scan-files//terragrunt/aws/integration_test?ref=${get_env("INFRASTRUCTURE_VERSION")}"
 }
 
 include {
