@@ -12,7 +12,7 @@ module "gh_oidc_roles" {
       claim     = "*"
     }
   ]
-  oidc_exists       = false
+  oidc_exists       = var.oidc_exists
   billing_tag_value = var.billing_code
 
 }

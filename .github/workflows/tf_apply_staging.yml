@@ -1,0 +1,93 @@
+name: "Terraform apply staging"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terragrunt/**"
+      - ".github/workflows/tf_apply_staging.yml"
+
+env:
+  TERRAFORM_VERSION: 1.0.3
+  TERRAGRUNT_VERSION: 0.38.4
+  TF_VAR_api_auth_token: ${{ secrets.STAGING_API_AUTH_TOKEN }}
+  TF_VAR_aws_org_id: ${{ secrets.STAGING_AWS_ORG_ID }}
+  TF_VAR_rds_password: ${{ secrets.STAGING_RDS_PASSWORD }}
+  TF_VAR_slack_webhook_url: ${{ secrets.SCAN_FILES_STAGING_OPS_WEBHOOK }}
+  AWS_REGION: ca-central-1
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
+
+jobs:
+  terragrunt-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: setup terraform tools
+        uses: cds-snc/terraform-tools-setup@v1
+
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
+        id: filter
+        with:
+          filters: |
+            alarms:
+              - 'terragrunt/aws/alarms/**'
+              - 'terragrunt/env/staging/alarms/**'
+            api:
+              - 'terragrunt/aws/api/**'
+              - 'terragrunt/env/staging/api/**'
+            hosted_zone:
+              - 'terragrunt/aws/hosted_zone/**'
+              - 'terragrunt/env/staging/hosted_zone/**'
+            integration_test:
+              - 'terragrunt/aws/integration_test/**'
+              - 'terragrunt/env/staging/integration_test/**'
+            s3_scan_object:
+              - 'terragrunt/aws/s3_scan_object/**'
+              - 'terragrunt/env/staging/s3_scan_object/**'
+
+      - name: configure aws credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
+        with:
+          role-to-assume: arn:aws:iam::127893201980:role/OIDCGithubWorkflowRole
+          role-session-name: TFApply
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Apply hosted_zone
+        if: ${{ steps.filter.outputs.hosted_zone == 'true' }}
+        working-directory: terragrunt/env/staging/hosted_zone
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply integration_test
+        if: ${{ steps.filter.outputs.integration_test == 'true' }}
+        working-directory: terragrunt/env/staging/integration_test
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply api
+        if: ${{ steps.filter.outputs.api == 'true' }}
+        working-directory: terragrunt/env/staging/api
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply s3_scan_object
+        if: ${{ steps.filter.outputs.s3_scan_object == 'true' }}
+        working-directory: terragrunt/env/staging/s3_scan_object
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
+
+      - name: Apply alarms
+        if: ${{ steps.filter.outputs.alarms == 'true' }}
+        working-directory: terragrunt/env/staging/alarms
+        run: |
+          terragrunt apply --terragrunt-non-interactive -auto-approve
