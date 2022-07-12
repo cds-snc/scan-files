@@ -12,13 +12,17 @@ def test_handler_api_gateway_event(mock_mangum, context_fixture, capsys):
     assert (
         main.handler(
             {
+                "headers": {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
                 "requestContext": {
                     "http": {
                         "method": "POST",
                         "path": "/foo",
                         "protocol": "HTTP/1.1",
                     }
-                }
+                },
             },
             context_fixture,
         )
@@ -26,13 +30,17 @@ def test_handler_api_gateway_event(mock_mangum, context_fixture, capsys):
     )
     mock_asgi_handler.assert_called_once_with(
         {
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
             "requestContext": {
                 "http": {
                     "method": "POST",
                     "path": "/foo",
                     "protocol": "HTTP/1.1",
                 }
-            }
+            },
         },
         context_fixture,
     )

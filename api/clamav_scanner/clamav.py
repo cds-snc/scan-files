@@ -184,7 +184,7 @@ def scan_output_to_json(output):
     return summary
 
 
-def scan_file(session, path, ignore_cache=False, aws_account=None):
+def scan_file(log, session, path, ignore_cache=False, aws_account=None):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
     log.info("Starting clamscan of %s." % path)
@@ -251,12 +251,12 @@ def scan_file(session, path, ignore_cache=False, aws_account=None):
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
     verdict, signature = determine_verdict(
-        ScanProviders.CLAMAV.value, path, summary, av_proc
+        log, ScanProviders.CLAMAV.value, path, summary, av_proc
     )
     return checksum, verdict, signature, path
 
 
-def determine_verdict(provider, path, summary, av_proc):
+def determine_verdict(log, provider, path, summary, av_proc):
     if None in (provider, path, summary, av_proc):
         log.error(
             f"determine_verdict called with missing arguments: {provider}, {path}, {summary}, {av_proc}"

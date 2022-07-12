@@ -9,10 +9,10 @@ from fastapi import (
     File,
     Query,
     Response,
+    Request,
     status,
     UploadFile,
 )
-from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -24,12 +24,14 @@ router = APIRouter()
 
 @router.post("")
 def start_clamav_scan(
+    request: Request,
     response: Response,
     file: UploadFile = File(...),
     ignore_cache: Optional[bool] = Query(False),
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
+    log = request.scope["aws.context"].logger.log
     try:
         save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
         create_dir(f"{AV_DEFINITION_PATH}/quarantine")
@@ -44,17 +46,17 @@ def start_clamav_scan(
         session.add(scan)
         session.commit()
 
-        scan_verdict = launch_scan(save_path, scan.id, ignore_cache=ignore_cache)
+        scan_verdict = launch_scan(log, save_path, scan.id, ignore_cache=ignore_cache)
         return {"scan_id": str(scan.id), "status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
-        print(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
         return {"error": f"error scanning file [{file.filename}] with clamav"}
 
 
 @router.post("/s3")
 def start_clamav_scan_from_s3(
+    request: Request,
     response: Response,
     aws_account: str = Body(...),
     s3_key: str = Body(...),
@@ -62,8 +64,8 @@ def start_clamav_scan_from_s3(
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
+    log = request.scope["aws.context"].logger.log
     try:
-
         filename = s3_key.split("/")[-1]
 
         scan = Scan(
@@ -74,6 +76,7 @@ def start_clamav_scan_from_s3(
         session.commit()
 
         launch_background_scan(
+            request.scope["aws.context"].logger,
             s3_key,
             scan.id,
             session=session,
@@ -83,7 +86,6 @@ def start_clamav_scan_from_s3(
         return {"status": "OK", "scan_id": str(scan.id)}
 
     except Exception as err:
-        print(err)
         log.error(err)
         response.status_code = status.HTTP_502_BAD_GATEWAY
         return {"error": f"error scanning file [{s3_key}] with clamav"}
@@ -91,12 +93,15 @@ def start_clamav_scan_from_s3(
 
 @router.get("/{scan_id}")
 def get_clamav_scan_results(
+    request: Request,
     response: Response,
     scan_id: UUID,
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
+    log = request.scope["aws.context"].logger.log
     try:
+        log.info(f"get_clamav_scan_results: scan_id={scan_id}")
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
         if scan and scan.completed:
             return {"status": "completed", "verdict": scan.verdict}

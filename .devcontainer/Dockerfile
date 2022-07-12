@@ -15,7 +15,7 @@ ARG SHELLCHECK_CHECKSUM
 
 # Install packages
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends clamav clamav-daemon \
+    && apt-get -y install --no-install-recommends clamav clamav-daemon clamdscan \
     && apt-get autoremove -y && apt-get clean -y
 
 # Install ShellCheck
@@ -68,9 +68,12 @@ RUN chown -R vscode:vscode /home/vscode/.aws
 RUN mkdir -p /tmp/clamav \
  && mkdir -p /tmp/clamav/quarantine \
  && chown -R vscode:vscode /tmp/clamav /var/log/clamav \
- && sed -i 's/User clamav/User vscode/g' /etc/clamav/clamd.conf \
+ && sed -i 's=DatabaseDirectory /var/lib/clamav=DatabaseDirectory /tmp/clamav=g' /etc/clamav/clamd.conf \
  && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
- && sed -i 's/DatabaseOwner clamav/DatabaseOwner vscode/g' /etc/clamav/freshclam.conf \
+ && sed -i 's=LogFile /var/log/clamav/clamav.log=LogFile /tmp/clamav.log=g' /etc/clamav/clamd.conf \ 
+ && sed -i 's=LocalSocket /var/run/clamav/clamd.ctl=LocalSocket /tmp/clamd.sock=g' /etc/clamav/clamd.conf \ 
+ && sed -i 's=LocalSocketGroup clamav=# LocalSocketGroup python=g' /etc/clamav/clamd.conf \
+ && echo "PidFile /tmp/clamd.pid" >> /etc/clamav/clamd.conf \ 
  && sed -i 's=UpdateLogFile /var/log/clamav/freshclam.log=UpdateLogFile /tmp/clamav/freshclam.log=g' /etc/clamav/freshclam.conf
 
 

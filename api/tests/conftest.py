@@ -35,6 +35,7 @@ def assert_new_model_saved():
 def context_fixture():
     context = MagicMock()
     context.function_name = "scan-files-api"
+    context.aws_request_id = "request_id"
     return context
 
 
