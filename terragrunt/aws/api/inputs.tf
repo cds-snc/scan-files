@@ -27,3 +27,7 @@ variable "scan_queue_statemachine_name" {
 variable "hosted_zone_id" {
   type = string
 }
+
+variable "oidc_exists" {
+  type = bool
+}
