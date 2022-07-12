@@ -34,7 +34,6 @@ jobs:
           - module: hosted_zone
           - module: integration_test
           - module: s3_scan_object
-          - module: scan_queue
 
     runs-on: ubuntu-latest
     steps:
