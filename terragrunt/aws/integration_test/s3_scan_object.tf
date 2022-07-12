@@ -18,7 +18,7 @@ module "integration_test_bucket" {
       enabled = true
       expiration = {
         days                         = 1
-        expired_object_delete_marker = true
+        expired_object_delete_marker = false
       }
     },
   ]
