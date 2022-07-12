@@ -28,11 +28,6 @@ const {
 } = helpers;
 
 jest.mock("axios");
-global.console = {
-  ...console,
-  error: jest.fn(),
-  info: jest.fn(),
-};
 
 const TEST_TIME = new Date(1978, 3, 30).getTime();
 beforeAll(() => {
@@ -70,6 +65,7 @@ describe("handler", () => {
           EventSource: "aws:sns",
           Sns: {
             MessageAttributes: {
+              "request-id": { Value: "zxcv9584" },
               "av-filepath": { Value: "s3://bam/baz" },
               "av-status": { Value: "SPIFY" },
               "av-checksum": { Value: "42" },
@@ -104,7 +100,7 @@ describe("handler", () => {
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event);
+    const response = await handler(event, {});
     expect(response).toEqual(expectedResponse);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
@@ -127,6 +123,7 @@ describe("handler", () => {
           { Key: "av-status", Value: "SPIFY" },
           { Key: "av-timestamp", Value: TEST_TIME },
           { Key: "av-checksum", Value: "42" },
+          { Key: "request-id", Value: "zxcv9584" },
         ],
       },
     });
@@ -138,7 +135,7 @@ describe("handler", () => {
           { Key: "av-scanner", Value: "clamav" },
           { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
-          { Key: "request-id", Value: "1234asdf" },
+          { Key: "request-id", Value: "zxcv9584" },
         ],
       },
     });
@@ -187,7 +184,7 @@ describe("handler", () => {
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event);
+    const response = await handler(event, {});
     expect(response).toEqual(expectedResponse);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
@@ -230,7 +227,7 @@ describe("handler", () => {
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event);
+    const response = await handler(event, {});
     expect(response).toEqual(expectedResponse);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
@@ -266,7 +263,7 @@ describe("handler", () => {
     axios.post.mockResolvedValue({ status: 200 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
 
-    const response = await handler(event);
+    const response = await handler(event, {});
     expect(response).toEqual(expectedResponse);
   });
 });
@@ -331,7 +328,7 @@ describe("getRoleCredentials", () => {
       },
     };
     mockSTSClient.on(AssumeRoleCommand).resolves(response);
-    const credentials = await getRoleCredentials(mockSTSClient, "foo", "123");
+    const credentials = await getRoleCredentials(mockSTSClient, "foo");
 
     expect(credentials).toEqual({
       accessKeyId: "why",
@@ -346,7 +343,7 @@ describe("getRoleCredentials", () => {
 
   test("fails to assume role", async () => {
     mockSTSClient.on(AssumeRoleCommand).rejects(new Error("nope"));
-    const credentials = await getRoleCredentials(mockSTSClient, "foo", "123");
+    const credentials = await getRoleCredentials(mockSTSClient, "foo");
     expect(credentials).toBe(null);
   });
 });
@@ -354,7 +351,7 @@ describe("getRoleCredentials", () => {
 describe("getS3Client", () => {
   test("successfully gets new client", async () => {
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: { foo: "bar" } });
-    const s3Client = await getS3Client(null, mockSTSClient, "bar", "bam");
+    const s3Client = await getS3Client(null, mockSTSClient, "bar");
     expect(s3Client).toBeInstanceOf(S3Client);
     expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
       RoleArn: "bar",
@@ -363,7 +360,7 @@ describe("getS3Client", () => {
   });
 
   test("successfully returns cached client", async () => {
-    const s3Client = await getS3Client("mellow", mockSTSClient, "bar", "baz");
+    const s3Client = await getS3Client("mellow", mockSTSClient, "bar");
     expect(s3Client).toBe("mellow");
     expect(mockSTSClient.calls().length).toBe(0);
   });
@@ -543,19 +540,16 @@ describe("tagS3Object", () => {
         TagSet: [{ Key: "some-tag", Value: "some-value" }],
       },
     };
-    const response = await tagS3Object(
-      mockS3Client,
-      { Bucket: "foo", Key: "bar" },
-      [{ Key: "some-tag", Value: "some-value" }],
-      "foo"
-    );
+    const response = await tagS3Object(mockS3Client, { Bucket: "foo", Key: "bar" }, [
+      { Key: "some-tag", Value: "some-value" },
+    ]);
     expect(response).toBe(true);
     expect(mockS3Client).toHaveReceivedCommandWith(PutObjectTaggingCommand, input);
   });
 
   test("fails to tag", async () => {
     mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({});
-    const response = await tagS3Object(mockS3Client, {}, [], null);
+    const response = await tagS3Object(mockS3Client, {}, []);
     expect(response).toBe(false);
   });
 });
