@@ -3,9 +3,9 @@ module "integration_test" {
 
   product_name                = "integration-test"
   s3_upload_bucket_name       = module.integration_test_bucket.s3_bucket_id
-  scan_files_role_arn         = "arn:aws:iam::${var.account}:role/scan-files-api"
-  s3_scan_object_function_arn = "arn:aws:lambda:ca-central-1:${var.account}:function:s3-scan-object"
-  s3_scan_object_role_arn     = "arn:aws:iam::${var.account}:role/s3-scan-object"
+  scan_files_role_arn         = "arn:aws:iam::${var.account_id}:role/scan-files-api"
+  s3_scan_object_function_arn = "arn:aws:lambda:ca-central-1:${var.account_id}:function:s3-scan-object"
+  s3_scan_object_role_arn     = "arn:aws:iam::${var.account_id}:role/s3-scan-object"
   scan_files_url              = "https://${var.domain}"
 
   billing_tag_value = var.billing_code
