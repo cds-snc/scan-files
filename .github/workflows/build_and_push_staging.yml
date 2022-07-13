@@ -1,0 +1,110 @@
+name: Build, Push and Deploy to Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  REGISTRY: 127893201980.dkr.ecr.ca-central-1.amazonaws.com/scan-files
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: write
+  checks: write
+  statuses: write
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
+        id: filter
+        with:
+          filters: |
+            api: 'api/**'
+            module/s3-scan-object: 'module/s3-scan-object/**'
+
+  build-push-and-deploy:
+    if: needs.changes.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.changes.outputs.images) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
+        with:
+          role-to-assume: arn:aws:iam::127893201980:role/OIDCGithubWorkflowRole
+          role-session-name: ECRPushAndDeploy
+          aws-region: ca-central-1
+
+      - name: Build container
+        working-directory: ./${{ matrix.image }}
+        run: |
+          docker build \
+            --build-arg git_sha=$GITHUB_SHA \
+            -t $REGISTRY/${{ matrix.image }}:$GITHUB_SHA \
+            -t $REGISTRY/${{ matrix.image }}:latest .
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@3d4e073ce6a6845ed27b30a0fe05b6e22c80ac6b # tag=v1.4.0
+
+      - name: Push containers to ECR
+        run: |
+          docker push $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
+          docker push $REGISTRY/${{ matrix.image }}:latest
+
+      - name: Logout of Amazon ECR
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}
+
+      - name: Deploy S3 scan object
+        if: matrix.image == 'module/s3-scan-object'
+        run: |
+          aws lambda update-function-code \
+            --function-name s3-scan-object \
+            --image-uri $REGISTRY/${{ matrix.image }}:$GITHUB_SHA  > /dev/null 2>&1
+
+      - name: Deploy API
+        if: matrix.image == 'api'
+        run: |
+          aws lambda update-function-code \
+            --function-name scan-files-api \
+            --image-uri $REGISTRY/${{ matrix.image }}:$GITHUB_SHA  > /dev/null 2>&1
+
+      - name: Migrate database
+        if: matrix.image == 'api'
+        run: |
+          aws lambda wait function-active --function-name scan-files-api
+          source .github/workflows/scripts/migrate.sh
+          migrate
+
+      - name: API healthcheck
+        uses: jtalk/url-health-check-action@d6ec9590f0f1bd173fa43aeac8b75c2270e9069d # renovate: tag=v2
+        with:
+          url: https://scan-files.cdssandbox.xyz/version
+          max-attempts: 3
+          retry-delay: 5s
+
+      - name: Generate ${{ matrix.image }}/docker SBOM
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@4c6b386722985552f3f008d04279a3f01402cc35 # tag=v1
+        with:
+          dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          docker_image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
+          project_name: scan-files/${{ matrix.image }}/docker
+          project_type: docker
