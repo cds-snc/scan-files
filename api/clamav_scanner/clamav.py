@@ -290,8 +290,8 @@ def get_clamd_pid():
     except ValueError:
         log.error("Failed to convert PID: %s into an integer" % clamd_pid)
         pass
-    except Exception:
-        log.error("Failed to get PID of clamd")
+    except Exception as e:
+        log.error("Failed to get PID of clamd: %s" % e)
         pass
 
     return None
@@ -314,16 +314,17 @@ def is_clamd_running():
         log.info("Received %s in response to PING" % repr(data))
         return data == b"PONG\n"
 
-    log.error("Clamd is not running on %s" % CLAMD_SOCKET)
+    log.info("Clamd is not running on %s" % CLAMD_SOCKET)
     return False
 
 
 def setup_clamd_daemon():
-    clamd_pid = get_clamd_pid()
+    clamd_pid = None
     lock = FileLock(CLAMD_STARTUP_LOCK, timeout=120)
     lock.acquire(poll_interval=5)
     try:
         if not is_clamd_running():
+            clamd_pid = get_clamd_pid()
             if clamd_pid is not None:
                 kill_process_by_pid(clamd_pid)
 
