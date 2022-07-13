@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "terragrunt/**"
+      - ".github/manifests/infrastructure_version"
       - ".github/workflows/tf_apply_production.yml"
 
 env:
@@ -27,39 +27,23 @@ permissions:
 
 jobs:
   terragrunt-apply:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
-      - name: setup terraform tools
+      - name: Get infrastructure version
+        run: echo "INFRASTRUCTURE_VERSION=$(cat .github/manifests/infrastructure_version)" >> $GITHUB_ENV
+
+      - name: Checkout infrastructure version tag
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        with:
+          ref: ${{ env.INFRASTRUCTURE_VERSION }}
+
+      - name: Setup terraform tools
         uses: cds-snc/terraform-tools-setup@v1
 
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
-        id: filter
-        with:
-          filters: |
-            alarms:
-              - 'terragrunt/aws/alarms/**'
-              - 'terragrunt/env/production/alarms/**'
-            api:
-              - 'terragrunt/aws/api/**'
-              - 'terragrunt/env/production/api/**'
-            hosted_zone:
-              - 'terragrunt/aws/hosted_zone/**'
-              - 'terragrunt/env/production/hosted_zone/**'
-            integration_test:
-              - 'terragrunt/aws/integration_test/**'
-              - 'terragrunt/env/production/integration_test/**'
-            s3_scan_object:
-              - 'terragrunt/aws/s3_scan_object/**'
-              - 'terragrunt/env/production/s3_scan_object/**'
-            scan_queue:
-              - 'terragrunt/aws/scan_queue/**'
-              - 'terragrunt/env/production/scan_queue/**'
-
-      - name: configure aws credentials using OIDC
+      - name: Configure aws credentials using OIDC
         uses: aws-actions/configure-aws-credentials@05b148adc31e091bafbaf404f745055d4d3bc9d2 # tag=v1.6.1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/OIDCGithubWorkflowRole
@@ -67,37 +51,25 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Apply hosted_zone
-        if: ${{ steps.filter.outputs.hosted_zone == 'true' }}
         working-directory: terragrunt/env/production/hosted_zone
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply integration_test
-        if: ${{ steps.filter.outputs.integration_test == 'true' }}
         working-directory: terragrunt/env/production/integration_test
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply api
-        if: ${{ steps.filter.outputs.api == 'true' }}
         working-directory: terragrunt/env/production/api
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply s3_scan_object
-        if: ${{ steps.filter.outputs.s3_scan_object == 'true' }}
         working-directory: terragrunt/env/production/s3_scan_object
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply scan_queue
-        if: ${{ steps.filter.outputs.scan_queue == 'true' }}
         working-directory: terragrunt/env/production/scan_queue
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
       - name: Apply alarms
-        if: ${{ steps.filter.outputs.alarms == 'true' }}
         working-directory: terragrunt/env/production/alarms
-        run: |
-          terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve

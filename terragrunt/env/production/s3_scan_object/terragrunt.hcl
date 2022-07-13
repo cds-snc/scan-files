@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../aws//s3_scan_object"
+  source = "git::https://github.com/cds-snc/scan-files//terragrunt/aws/s3_scan_object?ref=${get_env("INFRASTRUCTURE_VERSION")}"
 }
 
 dependencies {

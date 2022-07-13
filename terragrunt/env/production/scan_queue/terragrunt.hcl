@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../aws//scan_queue"
+  source = "git::https://github.com/cds-snc/scan-files//terragrunt/aws/scan_queue?ref=${get_env("INFRASTRUCTURE_VERSION")}"
 }
 
 dependencies {
