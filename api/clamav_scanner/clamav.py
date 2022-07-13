@@ -287,6 +287,9 @@ def get_clamd_pid():
     try:
         clamd_pid = subprocess.check_output(["pidof", "clamd"]).decode("utf-8").strip()
         return int(clamd_pid)
+    except subprocess.CalledProcessError as e:
+        log.info("Clamd is not running: %s" % e)
+        pass
     except ValueError:
         log.error("Failed to convert PID: %s into an integer" % clamd_pid)
         pass
