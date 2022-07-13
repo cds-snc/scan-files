@@ -5,6 +5,7 @@ x-db-connection-strings: &db-connection-strings
   SQLALCHEMY_DATABASE_TEST_URI: postgresql://postgres:postgres@test-db/scan-files
 
 x-api_envs: &api_envs
+  API_AUTH_TOKEN: "123"
   AWS_LOCALSTACK: "True"
   OPENAPI_URL: "/openapi.json"
   AV_DEFINITION_PATH: "/tmp/clamav"
@@ -37,6 +38,8 @@ services:
       - ../api:/function
     environment:
       <<: [*db-connection-strings, *api_envs]
+    ports:
+      - "8082:8080"
 
   db:
     image: postgres:11.16

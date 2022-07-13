@@ -44,7 +44,9 @@ def handler(event, context):
         if scanning_request_id:
             context.logger = CustomLogger(context.aws_request_id, scanning_request_id)
         else:
-            context.logger = log
+            context.logger = CustomLogger(
+                context.aws_request_id, context.aws_request_id
+            )
 
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
@@ -65,9 +67,9 @@ def handler(event, context):
     elif event.get("task", "") == CLAMAV_LAMBDA_SCAN_TASK_NAME:
         event_logger = CustomLogger(
             context.aws_request_id, event.get("scanning_request_id", None)
-        )
+        ).log
         return clamav_launch_scan(
-            log=event_logger.log,
+            log=event_logger,
             file_path=event.get("file_path"),
             scan_id=event.get("scan_id"),
             aws_account=event.get("aws_account"),

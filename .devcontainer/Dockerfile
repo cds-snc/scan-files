@@ -69,6 +69,7 @@ RUN mkdir -p /tmp/clamav \
  && mkdir -p /tmp/clamav/quarantine \
  && chown -R vscode:vscode /tmp/clamav /var/log/clamav \
  && sed -i 's=DatabaseDirectory /var/lib/clamav=DatabaseDirectory /tmp/clamav=g' /etc/clamav/clamd.conf \
+ && sed -i 's=DisableCache false=DisableCache true=g' /etc/clamav/clamd.conf \ 
  && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
  && sed -i 's=LogFile /var/log/clamav/clamav.log=LogFile /tmp/clamav.log=g' /etc/clamav/clamd.conf \ 
  && sed -i 's=LocalSocket /var/run/clamav/clamd.ctl=LocalSocket /tmp/clamd.sock=g' /etc/clamav/clamd.conf \ 
