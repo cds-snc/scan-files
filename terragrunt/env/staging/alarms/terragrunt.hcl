@@ -3,7 +3,7 @@ terraform {
 }
 
 dependencies {
-  paths = ["../api, "../s3_scan_object"]
+  paths = ["../api", "../s3_scan_object"]
 }
 
 dependency "api" {
