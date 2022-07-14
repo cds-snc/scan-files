@@ -1,3 +1,9 @@
+locals {
+  error_logged_api            = "ErrorLoggedAPI"
+  error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
+  error_namespace             = "ScanFiles"
+}
+
 resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
   provider = aws.us-east-1
 
@@ -22,19 +28,19 @@ resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
-  name           = "ErrorLoggedAPI"
+  name           = local.error_logged_api
   pattern        = "ERROR"
   log_group_name = var.scan_files_api_log_group_name
 
   metric_transformation {
-    name      = "ErrorLoggedAPI"
-    namespace = "ScanFiles"
+    name      = local.error_logged_api
+    namespace = local.error_namespace
     value     = "1"
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
-  alarm_name          = "ErrorLoggedAPI"
+  alarm_name          = local.error_logged_api
   alarm_description   = "Errors logged by the Scan Files API lambda function"
   comparison_operator = "GreaterThanThreshold"
 
@@ -51,19 +57,19 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "s3_scan_object_error" {
-  name           = "ErrorLoggedS3ScanObject"
+  name           = local.error_logged_s3_scan_object
   pattern        = "ERROR"
   log_group_name = var.s3_scan_object_log_group_name
 
   metric_transformation {
-    name      = "ErrorLoggedS3ScanObject"
-    namespace = "ScanFiles"
+    name      = local.error_logged_s3_scan_object
+    namespace = local.error_namespace
     value     = "1"
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "s3_scan_object_error" {
-  alarm_name          = "ErrorLoggedS3ScanObject"
+  alarm_name          = local.error_logged_s3_scan_object
   alarm_description   = "Errors logged by the S3 scan object lambda function"
   comparison_operator = "GreaterThanThreshold"
   metric_name         = aws_cloudwatch_log_metric_filter.s3_scan_object_error.metric_transformation[0].name
