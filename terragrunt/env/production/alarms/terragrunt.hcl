@@ -32,8 +32,9 @@ inputs = {
   scan_files_api_log_group_name = dependency.api.outputs.function_log_group_name
   route53_health_check_api_id   = dependency.api.outputs.route53_health_check_api_id
 
-  s3_scan_object_error_threshold = "1"
-  scan_files_api_error_threshold = "1"  
+  s3_scan_object_error_threshold                   = "1"
+  scan_files_api_error_threshold                   = "1"
+  scan_files_api_scan_verdict_suspicious_threshold = "1"
 }
 
 include {

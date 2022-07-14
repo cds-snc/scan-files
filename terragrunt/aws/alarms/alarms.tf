@@ -2,6 +2,7 @@ locals {
   error_logged_api            = "ErrorLoggedAPI"
   error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
   error_namespace             = "ScanFiles"
+  scan_verdict_suspicious     = "ScanVerdictSuspicious"
 }
 
 resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
@@ -50,6 +51,35 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   evaluation_periods = "1"
   statistic          = "Sum"
   threshold          = var.scan_files_api_error_threshold
+  treat_missing_data = "notBreaching"
+
+  alarm_actions = [aws_sns_topic.cloudwatch_warning.arn]
+  ok_actions    = [aws_sns_topic.cloudwatch_warning.arn]
+}
+
+resource "aws_cloudwatch_log_metric_filter" "scan_verdict_suspicious" {
+  name           = local.scan_verdict_suspicious
+  pattern        = "suspicious? malicious? unknown? unable_to_scan?"
+  log_group_name = var.scan_files_api_log_group_name
+
+  metric_transformation {
+    name      = local.scan_verdict_suspicious
+    namespace = local.error_namespace
+    value     = "1"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "scan_verdict_suspicious" {
+  alarm_name          = local.scan_verdict_suspicious
+  alarm_description   = "Scan verdicts that are malicious, suspicious, or that could not complete"
+  comparison_operator = "GreaterThanThreshold"
+  metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].name
+  namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].namespace
+
+  period             = "60"
+  evaluation_periods = "1"
+  statistic          = "Sum"
+  threshold          = var.scan_files_api_scan_verdict_suspicious_threshold
   treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.cloudwatch_warning.arn]
