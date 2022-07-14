@@ -42,7 +42,7 @@ def handler(event, context):
             else context.aws_request_id
         )
 
-        context.logger = CustomLogger(context.aws_request_id, scanning_request_id)
+        context.scanning_request_id = scanning_request_id
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
