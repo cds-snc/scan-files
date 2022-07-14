@@ -24,7 +24,10 @@ async def log_requests(request: Request, call_next):
         request.scope["aws.context"] = types.SimpleNamespace()
         request.scope["aws.context"].logger = CustomLogger("scan-files", None)
     else:
-        request.scope["aws.context"].logger = CustomLogger("scan-files", request.scope["aws.context"].scanning_request_id)
+        request.scope["aws.context"].logger = CustomLogger(
+            request.scope["aws.context"].aws_request_id,
+            request.scope["aws.context"].scanning_request_id,
+        )
 
     log = request.scope["aws.context"].logger.log
     log.info(f"start request path={request.url.path}")
