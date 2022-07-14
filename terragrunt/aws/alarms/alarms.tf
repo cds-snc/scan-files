@@ -43,7 +43,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
 resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   alarm_name          = local.error_logged_api
   alarm_description   = "Errors logged by the Scan Files API lambda function"
-  comparison_operator = "GreaterThanThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
 
   metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_error.metric_transformation[0].name
   namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_error.metric_transformation[0].namespace
@@ -72,7 +72,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_verdict_suspicious" {
 resource "aws_cloudwatch_metric_alarm" "scan_verdict_suspicious" {
   alarm_name          = local.scan_verdict_suspicious
   alarm_description   = "Scan verdicts that are malicious, suspicious, or that could not complete"
-  comparison_operator = "GreaterThanThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].name
   namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].namespace
 
@@ -101,7 +101,7 @@ resource "aws_cloudwatch_log_metric_filter" "s3_scan_object_error" {
 resource "aws_cloudwatch_metric_alarm" "s3_scan_object_error" {
   alarm_name          = local.error_logged_s3_scan_object
   alarm_description   = "Errors logged by the S3 scan object lambda function"
-  comparison_operator = "GreaterThanThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   metric_name         = aws_cloudwatch_log_metric_filter.s3_scan_object_error.metric_transformation[0].name
   namespace           = aws_cloudwatch_log_metric_filter.s3_scan_object_error.metric_transformation[0].namespace
 
