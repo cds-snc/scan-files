@@ -59,7 +59,7 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
 
 resource "aws_cloudwatch_log_metric_filter" "scan_verdict_suspicious" {
   name           = local.scan_verdict_suspicious
-  pattern        = "suspicious? malicious? unknown? unable_to_scan?"
+  pattern        = "?suspicious ?malicious ?unknown ?unable_to_scan"
   log_group_name = var.scan_files_api_log_group_name
 
   metric_transformation {
