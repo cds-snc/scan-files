@@ -12,7 +12,7 @@ dependency "api" {
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
-    function_log_group_name     = "/var/lambda/scan-files-api"
+    function_log_group_name     = "/aws/lambda/scan-files-api"
     route53_health_check_api_id = ""
   }
 }
@@ -23,7 +23,7 @@ dependency "s3_scan_object" {
   mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
-    function_log_group_name = "/var/lambda/s3-scan-object"
+    function_log_group_name = "/aws/lambda/s3-scan-object"
   }
 }
 
