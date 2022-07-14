@@ -14,6 +14,10 @@ output "function_arn" {
   value = module.api.function_arn
 }
 
+output "function_log_group_name" {
+  value = "/var/lambda/${module.api.function_name}"
+}
+
 output "function_name" {
   value = module.api.function_name
 }
