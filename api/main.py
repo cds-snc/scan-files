@@ -39,15 +39,10 @@ def handler(event, context):
         scanning_request_id = (
             event["headers"]["X-Scanning-Request-Id"]
             if "X-Scanning-Request-Id" in event["headers"]
-            else None
+            else context.aws_request_id
         )
-        if scanning_request_id:
-            context.logger = CustomLogger(context.aws_request_id, scanning_request_id)
-        else:
-            context.logger = CustomLogger(
-                context.aws_request_id, context.aws_request_id
-            )
 
+        context.logger = CustomLogger(context.aws_request_id, scanning_request_id)
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
