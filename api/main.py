@@ -9,13 +9,14 @@ from clamav_scanner.update import update_virus_defs
 from clamav_scanner.common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 from clamav_scanner.scan import launch_scan as clamav_launch_scan
 from clamav_scanner.clamav import is_clamd_running, setup_clamd_daemon
-from aws_lambda_powertools import Metrics
+from aws_lambda_powertools import Logger, Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
 from logger import log, CustomLogger
 from mangum import Mangum
 from os import environ
 
+Logger(service="mangum")
 app = api.app
 metrics = Metrics(namespace="ScanFiles", service="api")
 
@@ -41,8 +42,8 @@ def handler(event, context):
             if "X-Scanning-Request-Id" in event["headers"]
             else context.aws_request_id
         )
-
         context.scanning_request_id = scanning_request_id
+
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
@@ -60,9 +61,7 @@ def handler(event, context):
         return resubmit_stale_scans()
 
     elif event.get("task", "") == CLAMAV_LAMBDA_SCAN_TASK_NAME:
-        event_logger = CustomLogger(
-            context.aws_request_id, event.get("scanning_request_id", None)
-        ).log
+        event_logger = CustomLogger(event.get("scanning_request_id", None)).log
         return clamav_launch_scan(
             log=event_logger,
             file_path=event.get("file_path"),

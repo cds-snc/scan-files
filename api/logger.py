@@ -8,10 +8,10 @@ CUSTOM_FORMAT = "[%(request_id)s][%(asctime)s %(filename)s %(funcName)s %(leveln
 
 
 class CustomLogger:
-    def __init__(self, logger_name, scanning_request_id):
+    def __init__(self, scanning_request_id):
         self.scanning_request_id = scanning_request_id
         self.old_factory = logging.getLogRecordFactory()
-        self.log = self.get_named_instance(logger_name, scanning_request_id)
+        self.log = self.get_named_instance("mangum", scanning_request_id)
 
     def record_factory(self, *args, **kwargs):
         record = self.old_factory(*args, **kwargs)
@@ -35,7 +35,7 @@ class CustomLogger:
         return self.scanning_request_id
 
 
-log = logging.getLogger("scan-files")
+log = logging.getLogger("mangum")
 log.setLevel(environ.get("LOG_LEVEL", logging.INFO))
 logHandler = logging.StreamHandler()
 formatter = jsonlogger.JsonFormatter()
