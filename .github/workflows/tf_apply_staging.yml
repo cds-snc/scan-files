@@ -59,6 +59,10 @@ jobs:
         working-directory: terragrunt/env/staging/s3_scan_object
         run: terragrunt apply --terragrunt-non-interactive -auto-approve
 
+      - name: Apply scan_queue
+        working-directory: terragrunt/env/staging/scan_queue
+        run: terragrunt apply --terragrunt-non-interactive -auto-approve
+
       - name: Apply alarms
         working-directory: terragrunt/env/staging/alarms
         run: terragrunt apply --terragrunt-non-interactive -auto-approve
