@@ -51,9 +51,15 @@ def sns_scan_results(
 
 
 def launch_background_scan(
-    logger, file_path, scan_id, aws_account=None, session=None, sns_arn=None
+    log,
+    scanning_request_id,
+    file_path,
+    scan_id,
+    aws_account=None,
+    session=None,
+    sns_arn=None,
 ):
-    logger.log.info("Launching background scan for %s" % file_path)
+    log.info("Launching background scan for %s" % file_path)
     lambda_client = get_session().client("lambda", endpoint_url=AWS_ENDPOINT_URL)
     lambda_client.invoke(
         FunctionName=os.environ.get("AWS_LAMBDA_FUNCTION_NAME"),
@@ -65,7 +71,7 @@ def launch_background_scan(
                 "scan_id": str(scan_id),
                 "aws_account": aws_account,
                 "sns_arn": sns_arn,
-                "scanning_request_id": logger.get_scanning_request_id(),
+                "scanning_request_id": scanning_request_id,
             }
         ),
     )

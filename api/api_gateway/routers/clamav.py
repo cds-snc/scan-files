@@ -32,6 +32,7 @@ def start_clamav_scan(
     _authorized: bool = Depends(verify_token),
 ):
     log = request.scope["aws.context"].logger.log
+    log.info("start_clamav_scan")
     try:
         save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
         create_dir(f"{AV_DEFINITION_PATH}/quarantine")
@@ -65,6 +66,7 @@ def start_clamav_scan_from_s3(
     _authorized: bool = Depends(verify_token),
 ):
     log = request.scope["aws.context"].logger.log
+    log.info(f"start_clamav_scan_from_s3: aws_account={aws_account}")
     try:
         filename = s3_key.split("/")[-1]
 
@@ -76,7 +78,8 @@ def start_clamav_scan_from_s3(
         session.commit()
 
         launch_background_scan(
-            request.scope["aws.context"].logger,
+            log,
+            request.scope["aws.context"].logger.get_scanning_request_id(),
             s3_key,
             scan.id,
             session=session,
@@ -100,8 +103,8 @@ def get_clamav_scan_results(
     _authorized: bool = Depends(verify_token),
 ):
     log = request.scope["aws.context"].logger.log
+    log.info(f"get_clamav_scan_results: scan_id={scan_id}")
     try:
-        log.info(f"get_clamav_scan_results: scan_id={scan_id}")
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
         if scan and scan.completed:
             return {"status": "completed", "verdict": scan.verdict}
