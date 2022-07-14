@@ -15,7 +15,7 @@ output "function_arn" {
 }
 
 output "function_log_group_name" {
-  value = "/var/lambda/${module.api.function_name}"
+  value = "/aws/lambda/${module.api.function_name}"
 }
 
 output "function_name" {
