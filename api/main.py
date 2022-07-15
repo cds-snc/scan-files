@@ -37,8 +37,7 @@ def handler(event, context):
     ):
         # Assume it is a request to the lambda function url
         if "X-Scanning-Request-Id" in event["headers"]:
-            context.scanning_request_id = event["headers"]["X-Scanning-Request-Id"]
-            log.set_correlation_id(context.scanning_request_id)
+            log.set_correlation_id(event["headers"]["X-Scanning-Request-Id"])
 
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
@@ -57,7 +56,7 @@ def handler(event, context):
         return resubmit_stale_scans()
 
     elif event.get("task", "") == CLAMAV_LAMBDA_SCAN_TASK_NAME:
-        log.set_correlation_id(event.get("scanning_request_id"))
+        log.set_correlation_id(event.get("scanning_request_id", None))
         return clamav_launch_scan(
             file_path=event.get("file_path"),
             scan_id=event.get("scan_id"),
