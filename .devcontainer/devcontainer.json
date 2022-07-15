@@ -74,7 +74,6 @@
     "redhat.vscode-yaml",
     "timonwong.shellcheck",
     "hashicorp.terraform",
-    "ms-python.vscode-pylance",
     "GitHub.copilot"
   ],
   // Use 'forwardPorts' to make a list of ports inside the container available locally.

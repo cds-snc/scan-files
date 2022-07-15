@@ -35,10 +35,7 @@ def handler(event, context):
     if "httpMethod" in event or (
         "requestContext" in event and "http" in event["requestContext"]
     ):
-        # Assume it is a request to the lambda function url
-        if "X-Scanning-Request-Id" in event["headers"]:
-            log.set_correlation_id(event["headers"]["X-Scanning-Request-Id"])
-
+        log.set_correlation_id(event["headers"].get("x-scanning-request-id", None))
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response

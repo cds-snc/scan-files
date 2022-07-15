@@ -6,7 +6,7 @@ curl "http://api:8080/2015-03-31/functions/function/invocations" -d '{
     "path": "/healthcheck",
     "requestContext": {},
     "httpMethod": "GET",
-    "headers": {"X-Scanning-Request-Id": "bar"},
+    "headers": {"x-scanning-request-id": "bar"},
     "multiValueHeaders": { },
     "queryStringParameters": null,
     "multiValueQueryStringParameters": null,
