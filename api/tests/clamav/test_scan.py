@@ -18,7 +18,6 @@ def test_clamav_scan(
 ):
     scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
     session.commit()
-    mock_logger = MagicMock()
     mock_scan_file.return_value = (
         "123",
         ScanVerdicts.CLEAN.value,
@@ -26,7 +25,6 @@ def test_clamav_scan(
         "/foo/bar/file.txt",
     )
     scan_verdict = launch_scan(
-        mock_logger,
         "/tmp/foo",  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
         scan.id,
         session=session,
@@ -48,9 +46,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
     )
     session.commit()
     mock_sns_client = MagicMock()
-    mock_logger = MagicMock()
     sns_scan_results(
-        mock_logger,
         mock_sns_client,
         scan,
         "arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",
@@ -82,10 +78,8 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
         checksum="",
     )
     session.commit()
-    mock_logger = MagicMock()
     mock_sns_client = MagicMock()
     sns_scan_results(
-        mock_logger,
         mock_sns_client,
         scan,
         "arn:aws:sns:ca-central-1:000000000000:clamav_scan-topic",

@@ -17,6 +17,7 @@ module "api" {
     SQLALCHEMY_DATABASE_URI   = module.rds.proxy_connection_string_value
     FILE_QUEUE_BUCKET         = module.file-queue.s3_bucket_id
     API_AUTH_TOKEN_SECRET_ARN = aws_secretsmanager_secret.api_auth_token.id
+    POWERTOOLS_SERVICE_NAME   = "${var.product_name}-api"
   }
 
   policies = [

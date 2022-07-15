@@ -12,7 +12,7 @@ from clamav_scanner.clamav import is_clamd_running, setup_clamd_daemon
 from aws_lambda_powertools import Metrics
 from database.dynamodb import get_scan_result
 from database.migrate import migrate_head
-from logger import log, CustomLogger
+from logger import log
 from mangum import Mangum
 from os import environ
 
@@ -36,13 +36,10 @@ def handler(event, context):
         "requestContext" in event and "http" in event["requestContext"]
     ):
         # Assume it is a request to the lambda function url
-        scanning_request_id = (
-            event["headers"]["X-Scanning-Request-Id"]
-            if "X-Scanning-Request-Id" in event["headers"]
-            else context.aws_request_id
-        )
+        if "X-Scanning-Request-Id" in event["headers"]:
+            context.scanning_request_id = event["headers"]["X-Scanning-Request-Id"]
+            log.set_correlation_id(context.scanning_request_id)
 
-        context.scanning_request_id = scanning_request_id
         asgi_handler = Mangum(app)
         response = asgi_handler(event, context)
         return response
@@ -60,11 +57,8 @@ def handler(event, context):
         return resubmit_stale_scans()
 
     elif event.get("task", "") == CLAMAV_LAMBDA_SCAN_TASK_NAME:
-        event_logger = CustomLogger(
-            context.aws_request_id, event.get("scanning_request_id", None)
-        ).log
+        log.set_correlation_id(event.get("scanning_request_id"))
         return clamav_launch_scan(
-            log=event_logger,
             file_path=event.get("file_path"),
             scan_id=event.get("scan_id"),
             aws_account=event.get("aws_account"),

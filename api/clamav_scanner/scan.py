@@ -12,12 +12,11 @@ from .common import CLAMAV_LAMBDA_SCAN_TASK_NAME
 from boto3wrapper.wrapper import get_session
 from clamav_scanner.clamav import scan_file
 from database.db import get_db_session
+from logger import log
 from models.Scan import Scan, ScanVerdicts
 
 
-def sns_scan_results(
-    log, sns_client, scan, sns_arn, scan_signature, file_path, aws_account
-):
+def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_account):
 
     message = {
         "scan_id": str(scan.id),
@@ -51,7 +50,6 @@ def sns_scan_results(
 
 
 def launch_background_scan(
-    log,
     scanning_request_id,
     file_path,
     scan_id,
@@ -78,7 +76,6 @@ def launch_background_scan(
 
 
 def launch_scan(
-    log,
     file_path,
     scan_id,
     ignore_cache=False,
@@ -95,7 +92,7 @@ def launch_scan(
     scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()
     try:
         checksum, scan_result, scan_signature, scanned_path = scan_file(
-            log, session, file_path, ignore_cache, aws_account
+            session, file_path, ignore_cache, aws_account
         )
         scan.completed = datetime.datetime.utcnow()
         scan.verdict = scan_result
@@ -115,7 +112,7 @@ def launch_scan(
     # Publish the scan results
     if sns_arn not in [None, ""]:
         sns_scan_results(
-            log, sns_client, scan, sns_arn, scan_signature, file_path, aws_account
+            sns_client, scan, sns_arn, scan_signature, file_path, aws_account
         )
 
     # Delete downloaded file to free up room on re-usable lambda function container

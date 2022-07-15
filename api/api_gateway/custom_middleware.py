@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Request
+from logger import log
 from os import environ
 from uuid import uuid4
-from logger import CustomLogger
 import time
 import types
 
@@ -19,19 +19,14 @@ async def add_security_headers(request: Request, call_next):
 
 async def log_requests(request: Request, call_next):
 
-    # Inject a custom logger into the request object if API wasn't invoked by a lambda function
+    # This should only happen when the app is not running in Lambda
     if "aws.context" not in request.scope:
         request.scope["aws.context"] = types.SimpleNamespace()
-        request.scope["aws.context"].logger = CustomLogger("scan-files", None)
-    else:
-        request.scope["aws.context"].logger = CustomLogger(
-            request.scope["aws.context"].aws_request_id,
-            request.scope["aws.context"].scanning_request_id,
-        )
+        random_id = str(uuid4())
+        request.scope["aws.context"].scanning_request_id = random_id
+        log.set_correlation_id(random_id)
 
-    log = request.scope["aws.context"].logger.log
     log.info(f"start request path={request.url.path}")
-
     start_time = time.time()
 
     response = await call_next(request)
