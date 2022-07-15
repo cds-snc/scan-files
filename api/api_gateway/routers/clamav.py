@@ -13,6 +13,7 @@ from fastapi import (
     status,
     UploadFile,
 )
+from logger import log
 from models.Scan import Scan, ScanProviders, ScanVerdicts
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -31,7 +32,6 @@ def start_clamav_scan(
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
-    log = request.scope["aws.context"].logger.log
     log.info("start_clamav_scan")
     try:
         save_path = f"{AV_DEFINITION_PATH}/quarantine/{str(uuid4())}"
@@ -47,7 +47,7 @@ def start_clamav_scan(
         session.add(scan)
         session.commit()
 
-        scan_verdict = launch_scan(log, save_path, scan.id, ignore_cache=ignore_cache)
+        scan_verdict = launch_scan(save_path, scan.id, ignore_cache=ignore_cache)
         return {"scan_id": str(scan.id), "status": "completed", "verdict": scan_verdict}
     except Exception as err:
         log.error(err)
@@ -65,7 +65,6 @@ def start_clamav_scan_from_s3(
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
-    log = request.scope["aws.context"].logger.log
     log.info(f"start_clamav_scan_from_s3: aws_account={aws_account}")
     try:
         filename = s3_key.split("/")[-1]
@@ -78,8 +77,7 @@ def start_clamav_scan_from_s3(
         session.commit()
 
         launch_background_scan(
-            log,
-            request.scope["aws.context"].logger.get_scanning_request_id(),
+            request.scope["aws.context"].scanning_request_id,
             s3_key,
             scan.id,
             session=session,
@@ -102,7 +100,6 @@ def get_clamav_scan_results(
     session: Session = Depends(get_db_session),
     _authorized: bool = Depends(verify_token),
 ):
-    log = request.scope["aws.context"].logger.log
     log.info(f"get_clamav_scan_results: scan_id={scan_id}")
     try:
         scan = session.query(Scan).filter(Scan.id == scan_id).one_or_none()

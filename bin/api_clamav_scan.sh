@@ -7,7 +7,7 @@ curl "http://api:8080/2015-03-31/functions/function/invocations" -d '{
     "path": "/clamav",
     "requestContext": {},
     "httpMethod": "POST",
-    "headers": {"authorization": "123", "content-length": "7713", "content-type": "multipart/form-data; boundary=--------------------------733922910553358931761280", "accept-encoding": "gzip, deflate, br"},
+    "headers": {"X-Scanning-Request-Id": "abcd123", "authorization": "123", "content-length": "7713", "content-type": "multipart/form-data; boundary=--------------------------733922910553358931761280", "accept-encoding": "gzip, deflate, br"},
     "multiValueHeaders": { },
     "queryStringParameters": {"ignore_cache": "true"},
     "multiValueQueryStringParameters": null,
