@@ -11,6 +11,7 @@ import botocore
 from pytz import utc
 
 from .common import AWS_ENDPOINT_URL
+from .common import CLAMSCAN_PATH
 from .common import CLAMD_PATH
 from .common import AV_DEFINITION_S3_BUCKET
 from .common import AV_DEFINITION_S3_PREFIX
@@ -246,13 +247,32 @@ def scan_file(session, path, ignore_cache=False, aws_account=None):
             env=av_env,
         )
         output = av_proc.stdout.decode("utf-8")
-        log.info("clamscan output:\n%s" % output)
+        log.info("clamdscan output:\n%s" % output)
 
     # Turn the output into a data source we can read
     summary = scan_output_to_json(output)
+
+    # ClamAV will return a OK verdict even if it did not scan the file due to file limits
+    # We need to check the scan time to determine if the file was scanned
+    # If the daemon did not run the scan, fallback to the clamav ondemand scanner
+    if "0.000" in summary.get("Time", "").strip():
+        log.info(
+            "ClamAV daemon did not scan the file, falling back to on demand scanner."
+        )
+        av_proc = subprocess.run(
+            [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
+            stderr=subprocess.STDOUT,
+            stdout=subprocess.PIPE,
+            env=av_env,
+        )
+        output = av_proc.stdout.decode("utf-8")
+        summary = scan_output_to_json(output)
+        log.info("clamscan output:\n%s" % output)
+
     verdict, signature = determine_verdict(
         ScanProviders.CLAMAV.value, path, summary, av_proc
     )
+
     return checksum, verdict, signature, path
 
 
