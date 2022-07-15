@@ -77,7 +77,7 @@ def start_clamav_scan_from_s3(
         session.commit()
 
         launch_background_scan(
-            request.scope["aws.context"].scanning_request_id,
+            log.get_correlation_id(),
             s3_key,
             scan.id,
             session=session,
