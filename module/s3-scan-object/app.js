@@ -35,7 +35,7 @@ const logger = pino({ level: LOGGING_LEVEL }, pinoLambdaDestination());
 const withRequest = lambdaRequestTracker({
   requestMixin: (event) => {
     return {
-      requestId: event.RequestId ? event.RequestId : undefined,
+      correlation_id: event.RequestId ? event.RequestId : undefined,
     };
   },
 });
