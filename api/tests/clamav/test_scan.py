@@ -35,9 +35,10 @@ def test_clamav_scan(
     assert mock_sns_scan_results.called is False
 
 
+@patch("clamav_scanner.scan.log")
 @patch("clamav_scanner.scan.get_session")
 @patch("clamav_scanner.scan.get_db_session")
-def test_sns_scan_results(mock_db_session, mock_aws_session, session):
+def test_sns_scan_results(mock_db_session, mock_aws_session, mock_log, session):
     scan = ScanFactory(
         verdict=ScanVerdicts.CLEAN.value,
         meta_data={"sid": "123"},
@@ -46,6 +47,7 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
     )
     session.commit()
     mock_sns_client = MagicMock()
+    mock_log.get_correlation_id.return_value = "random-id"
     sns_scan_results(
         mock_sns_client,
         scan,
@@ -64,13 +66,15 @@ def test_sns_scan_results(mock_db_session, mock_aws_session, session):
             "av-status": {"DataType": "String", "StringValue": "clean"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
             "aws-account": {"DataType": "String", "StringValue": "123456789012"},
+            "correlation-id": {"DataType": "String", "StringValue": "random-id"},
         },
     )
 
 
+@patch("clamav_scanner.scan.log")
 @patch("clamav_scanner.scan.get_session")
 @patch("clamav_scanner.scan.get_db_session")
-def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
+def test_sns_scan_results_error(mock_db_session, mock_aws_session, mock_log, session):
     scan = ScanFactory(
         verdict=ScanVerdicts.ERROR.value,
         meta_data={"sid": "123"},
@@ -79,6 +83,7 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
     )
     session.commit()
     mock_sns_client = MagicMock()
+    mock_log.get_correlation_id.return_value = "random-id"
     sns_scan_results(
         mock_sns_client,
         scan,
@@ -97,5 +102,6 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, session):
             "av-status": {"DataType": "String", "StringValue": "error"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
             "aws-account": {"DataType": "String", "StringValue": "210987654321"},
+            "correlation-id": {"DataType": "String", "StringValue": "random-id"}
         },
     )
