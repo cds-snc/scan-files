@@ -102,6 +102,6 @@ def test_sns_scan_results_error(mock_db_session, mock_aws_session, mock_log, ses
             "av-status": {"DataType": "String", "StringValue": "error"},
             "av-signature": {"DataType": "String", "StringValue": "OK"},
             "aws-account": {"DataType": "String", "StringValue": "210987654321"},
-            "correlation-id": {"DataType": "String", "StringValue": "random-id"}
+            "correlation-id": {"DataType": "String", "StringValue": "random-id"},
         },
     )

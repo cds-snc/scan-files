@@ -26,7 +26,9 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_a
         AV_STATUS_METADATA: scan.verdict,
         AV_TIMESTAMP_METADATA: scan.completed.isoformat(),
         "aws_account": aws_account,
-        "correlation_id": log.get_correlation_id() if log.get_correlation_id() else "None"
+        "correlation_id": log.get_correlation_id()
+        if log.get_correlation_id()
+        else "None",
     }
 
     log.info("Publishing to sns arn: %s; message: %s" % (sns_arn, str(message)))
@@ -46,7 +48,10 @@ def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_a
                 "StringValue": scan_signature,
             },
             "aws-account": {"DataType": "String", "StringValue": aws_account},
-            "correlation-id": {"DataType": "String", "StringValue": message["correlation_id"]},
+            "correlation-id": {
+                "DataType": "String",
+                "StringValue": message["correlation_id"],
+            },
         },
     )
 
