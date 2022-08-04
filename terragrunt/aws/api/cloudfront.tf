@@ -91,7 +91,7 @@ resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" 
       override = true
     }
     content_security_policy {
-      content_security_policy = "report-uri https://csp-report-to.security.cdssandbox.xyz/report; default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+      content_security_policy = "report-uri https://csp-report-to.security.cdssandbox.xyz; default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
       override                = true
     }
     referrer_policy {
