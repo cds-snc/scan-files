@@ -70,10 +70,15 @@ def test_api_docs_enabled_via_environ():
     assert response.status_code == 200
 
 
-def test_hsts_in_response(hsts_middleware_client):
+def test_security_headers_in_response(hsts_middleware_client):
     response = hsts_middleware_client.get("/version")
     assert response.status_code == 200
     assert (
         response.headers["Strict-Transport-Security"]
         == "max-age=63072000; includeSubDomains; preload"
+    )
+
+    assert (
+        response.headers["Content-Security-Policy"]
+        == "report-uri https://csp-report-to.security.cdssandbox.xyz/report; default-src 'none'; script-src 'self'; script-src-elem https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/ 'sha256-QOOQu4W1oxGqd2nbXbxiA1Di6OHQOLQD+o+G9oWL8YY='; connect-src 'self'; img-src 'self' https://fastapi.tiangolo.com/img/ data: 'unsafe-eval'; style-src 'self'; style-src-elem 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/; frame-ancestors 'self'; form-action 'self';"
     )

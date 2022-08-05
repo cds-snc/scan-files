@@ -13,6 +13,10 @@ async def add_security_headers(request: Request, call_next):
     response.headers[
         "Strict-Transport-Security"
     ] = "max-age=63072000; includeSubDomains; preload"
+
+    response.headers[
+        "Content-Security-Policy"
+    ] = "report-uri https://csp-report-to.security.cdssandbox.xyz/report; default-src 'none'; script-src 'self'; script-src-elem https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/ 'sha256-QOOQu4W1oxGqd2nbXbxiA1Di6OHQOLQD+o+G9oWL8YY='; connect-src 'self'; img-src 'self' https://fastapi.tiangolo.com/img/ data: 'unsafe-eval'; style-src 'self'; style-src-elem 'self' https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/; frame-ancestors 'self'; form-action 'self';"
     return response
 
 
