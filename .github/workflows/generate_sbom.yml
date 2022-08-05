@@ -5,26 +5,51 @@ on:
     branches:
       - main
     paths:
-      - api/requirements.txt
+      - /**/requirements.txt
+      - /**/yarn.lock
       - .github/workflows/generate_sbom.yml
   push:
     branches:
       - main
     paths:
-      - api/requirements.txt
+      - /**/requirements.txt
+      - /**/yarn.lock
       - .github/workflows/generate_sbom.yml
 
 jobs:
   generate-sbom:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: scan-files/api
+            directory: ./api
+            manifest: requirements.txt
+            type: python
+          - component: scan-files/s3-scan-object
+            directory: ./module/s3-scan-object
+            manifest: yarn.lock
+            type: node
+
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        uses: actions/checkout@v2
 
-      - name: Generate api SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@4c6b386722985552f3f008d04279a3f01402cc35 # tag=v1
+      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721
+        id: changes
+        with:
+          filters: |
+            common:
+              - .github/workflows/generate_sbom.yml
+            lock: 
+              - '${{ matrix.directory }}/${{ matrix.manifest }}'
+
+      - name: Generate ${{ matrix.component }} SBOM
+        if: steps.changes.outputs.lock == 'true' || steps.changes.outputs.common == 'true'
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@4c6b386722985552f3f008d04279a3f01402cc35
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
-          project_name: scan-files/api
-          project_type: python
-          working_directory: api
+          project_name: ${{ matrix.component }}
+          project_type: ${{ matrix.type }}
+          working_directory: ${{ matrix.directory }}
