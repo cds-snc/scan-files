@@ -87,7 +87,3 @@ jobs:
         run: |
           json='{"blocks":[{"type":"section","text":{"type":"mrkdwn","text":":red: Integration test failed: <https://github.com/cds-snc/scan-files/actions/workflows/integration_test_production.yml|Integration test production>"}}]}'
           curl -X POST -H 'Content-type: application/json' --data "$json" ${{ secrets.SCAN_FILES_PROD_OPS_WEBHOOK }}
-
-      - name: Remove test file
-        if: always()
-        run: aws s3 rm s3://${{ env.BUCKET_NAME }}/${{ env.FILENAME }}
