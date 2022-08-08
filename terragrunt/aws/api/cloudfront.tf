@@ -11,6 +11,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
+      origin_read_timeout    = 60
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
