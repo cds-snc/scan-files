@@ -48,8 +48,8 @@ data "aws_iam_policy_document" "assume_cross_account" {
       "arn:aws:iam::*:role/ScanFilesGetObjects"
     ]
     condition {
-      test     = "StringEquals"
-      values   = [var.aws_org_id]
+      test     = "ForAnyValue:StringEquals"
+      values   = [var.aws_org_id, var.aws_org_id_old]
       variable = "aws:PrincipalOrgID"
     }
   }
@@ -61,4 +61,12 @@ resource "aws_lambda_permission" "s3_scan_object_org_account_execute" {
   function_name    = module.s3_scan_object.function_name
   principal        = "*"
   principal_org_id = var.aws_org_id
+}
+
+resource "aws_lambda_permission" "s3_scan_object_old_org_account_execute" {
+  statement_id     = "AllowExecutionFromOldOrgAccounts"
+  action           = "lambda:InvokeFunction"
+  function_name    = module.s3_scan_object.function_name
+  principal        = "*"
+  principal_org_id = var.aws_org_id_old
 }

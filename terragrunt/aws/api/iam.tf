@@ -152,8 +152,8 @@ data "aws_iam_policy_document" "api_assume_cross_account" {
       "arn:aws:iam::*:role/ScanFilesGetObjects"
     ]
     condition {
-      test     = "StringEquals"
-      values   = [var.aws_org_id]
+      test     = "ForAnyValue:StringEquals"
+      values   = [var.aws_org_id, var.aws_org_id_old]
       variable = "aws:PrincipalOrgID"
     }
   }
