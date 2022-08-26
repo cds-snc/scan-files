@@ -8,7 +8,14 @@ if os.environ.get("CI"):
 else:
     connection_string = os.environ.get("SQLALCHEMY_DATABASE_URI")
 # Timeout is set to 10 seconds
-db_engine = create_engine(connection_string, connect_args={"connect_timeout": 10})
+db_engine = create_engine(
+    connection_string,
+    connect_args={"connect_timeout": 10},
+    pool_size=1,
+    pool_pre_ping=True,  # Check that a connection is still active before attempting to use
+    pool_recycle=1500,  # Prune connections older than 25 minutes (RDS Proxy has a timeout of 30 minutes)
+    pool_use_lifo=True,  # Re-use last connection used (allows server-side timeouts to remove unused connections)
+)
 db_session = sessionmaker(bind=db_engine)
 
 
