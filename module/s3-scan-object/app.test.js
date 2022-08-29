@@ -1,5 +1,7 @@
 "use strict";
 
+require("aws-sdk-client-mock-jest");
+
 const axios = require("axios");
 const { mockClient } = require("aws-sdk-client-mock");
 const { S3Client, PutObjectTaggingCommand } = require("@aws-sdk/client-s3");
