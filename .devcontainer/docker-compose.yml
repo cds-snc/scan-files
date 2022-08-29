@@ -38,6 +38,7 @@ services:
       context: ../api/
     volumes:
       - ../api:/function
+      - ../api/clamav_defs:/tmp/clamav
     environment:
       <<: [*db-connection-strings, *api_envs]
     ports:
