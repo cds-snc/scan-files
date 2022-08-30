@@ -3,7 +3,9 @@ name: Integration test production
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Deploy Lambda Docker images to production"]
+    workflows:
+      - "Deploy Lambda Docker images to production"
+      - "Terraform apply production"
     types:
       - completed
 

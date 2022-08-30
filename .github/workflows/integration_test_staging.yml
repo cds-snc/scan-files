@@ -3,7 +3,9 @@ name: Integration test staging
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Build, Push and Deploy to Staging"]
+    workflows:
+      - "Build, Push and Deploy to Staging"
+      - "Terraform apply staging"
     types:
       - completed
 
