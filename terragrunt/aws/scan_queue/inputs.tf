@@ -3,11 +3,6 @@ variable "concurrent_scan_limit" {
   type        = number
 }
 
-variable "retry_interval_seconds" {
-  description = "The number of seconds to wait before polling for results"
-  type        = number
-}
-
 variable "api_function_arn" {
   default = "ARN of the API function"
   type    = string

@@ -1,11 +1,9 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/python-3
 {
   "name": "Scan files",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspace",
-  // Set *default* container specific settings.json values on container create.
+
   "settings": {
     "python.pythonPath": "/usr/local/bin/python",
     "python.languageServer": "Pylance",
@@ -64,7 +62,7 @@
       "version": "2.7.12"
     }
   },
-  // Add the IDs of extensions you want installed when the container is created.
+
   "extensions": [
     "esbenp.prettier-vscode",
     "ms-python.python",
@@ -76,9 +74,7 @@
     "hashicorp.terraform",
     "GitHub.copilot"
   ],
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
-  // Use 'postCreateCommand' to run commands after the container is created.
+
   "postCreateCommand": "make install && make install-dev",
   "remoteUser": "vscode"
 }
