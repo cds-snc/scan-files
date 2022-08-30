@@ -159,6 +159,46 @@
                 "view": "table",
                 "title": "Errors: S3 scan object"
             }
+        },
+        {
+            "type": "explorer",
+            "x": 0,
+            "y": 26,
+            "width": 18,
+            "height": 12,
+            "properties": {
+                "metrics": [
+                    {
+                        "metricName": "CPUUtilization",
+                        "resourceType": "AWS::RDS::DBInstance",
+                        "stat": "Average"
+                    },
+                    {
+                        "metricName": "FreeableMemory",
+                        "resourceType": "AWS::RDS::DBInstance",
+                        "stat": "Average"
+                    }
+                ],
+                "labels": [
+                    {
+                        "key": "Name",
+                        "value": "scan-files-instance-0"
+                    }
+                ],
+                "widgetOptions": {
+                    "legend": {
+                        "position": "bottom"
+                    },
+                    "view": "timeSeries",
+                    "stacked": false,
+                    "rowsPerPage": 1,
+                    "widgetsPerRow": 2
+                },
+                "period": 300,
+                "splitBy": "",
+                "region": "ca-central-1",
+                "title": "Database"
+            }
         }
     ]
 }
