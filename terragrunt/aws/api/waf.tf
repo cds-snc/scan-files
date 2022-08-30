@@ -301,22 +301,22 @@ resource "aws_wafv2_regex_pattern_set" "body_exclusions" {
 resource "aws_wafv2_regex_pattern_set" "valid_uri_paths" {
   provider    = aws.us-east-1
   name        = "ValidURIPaths"
-  description = "Regex to match the API's valid URI paths"
+  description = "Regex to match the APIs valid URI paths"
   scope       = "CLOUDFRONT"
 
   # ops
   regular_expression {
-    regex_string = "^/(healthcheck|version|docs)$"
+    regex_string = "^/(healthcheck|version|docs|openapi.json)$"
   }
 
   # assemblyline
   regular_expression {
-    regex_string = "^/assemblyline(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$"
+    regex_string = "^/assemblyline(/[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12})?$"
   }
 
   # clamav
   regular_expression {
-    regex_string = "^/clamav(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|s3))?$"
+    regex_string = "^/clamav(/([\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}|s3))?$"
   }
 
   tags = {
