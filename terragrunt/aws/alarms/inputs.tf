@@ -1,3 +1,8 @@
+variable "api_cloudfront_distribution_id" {
+  description = "ID of the API CloudFront distribution"
+  type        = string
+}
+
 variable "route53_health_check_api_id" {
   description = "ID of the API's Route53 health check"
   type        = string

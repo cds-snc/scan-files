@@ -1,0 +1,164 @@
+{
+    "widgets": [
+        {
+            "height": 4,
+            "width": 6,
+            "y": 4,
+            "x": 18,
+            "type": "alarm",
+            "properties": {
+                "title": "Alarms",
+                "alarms": [
+                    "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ErrorLoggedAPI",
+                    "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ErrorLoggedS3ScanObject",
+                    "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ScanVerdictSuspicious"
+                ]
+            }
+        },
+        {
+            "height": 16,
+            "width": 18,
+            "y": 4,
+            "x": 0,
+            "type": "explorer",
+            "properties": {
+                "metrics": [
+                    {
+                        "metricName": "Invocations",
+                        "resourceType": "AWS::Lambda::Function",
+                        "stat": "Sum"
+                    },
+                    {
+                        "metricName": "Duration",
+                        "resourceType": "AWS::Lambda::Function",
+                        "stat": "Average"
+                    },
+                    {
+                        "metricName": "Errors",
+                        "resourceType": "AWS::Lambda::Function",
+                        "stat": "Sum"
+                    },
+                    {
+                        "metricName": "ConcurrentExecutions",
+                        "resourceType": "AWS::Lambda::Function",
+                        "stat": "Maximum"
+                    }
+                ],
+                "labels": [
+                    {
+                        "key": "FunctionName",
+                        "value": "scan-files-api"
+                    },
+                    {
+                        "key": "FunctionName",
+                        "value": "s3-scan-object"
+                    },
+                    {
+                        "key": "FunctionName",
+                        "value": "s3-scan-object-integration-test"
+                    }
+                ],
+                "widgetOptions": {
+                    "legend": {
+                        "position": "bottom"
+                    },
+                    "view": "timeSeries",
+                    "stacked": false,
+                    "rowsPerPage": 5,
+                    "widgetsPerRow": 2
+                },
+                "period": 300,
+                "splitBy": "",
+                "region": "ca-central-1",
+                "title": "Lambda"
+            }
+        },
+        {
+            "height": 4,
+            "width": 18,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "AWS/CloudFront", "Requests", "Region", "Global", "DistributionId", "${api_cloudfront_distribution_id}", { "region": "us-east-1" } ],
+                    [ ".", "4xxErrorRate", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "5xxErrorRate", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "TotalErrorRate", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "BytesUploaded", ".", ".", ".", ".", { "region": "us-east-1" } ],
+                    [ ".", "BytesDownloaded", ".", ".", ".", ".", { "region": "us-east-1" } ]
+                ],
+                "view": "singleValue",
+                "region": "ca-central-1",
+                "stacked": true,
+                "title": "Cloudfront",
+                "period": 300,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 6,
+            "width": 6,
+            "y": 8,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "AWS/WAFV2", "AllowedRequests", "WebACL", "api_waf", "Rule", "ALL", { "region": "us-east-1", "color": "#2ca02c" } ],
+                    [ ".", "BlockedRequests", ".", ".", ".", ".", { "region": "us-east-1", "color": "#d62728" } ]
+                ],
+                "sparkline": true,
+                "view": "timeSeries",
+                "region": "ca-central-1",
+                "stacked": true,
+                "title": "Firewall",
+                "period": 300,
+                "stat": "Sum"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 0,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "view": "singleValue",
+                "metrics": [
+                    [ "AWS/Route53", "HealthCheckPercentageHealthy", "HealthCheckId", "${health_check_id}", { "region": "us-east-1" } ]
+                ],
+                "region": "ca-central-1",
+                "stacked": false,
+                "title": "Route53"
+            }
+        },
+        {
+            "height": 6,
+            "width": 12,
+            "y": 20,
+            "x": 0,
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/aws/lambda/scan-files-api' | fields @timestamp, @message, @logStream\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20\n",
+                "region": "ca-central-1",
+                "stacked": false,
+                "view": "table",
+                "title": "Errors: API"
+            }
+        },
+        {
+            "height": 6,
+            "width": 12,
+            "y": 20,
+            "x": 12,
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/aws/lambda/s3-scan-object' | fields @timestamp, @message, @logStream\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20\n",
+                "region": "ca-central-1",
+                "stacked": false,
+                "view": "table",
+                "title": "Errors: S3 scan object"
+            }
+        }
+    ]
+}

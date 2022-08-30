@@ -1,3 +1,7 @@
+output "api_cloudfront_distribution_id" {
+  value = aws_cloudfront_distribution.scan_files_api.id
+}
+
 output "vpc_id" {
   value = module.vpc.vpc_id
 }
