@@ -15,6 +15,67 @@ resource "aws_wafv2_web_acl" "api_waf" {
   }
 
   rule {
+    name     = "NorthAmericaOnly"
+    priority = 1
+
+    action {
+      block {}
+    }
+
+    statement {
+      not_statement {
+        statement {
+          geo_match_statement {
+            country_codes = ["CA", "US"]
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "NorthAmericaOnly"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "APIInvalidPath"
+    priority = 5
+
+    action {
+      block {}
+    }
+
+    statement {
+      not_statement {
+        statement {
+          regex_pattern_set_reference_statement {
+            arn = aws_wafv2_regex_pattern_set.valid_uri_paths.arn
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 1
+              type     = "COMPRESS_WHITE_SPACE"
+            }
+            text_transformation {
+              priority = 2
+              type     = "LOWERCASE"
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "APIInvalidPaths"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
     name     = "AWSManagedRulesAmazonIpReputationList"
     priority = 10
 
@@ -37,7 +98,7 @@ resource "aws_wafv2_web_acl" "api_waf" {
   }
 
   rule {
-    name     = "api_rate_limit"
+    name     = "APIRateLimit"
     priority = 20
 
     action {
@@ -46,14 +107,14 @@ resource "aws_wafv2_web_acl" "api_waf" {
 
     statement {
       rate_based_statement {
-        limit              = 10000
+        limit              = 2000
         aggregate_key_type = "IP"
       }
     }
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name                = "api_rate_limit"
+      metric_name                = "APIRateLimit"
       sampled_requests_enabled   = true
     }
   }
@@ -214,8 +275,6 @@ resource "aws_wafv2_web_acl" "api_waf" {
     }
   }
 
-
-
   visibility_config {
     cloudwatch_metrics_enabled = true
     metric_name                = "api"
@@ -231,6 +290,33 @@ resource "aws_wafv2_regex_pattern_set" "body_exclusions" {
 
   regular_expression {
     regex_string = "^/(clamav|assemblyline)(/s3)?$"
+  }
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_wafv2_regex_pattern_set" "valid_uri_paths" {
+  provider    = aws.us-east-1
+  name        = "ValidURIPaths"
+  description = "Regex to match the API's valid URI paths"
+  scope       = "CLOUDFRONT"
+
+  # ops
+  regular_expression {
+    regex_string = "^/(healthcheck|version|docs)$"
+  }
+
+  # assemblyline
+  regular_expression {
+    regex_string = "^/assemblyline(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$"
+  }
+
+  # clamav
+  regular_expression {
+    regex_string = "^/clamav(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|s3))?$"
   }
 
   tags = {
