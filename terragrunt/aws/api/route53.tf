@@ -17,6 +17,7 @@ resource "aws_route53_health_check" "scan_files_A" {
   resource_path     = "/healthcheck"
   failure_threshold = "5"
   request_interval  = "30"
+  regions           = ["ca-central-1", "us-east-1", "us-west-1"]
 
   tags = {
     CostCentre = var.billing_code
