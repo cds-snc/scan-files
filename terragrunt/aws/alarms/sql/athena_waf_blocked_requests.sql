@@ -3,7 +3,7 @@ WITH data AS (
         date_format(from_unixtime(timestamp / 1000e0), '%Y-%m-%d') as time, header.value as host, action,
         terminatingruleid,
         httprequest.clientip, httprequest.country, httprequest.httpmethod, httprequest.uri
-    FROM `${database_name}.${table_name}`
+    FROM "${database_name}"."${table_name}"
     CROSS JOIN UNNEST(httprequest.headers) AS t(header)
     WHERE lower(header.name) = 'host'
     AND action = 'BLOCK'
