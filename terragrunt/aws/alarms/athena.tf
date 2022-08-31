@@ -11,15 +11,15 @@ resource "aws_athena_database" "logs" {
   }
 }
 
-resource "aws_athena_workgroup" "primary" {
-  name = "primary"
+resource "aws_athena_workgroup" "logs" {
+  name = "logs"
 
   configuration {
     enforce_workgroup_configuration    = true
     publish_cloudwatch_metrics_enabled = true
 
     result_configuration {
-      output_location = "s3://${module.athena_bucket.s3_bucket_id}"
+      output_location = "s3://${module.athena_bucket.s3_bucket_id}/logs/"
 
       encryption_configuration {
         encryption_option = "SSE_S3"
@@ -35,7 +35,7 @@ resource "aws_athena_workgroup" "primary" {
 
 resource "aws_athena_named_query" "waf_create_table" {
   name      = "WAF: create table"
-  workgroup = aws_athena_workgroup.primary.name
+  workgroup = aws_athena_workgroup.logs.name
   database  = aws_athena_database.logs.name
   query = templatefile("${path.module}/sql/athena_waf_create_table.sql",
     {
@@ -48,7 +48,7 @@ resource "aws_athena_named_query" "waf_create_table" {
 
 resource "aws_athena_named_query" "waf_blocked_requests" {
   name      = "WAF: blocked requests"
-  workgroup = aws_athena_workgroup.primary.name
+  workgroup = aws_athena_workgroup.logs.name
   database  = aws_athena_database.logs.name
   query = templatefile("${path.module}/sql/athena_waf_blocked_requests.sql",
     {
@@ -60,7 +60,7 @@ resource "aws_athena_named_query" "waf_blocked_requests" {
 
 resource "aws_athena_named_query" "waf_all_requests" {
   name      = "WAF: all requests"
-  workgroup = aws_athena_workgroup.primary.name
+  workgroup = aws_athena_workgroup.logs.name
   database  = aws_athena_database.logs.name
   query = templatefile("${path.module}/sql/athena_waf_all_requests.sql",
     {
