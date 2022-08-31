@@ -3,7 +3,7 @@
 # WAF ACL access logs
 #
 resource "aws_athena_database" "logs" {
-  name   = "${var.product_name}-${var.env}"
+  name   = "scan_files_logs"
   bucket = module.athena_bucket.s3_bucket_id
 
   encryption_configuration {
