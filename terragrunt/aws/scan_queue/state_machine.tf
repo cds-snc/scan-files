@@ -12,10 +12,10 @@ resource "aws_sfn_state_machine" "scan_queue" {
 data "template_file" "scan_queue" {
   template = file("${path.module}/state-machines/scan-queue.json")
   vars = {
-    worker_lambda          = var.api_function_name
-    table_semaphore        = aws_dynamodb_table.scan-locktable.name
-    lock_name              = "ScanSemaphore"
-    concurrent_scan_limit  = var.concurrent_scan_limit
+    worker_lambda         = var.api_function_name
+    table_semaphore       = aws_dynamodb_table.scan-locktable.name
+    lock_name             = "ScanSemaphore"
+    concurrent_scan_limit = var.concurrent_scan_limit
   }
 }
 
