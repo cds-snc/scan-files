@@ -1,5 +1,5 @@
 module "rds" {
-  source                  = "github.com/cds-snc/terraform-modules?ref=v0.0.35//rds"
+  source                  = "github.com/cds-snc/terraform-modules?ref=v3.0.14//rds"
   backup_retention_period = 7
   billing_tag_value       = var.billing_code
   database_name           = "scan_files"
@@ -10,5 +10,8 @@ module "rds" {
   username                = var.rds_username
   password                = var.rds_password
   vpc_id                  = module.vpc.vpc_id
-  engine_version          = "11.13"
+  engine_version          = "11.16"
+
+  upgrade_immediately         = true
+  allow_major_version_upgrade = true
 }
