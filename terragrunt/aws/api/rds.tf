@@ -12,6 +12,6 @@ module "rds" {
   vpc_id                  = module.vpc.vpc_id
   engine_version          = "11.16"
 
-  upgrade_immediately         = true  
+  upgrade_immediately         = true
   allow_major_version_upgrade = true
 }
