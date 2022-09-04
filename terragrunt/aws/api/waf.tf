@@ -19,7 +19,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 1
 
     action {
-      block {}
+      dynamic "block" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -44,7 +54,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 5
 
     action {
-      block {}
+      dynamic "block" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -80,7 +100,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 10
 
     override_action {
-      none {}
+      dynamic "none" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -102,7 +132,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 20
 
     action {
-      block {}
+      dynamic "block" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -124,7 +164,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 30
 
     override_action {
-      none {}
+      dynamic "none" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -180,7 +230,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 40
 
     override_action {
-      none {}
+      dynamic "none" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -236,7 +296,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 50
 
     override_action {
-      none {}
+      dynamic "none" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
@@ -258,7 +328,17 @@ resource "aws_wafv2_web_acl" "api_waf" {
     priority = 60
 
     override_action {
-      none {}
+      dynamic "none" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
     }
 
     statement {
