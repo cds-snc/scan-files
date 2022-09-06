@@ -1,6 +1,13 @@
 variable "api_auth_token" {
-  type      = string
-  sensitive = true
+  description = "The API auth token that must be added as a header to all requests to the API."
+  type        = string
+  sensitive   = true
+}
+
+variable "enable_waf" {
+  description = "Turn the the WAF on the API on or off.  This is only meant to be used during testing."
+  type        = bool
+  default     = true
 }
 
 variable "rds_password" {

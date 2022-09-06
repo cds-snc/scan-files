@@ -17,6 +17,7 @@ dependency "hosted_zone" {
 }
 
 inputs = {
+  enable_waf     = true
   rds_username   = "databaseuser"
   hosted_zone_id = dependency.hosted_zone.outputs.hosted_zone_id
   oidc_exists    = true
