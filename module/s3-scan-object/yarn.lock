@@ -29,9 +29,9 @@
     tslib "^1.11.1"
 
 "@aws-crypto/ie11-detection@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/ie11-detection/-/ie11-detection-2.0.0.tgz#bb6c2facf8f03457e949dcf0921477397ffa4c6e"
-  integrity sha512-pkVXf/dq6PITJ0jzYZ69VhL8VFOFoPZLZqtU/12SGnzYuJOOGNfF41q9GxdI1yqC8R13Rq3jOLKDFpUJFT5eTA==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@aws-crypto/ie11-detection/-/ie11-detection-2.0.2.tgz#9c39f4a5558196636031a933ec1b4792de959d6a"
+  integrity sha512-5XDMQY98gMAf/WRTic5G++jfmS/VLM0rwpiOpaainKi4L0nqWMSB1SzsrEG5rjFZGYN6ZAefO+/Yta2dFM0kMw==
   dependencies:
     tslib "^1.11.1"
 
@@ -71,27 +71,27 @@
     tslib "^1.11.1"
 
 "@aws-crypto/sha256-js@^2.0.0":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/sha256-js/-/sha256-js-2.0.1.tgz#79e1e6cf61f652ef2089c08d471c722ecf1626a9"
-  integrity sha512-mbHTBSPBvg6o/mN/c18Z/zifM05eJrapj5ggoOIeHIWckvkv5VgGi7r/wYpt+QAO2ySKXLNvH2d8L7bne4xrMQ==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@aws-crypto/sha256-js/-/sha256-js-2.0.2.tgz#c81e5d378b8a74ff1671b58632779986e50f4c99"
+  integrity sha512-iXLdKH19qPmIC73fVCrHWCSYjN/sxaAvZ3jNNyw6FclmHyjLKg0f69WlC9KTnyElxCR5MO9SKaG00VwlJwyAkQ==
   dependencies:
-    "@aws-crypto/util" "^2.0.1"
-    "@aws-sdk/types" "^3.1.0"
+    "@aws-crypto/util" "^2.0.2"
+    "@aws-sdk/types" "^3.110.0"
     tslib "^1.11.1"
 
 "@aws-crypto/supports-web-crypto@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/supports-web-crypto/-/supports-web-crypto-2.0.0.tgz#fd6cde30b88f77d5a4f57b2c37c560d918014f9e"
-  integrity sha512-Ge7WQ3E0OC7FHYprsZV3h0QIcpdyJLvIeg+uTuHqRYm8D6qCFJoiC+edSzSyFiHtZf+NOQDJ1q46qxjtzIY2nA==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@aws-crypto/supports-web-crypto/-/supports-web-crypto-2.0.2.tgz#9f02aafad8789cac9c0ab5faaebb1ab8aa841338"
+  integrity sha512-6mbSsLHwZ99CTOOswvCRP3C+VCWnzBf+1SnbWxzzJ9lR0mA0JnY2JEAhp8rqmTE0GPFy88rrM27ffgp62oErMQ==
   dependencies:
     tslib "^1.11.1"
 
-"@aws-crypto/util@^2.0.0", "@aws-crypto/util@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/util/-/util-2.0.1.tgz#976cf619cf85084ca85ec5eb947a6ac6b8b5c98c"
-  integrity sha512-JJmFFwvbm08lULw4Nm5QOLg8+lAQeC8aCXK5xrtxntYzYXCGfHwUJ4Is3770Q7HmICsXthGQ+ZsDL7C2uH3yBQ==
+"@aws-crypto/util@^2.0.0", "@aws-crypto/util@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@aws-crypto/util/-/util-2.0.2.tgz#adf5ff5dfbc7713082f897f1d01e551ce0edb9c0"
+  integrity sha512-Lgu5v/0e/BcrZ5m/IWqzPUf3UYFTy/PpeED+uc9SWUR1iZQL8XXbGQg10UfllwwBryO3hFF5dizK+78aoXC1eA==
   dependencies:
-    "@aws-sdk/types" "^3.1.0"
+    "@aws-sdk/types" "^3.110.0"
     "@aws-sdk/util-utf8-browser" "^3.0.0"
     tslib "^1.11.1"
 
@@ -748,7 +748,7 @@
     "@aws-sdk/types" "3.162.0"
     tslib "^2.3.1"
 
-"@aws-sdk/types@3.162.0", "@aws-sdk/types@^3.1.0":
+"@aws-sdk/types@3.162.0", "@aws-sdk/types@^3.1.0", "@aws-sdk/types@^3.110.0":
   version "3.162.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.162.0.tgz#e908ff1a5de6bd06d7d6b88a648b384592acf7e2"
   integrity sha512-NBmuwVujH8fURDMvBHkHrYu/JAfG6Js/Bu0mC4o2Kdo5mRa3fD/N9kK0dEAxU1Rxp4wY2E++V9j2ZCw1KBGrSg==
@@ -1659,9 +1659,9 @@
     pretty-format "^28.0.0"
 
 "@types/node@*":
-  version "18.7.15"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.15.tgz#20ae1ec80c57ee844b469f968a1cd511d4088b29"
-  integrity sha512-XnjpaI8Bgc3eBag2Aw4t2Uj/49lLBSStHWfqKvIuXD7FIrZyMLWp8KuAFHAqxMZYTF9l08N1ctUn9YNybZJVmQ==
+  version "18.7.16"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.16.tgz#0eb3cce1e37c79619943d2fd903919fc30850601"
+  integrity sha512-EQHhixfu+mkqHMZl1R2Ovuvn47PUw18azMJOTwSZr9/fhzHNGXAJ0ma0dayRVchprpCj0Kc1K1xKoWaATWF1qg==
 
 "@types/prettier@^2.1.5":
   version "2.7.0"
@@ -1938,9 +1938,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001370:
-  version "1.0.30001390"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001390.tgz#158a43011e7068ef7fc73590e9fd91a7cece5e7f"
-  integrity sha512-sS4CaUM+/+vqQUlCvCJ2WtDlV81aWtHhqeEVkLokVJJa3ViN4zDxAGfq9R8i1m90uGHxo99cy10Od+lvn3hf0g==
+  version "1.0.30001393"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001393.tgz#1aa161e24fe6af2e2ccda000fc2b94be0b0db356"
+  integrity sha512-N/od11RX+Gsk+1qY/jbPa0R6zJupEa0lxeBG598EbrtblxVCTJsQwbRBm6+V+rxpc5lHKdsXb9RY83cZIPLseA==
 
 chalk@^2.0.0:
   version "2.4.2"
@@ -2107,9 +2107,9 @@ doctrine@^3.0.0:
     esutils "^2.0.2"
 
 electron-to-chromium@^1.4.202:
-  version "1.4.243"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.243.tgz#9d5f1b10eafd6e434b687a88f1e7b0441dee168a"
-  integrity sha512-BgLD2gBX43OSXwlT01oYRRD5NIB4n3okTRxkzEAC6G0SZG4TTlyrWMjbOo0fajCwqwpRtMHXQNMjtRN6qpNtfw==
+  version "1.4.244"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.244.tgz#ae9b56ed4ae2107e3a860dad80ed662c936e369e"
+  integrity sha512-E21saXLt2eTDaTxgUtiJtBUqanF9A32wZasAwDZ8gvrqXoxrBrbwtDCx7c/PQTLp81wj4X0OLDeoGQg7eMo3+w==
 
 emittery@^0.10.2:
   version "0.10.2"
