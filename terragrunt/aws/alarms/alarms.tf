@@ -3,6 +3,7 @@ locals {
   error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
   error_namespace             = "ScanFiles"
   scan_verdict_suspicious     = "ScanVerdictSuspicious"
+  warning_logged_api          = "WarningLoggedAPI"
 }
 
 resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
@@ -40,6 +41,18 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
   }
 }
 
+resource "aws_cloudwatch_log_metric_filter" "scan_files_api_warning" {
+  name           = local.warning_logged_api
+  pattern        = "WARNING"
+  log_group_name = var.scan_files_api_log_group_name
+
+  metric_transformation {
+    name      = local.warning_logged_api
+    namespace = local.error_namespace
+    value     = "1"
+  }
+}
+
 resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   alarm_name          = local.error_logged_api
   alarm_description   = "Errors logged by the Scan Files API lambda function"
@@ -51,6 +64,23 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   evaluation_periods = "1"
   statistic          = "Sum"
   threshold          = var.scan_files_api_error_threshold
+  treat_missing_data = "notBreaching"
+
+  alarm_actions = [aws_sns_topic.cloudwatch_warning.arn]
+  ok_actions    = [aws_sns_topic.cloudwatch_warning.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "scan_files_api_warning" {
+  alarm_name          = local.warning_logged_api
+  alarm_description   = "Warnings logged by the Scan Files API lambda function"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+
+  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_warning.metric_transformation[0].name
+  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_warning.metric_transformation[0].namespace
+  period             = "60"
+  evaluation_periods = "1"
+  statistic          = "Sum"
+  threshold          = var.scan_files_api_warning_threshold
   treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.cloudwatch_warning.arn]

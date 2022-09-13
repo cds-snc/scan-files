@@ -331,7 +331,7 @@ def is_clamd_running():
                 s.send(b"PING")
                 data = s.recv(32)
             except (socket.timeout, socket.error) as e:
-                log.error("Failed to read from socket: %s\n" % e)
+                log.warning("Failed to read from socket: %s\n" % e)
                 return False
 
         log.info("Received %s in response to PING" % repr(data))
