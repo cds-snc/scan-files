@@ -36,6 +36,7 @@ inputs = {
 
   s3_scan_object_error_threshold                   = "1"
   scan_files_api_error_threshold                   = "1"
+  scan_files_api_warning_threshold                 = "5"
   scan_files_api_scan_verdict_suspicious_threshold = "1"
 }
 

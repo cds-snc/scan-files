@@ -28,6 +28,11 @@ variable "scan_files_api_error_threshold" {
   type        = string
 }
 
+variable "scan_files_api_warning_threshold" {
+  description = "CloudWatch alarm threshold for the Scan Files API lambda function WARNING logs"
+  type        = string
+}
+
 variable "scan_files_api_scan_verdict_suspicious_threshold" {
   description = "CloudWatch alarm threshold for the Scan Files API scan verdicts that are suspicious"
   type        = string
