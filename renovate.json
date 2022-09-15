@@ -6,6 +6,6 @@
   "prBodyNotes": [
     "### Review",
     "- [ ] Updates tested and work as expected",
-    "- [ ] If this is a test dependency, its version still matches the infrastructure version (e.g. Lambda runtime, database engine, etc.)"
+    "- [ ] If this update is AWS related, its version still matches the infrastructure version (e.g. Lambda runtime, database engine, etc.)"
   ]
 }
