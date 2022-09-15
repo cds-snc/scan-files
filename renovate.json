@@ -3,6 +3,6 @@
     "github>cds-snc/renovate-config"
   ],
   "prBodyNotes": [
-    "### Review<br>- [ ] Updates tested and work as expected<br>- [ ] If this update is AWS related, its version still matches the infrastructure version (e.g. Lambda runtime, database engine, etc.)"
+    "### Review \n- [ ] Updates tested and work as expected<br>- [ ] If this update is AWS related, its version still matches the infrastructure version (e.g. Lambda runtime, database engine, etc.)"
   ]
 }
