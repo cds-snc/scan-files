@@ -20,7 +20,7 @@ inputs = {
   enable_waf     = true
   rds_username   = "databaseuser"
   hosted_zone_id = dependency.hosted_zone.outputs.hosted_zone_id
-  oidc_exists    = false
+  oidc_exists    = true
 }
 
 include {
