@@ -14,10 +14,15 @@ module "api" {
   }
 
   environment_variables = {
-    SQLALCHEMY_DATABASE_URI   = module.rds.proxy_connection_string_value
-    FILE_QUEUE_BUCKET         = module.file-queue.s3_bucket_id
-    API_AUTH_TOKEN_SECRET_ARN = aws_secretsmanager_secret.api_auth_token.id
-    POWERTOOLS_SERVICE_NAME   = "${var.product_name}-api"
+    API_AUTH_TOKEN_SECRET_ARN    = aws_secretsmanager_secret.api_auth_token.id
+    AV_DEFINITION_S3_BUCKET      = "${var.product_name}-${var.env}-clamav-defs"
+    COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
+    FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
+    FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
+    OPENAPI_URL                  = "/openapi.json"
+    POWERTOOLS_SERVICE_NAME      = "${var.product_name}-api"
+    SCAN_QUEUE_STATEMACHINE_NAME = "assemblyline-file-scan-queue"
+    SQLALCHEMY_DATABASE_URI      = module.rds.proxy_connection_string_value
   }
 
   policies = [

@@ -4,6 +4,12 @@ variable "api_auth_token" {
   sensitive   = true
 }
 
+variable "api_secret_environment_variables" {
+  description = "The secret environment variables loaded by the API on cold start."
+  type        = string
+  sensitive   = true
+}
+
 variable "enable_waf" {
   description = "Turn the the WAF on the API on or off.  This is only meant to be used during testing."
   type        = bool
