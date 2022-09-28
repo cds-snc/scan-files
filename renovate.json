@@ -1,5 +1,6 @@
 {
   "extends": [
     "github>cds-snc/renovate-config"
-  ]
+  ],
+  "schedule": ["at any time"]
 }
