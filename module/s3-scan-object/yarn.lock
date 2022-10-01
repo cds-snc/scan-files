@@ -3427,10 +3427,10 @@ pino-abstract-transport@v1.0.0:
     readable-stream "^4.0.0"
     split2 "^4.0.0"
 
-pino-lambda@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/pino-lambda/-/pino-lambda-4.0.0.tgz#6d140afc7f94ddb5186446d66e9ba384500d28c2"
-  integrity sha512-R/OpX1m+2xGVgrsQmXYJxXtjx0gWYdURULAms+eKrYpj6sZw7O3t30L007Nb4DkPhwCDmttob3XNm5cWLEyV8w==
+pino-lambda@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/pino-lambda/-/pino-lambda-4.1.0.tgz#8d901897e6d09dc5505be6c8abbde402dba1ebcd"
+  integrity sha512-yA2aPttqH80l5O0DEOjC/lqfLiQAK7N1+OTtNFhseo/Z3v+WCEh1VOZFLbq7fOE+rDuE4CZmaK35Gf31P/Wq1A==
 
 pino-std-serializers@^6.0.0:
   version "6.0.0"

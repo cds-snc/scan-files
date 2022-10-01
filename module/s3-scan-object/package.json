@@ -15,7 +15,7 @@
     "@aws-sdk/client-sts": "^3.121.0",
     "axios": "^0.27.2",
     "pino": "8.6.0",
-    "pino-lambda": "^4.0.0"
+    "pino-lambda": "^4.1.0"
   },
   "devDependencies": {
     "aws-sdk-client-mock": "2.0.0",
