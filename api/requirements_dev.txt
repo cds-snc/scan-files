@@ -1,6 +1,6 @@
 bandit==1.7.4
 black==22.8.0
-coverage==5.5
+coverage==6.5.0
 factory-boy==3.2.1
 flake8==3.9.2
 locust==2.12.1
