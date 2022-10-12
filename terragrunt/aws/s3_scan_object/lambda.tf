@@ -10,7 +10,7 @@ module "s3_scan_object" {
   reserved_concurrent_executions = 3
 
   environment_variables = {
-    LOGGING_LEVEL                 = "warning"
+    LOGGING_LEVEL                 = "warn"
     SCAN_FILES_URL                = "https://${var.domain}"
     SCAN_FILES_API_KEY_SECRET_ARN = var.scan_files_api_key_secret_arn
     SNS_SCAN_COMPLETE_TOPIC_ARN   = aws_sns_topic.scan_complete.arn
