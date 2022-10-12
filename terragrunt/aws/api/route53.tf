@@ -24,3 +24,44 @@ resource "aws_route53_health_check" "scan_files_A" {
     Terraform  = true
   }
 }
+
+#
+# Route53 DNS logging
+#
+resource "aws_cloudwatch_log_group" "route53_vpc_dns" {
+  name              = "/aws/route53/${module.vpc.vpc_id}"
+  retention_in_days = 14
+}
+
+data "aws_iam_policy_document" "route53_resolver_logging_policy" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    principals {
+      identifiers = ["route53.amazonaws.com"]
+      type        = "Service"
+    }
+
+    resources = [
+      "${aws_cloudwatch_log_group.route53_vpc_dns.arn}/*"
+    ]
+  }
+}
+
+resource "aws_cloudwatch_log_resource_policy" "route53_vpc_dns" {
+  policy_document = data.aws_iam_policy_document.route53_resolver_logging_policy.json
+  policy_name     = "route53_resolver_logging_policy"
+}
+
+resource "aws_route53_resolver_query_log_config" "route53_vpc_dns" {
+  name            = "route53_vpc_dns"
+  destination_arn = aws_cloudwatch_log_group.route53_vpc_dns.arn
+}
+
+resource "aws_route53_resolver_query_log_config_association" "route53_vpc_dns" {
+  resolver_query_log_config_id = aws_route53_resolver_query_log_config.route53_vpc_dns.id
+  resource_id                  = module.vpc.vpc_id
+}
