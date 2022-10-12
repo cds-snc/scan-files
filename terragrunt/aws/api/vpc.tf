@@ -1,5 +1,5 @@
 module "vpc" {
-  source            = "github.com/cds-snc/terraform-modules?ref=v0.0.46//vpc"
+  source            = "github.com/cds-snc/terraform-modules?ref=v3.0.19//vpc"
   name              = var.product_name
   billing_tag_value = var.billing_code
   high_availability = true
@@ -13,7 +13,52 @@ module "vpc" {
   allow_https_request_in_response  = true
 }
 
+#
+# VPC private endpoints
+#
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = module.vpc.vpc_id
+  vpc_endpoint_type   = "Interface"
+  service_name        = "com.amazonaws.${var.region}.ecr.dkr"
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.vpc_endpoint.id,
+  ]
+  subnet_ids = module.vpc.private_subnet_ids
+}
 
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = module.vpc.vpc_id
+  vpc_endpoint_type   = "Interface"
+  service_name        = "com.amazonaws.${var.region}.ecr.api"
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.vpc_endpoint.id,
+  ]
+  subnet_ids = module.vpc.private_subnet_ids
+}
+
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = module.vpc.vpc_id
+  vpc_endpoint_type   = "Interface"
+  service_name        = "com.amazonaws.${var.region}.logs"
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.vpc_endpoint.id,
+  ]
+  subnet_ids = module.vpc.private_subnet_ids
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = module.vpc.vpc_id
+  vpc_endpoint_type = "Gateway"
+  service_name      = "com.amazonaws.${var.region}.s3"
+  route_table_ids   = [module.vpc.main_route_table_id]
+}
+
+#
+# Security groups
+#
 resource "aws_security_group" "api" {
   # checkov:skip=CKV2_AWS_5: False-positive, SG is attached in lambda.tf
 
@@ -35,6 +80,40 @@ resource "aws_security_group" "api" {
     protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group" "vpc_endpoint" {
+  name        = "vpc_endpoints"
+  description = "PrivateLink VPC endpoints"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name       = "${var.product_name}_api_sg"
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_security_group_rule" "ecr_private_endpoint_ingress" {
+  description              = "Ingress from the API security group"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.vpc_endpoint.id
+  source_security_group_id = aws_security_group.api.id
+}
+
+resource "aws_security_group_rule" "s3_private_endpoint_ingress" {
+  description       = "Ingress from the private S3 endpoint"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.vpc_endpoint.id
+  prefix_list_ids = [
+    aws_vpc_endpoint.s3.prefix_list_id
+  ]
 }
 
 resource "aws_flow_log" "cloud_based_sensor" {
