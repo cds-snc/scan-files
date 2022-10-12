@@ -49,6 +49,28 @@ resource "aws_vpc_endpoint" "logs" {
   subnet_ids = module.vpc.private_subnet_ids
 }
 
+resource "aws_vpc_endpoint" "sns" {
+  vpc_id              = module.vpc.vpc_id
+  vpc_endpoint_type   = "Interface"
+  service_name        = "com.amazonaws.${var.region}.sns"
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.vpc_endpoint.id,
+  ]
+  subnet_ids = module.vpc.private_subnet_ids
+}
+
+resource "aws_vpc_endpoint" "sts" {
+  vpc_id              = module.vpc.vpc_id
+  vpc_endpoint_type   = "Interface"
+  service_name        = "com.amazonaws.${var.region}.sts"
+  private_dns_enabled = true
+  security_group_ids = [
+    aws_security_group.vpc_endpoint.id,
+  ]
+  subnet_ids = module.vpc.private_subnet_ids
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = module.vpc.vpc_id
   vpc_endpoint_type = "Gateway"
