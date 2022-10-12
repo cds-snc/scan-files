@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
 
       - name: Check for changes
-        uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # tag=v2.10.2
+        uses: dorny/paths-filter@737cb1986a0ab3e9b76e4306075223d1a2b2467b # tag=v2.11.0
         id: filter
         with:
           filters: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Setup python
         if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'module/s3-scan-object' }}
-        uses: actions/setup-python@b55428b1882923874294fa556849718a1d7f2ca5 # tag=v4.2.0
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
         with:
           python-version: "3.9"
 
