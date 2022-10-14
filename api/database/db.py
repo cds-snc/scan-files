@@ -13,7 +13,7 @@ db_engine = create_engine(
     connection_string,
     connect_args={"connect_timeout": 10},
     poolclass=StaticPool,
-    pool_recycle=1500,
+    pool_recycle=300,
 )
 db_session = sessionmaker(bind=db_engine)
 
