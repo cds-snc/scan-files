@@ -95,7 +95,7 @@ jobs:
           migrate
 
       - name: API healthcheck
-        uses: jtalk/url-health-check-action@d6ec9590f0f1bd173fa43aeac8b75c2270e9069d # renovate: tag=v2
+        uses: jtalk/url-health-check-action@61a0e49fff5cde3773b0bbe069d4ebbd04d24f07 # tag=v2
         with:
           url: https://scan-files.cdssandbox.xyz/version
           max-attempts: 3
