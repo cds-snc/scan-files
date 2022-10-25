@@ -7,6 +7,8 @@ module "vpc" {
   block_ssh         = true
   block_rdp         = true
 
+  single_nat_gateway = var.env != "production"
+
   allow_https_request_out          = true
   allow_https_request_out_response = true
   allow_https_request_in           = true
