@@ -29,6 +29,7 @@ jobs:
       with:
         languages: ${{ matrix.langauge }}
         setup-python-dependencies: false
+        queries: security,security-extended,security-and-quality
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
