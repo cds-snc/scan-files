@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['python']
+        language: ['python', 'javascript']
       
     steps:
     - name: Checkout repository
@@ -26,6 +26,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.langauge }}
+        setup-python-dependencies: false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
