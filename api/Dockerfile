@@ -1,7 +1,7 @@
 # Define function directory
 ARG FUNCTION_DIR="/function"
 
-FROM python:3.9-slim-buster@sha256:f67facc70967f80bd81c3310106865a8dae20cc1bdbd18f01680709648f69d9f
+FROM python:3.9-slim-buster@sha256:9e014f31a02bac75509aca42cc29921c52b9f54b98511188c66814f10208c905
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends ca-certificates curl git gstreamer1.0-libav libnss3-tools libatk-bridge2.0-0 libcups2-dev libxkbcommon-x11-0 libxcomposite-dev libxrandr2 libgbm-dev libgtk-3-0 libxshmfence-dev gnupg2 postgresql-client openssh-client python3-pip vim wget xz-utils zsh entr unzip clamav clamav-daemon clamdscan \
