@@ -73,6 +73,11 @@ jobs:
       - name: Logout of Amazon ECR
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
 
+      - name: Docker vulnerability scan
+        uses: ./.github/actions/docker-scan
+        with:
+          docker-image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
+
       - name: Generate ${{ matrix.image }}/docker SBOM
         uses: cds-snc/security-tools/.github/actions/generate-sbom@4c6b386722985552f3f008d04279a3f01402cc35 # tag=v1
         with:

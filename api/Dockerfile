@@ -9,7 +9,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR
-
 WORKDIR ${FUNCTION_DIR}
 
 RUN mkdir -p /pymodules
