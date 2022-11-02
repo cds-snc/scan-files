@@ -1,17 +1,17 @@
-name: Docker vulnerability scan
-description: Runs a vulnerability scan on the provided Docker image using Trivy and uploads the results to GitHub Security
+name: Docker dependency scan
+description: Generates an SBOM for Docker images and uploads it to the GitHub dependency submission API
 inputs:
   docker-image:
     description: Docker image to scan
     required: true
   github-pat:
-    description: "Personal access token used to upload the SBOM"
+    description: Personal access token used to upload the SBOM
     required: true    
 
 runs:
   using: "composite"
   steps:
-    - name: Docker vulnerability scan
+    - name: Docker dependency scan
       uses: aquasecurity/trivy-action@d63413b0a4a4482237085319f7f4a1ce99a8f2ac # tag=v0.7.1
       with:
         image-ref: ${{ inputs.docker-image }}

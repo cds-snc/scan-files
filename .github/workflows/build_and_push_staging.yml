@@ -101,7 +101,7 @@ jobs:
           max-attempts: 3
           retry-delay: 5s
 
-      - name: Docker vulnerability scan
+      - name: Docker dependency scan
         uses: ./.github/actions/docker-scan
         with:
           docker-image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA

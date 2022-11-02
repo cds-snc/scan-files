@@ -73,7 +73,7 @@ jobs:
       - name: Logout of Amazon ECR
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
 
-      - name: Docker vulnerability scan
+      - name: Docker dependency scan
         uses: ./.github/actions/docker-scan
         with:
           docker-image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA

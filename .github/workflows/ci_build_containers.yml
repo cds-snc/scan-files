@@ -42,7 +42,7 @@ jobs:
           --build-arg git_sha=${{ github.sha }} \
           -t ${{ matrix.image }}:latest .
 
-      - name: Docker vulnerability scan
+      - name: Docker dependency scan
         uses: ./.github/actions/docker-scan
         with:
           docker-image: ${{ matrix.image }}:latest
