@@ -104,7 +104,7 @@ jobs:
       - name: Docker dependency scan
         uses: ./.github/actions/docker-scan
         with:
-          docker-image: $REGISTRY/${{ matrix.image }}:$GITHUB_SHA
+          docker-image: ${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.GITHUB_SHA }}
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate ${{ matrix.image }}/docker SBOM
