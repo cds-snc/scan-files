@@ -16,6 +16,7 @@ permissions:
   actions: write
   checks: write
   statuses: write
+  security-events: write
 
 jobs:
   changes:
