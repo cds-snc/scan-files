@@ -4,6 +4,9 @@ inputs:
   docker-image:
     description: Docker image to scan
     required: true
+  github-pat:
+    description: "Personal access token used to upload the SBOM"
+    required: true    
 
 runs:
   using: "composite"
@@ -14,4 +17,4 @@ runs:
         image-ref: ${{ inputs.docker-image }}
         format: 'github'
         output: 'dependency-results.sbom.json'
-        github-pat: ${{ secrets.GITHUB_TOKEN }}
+        github-pat: ${{ inputs.github-pat }}
