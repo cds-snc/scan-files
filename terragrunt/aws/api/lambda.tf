@@ -97,7 +97,7 @@ resource "aws_lambda_function_url" "scan_files_url" {
   cors {
     allow_credentials = true
     allow_origins     = ["https://${var.domain}"]
-    allow_methods     = ["GET", "POST", "OPTIONS"]
+    allow_methods     = ["GET", "POST", "HEAD"]
     max_age           = 86400
   }
 }
