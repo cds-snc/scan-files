@@ -474,8 +474,10 @@ resource "aws_wafv2_web_acl_logging_configuration" "api_waf" {
 # Azure US East CIDR blocks that are being identified as being in Germany
 # These should be allowed.
 resource "aws_wafv2_ip_set" "ip_allowlist" {
+  provider = aws.us-east-1
+
   name               = "ip_allowlist"
-  scope              = "REGIONAL"
+  scope              = "CLOUDFRONT"
   ip_address_version = "IPV4"
   addresses = [
     "172.172.0.0/15",
