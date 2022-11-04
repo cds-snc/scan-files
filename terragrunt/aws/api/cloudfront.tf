@@ -88,7 +88,7 @@ resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" 
     access_control_allow_credentials = true
 
     access_control_allow_headers {
-      items = ["*"]
+      items = ["Authorization", "Content-Type"]
     }
 
     access_control_allow_methods {
