@@ -93,11 +93,4 @@ resource "aws_lambda_function_url" "scan_files_url" {
   # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
   function_name      = module.api.function_name
   authorization_type = "NONE"
-
-  cors {
-    allow_credentials = true
-    allow_origins     = ["https://${var.domain}"]
-    allow_methods     = ["GET", "POST", "HEAD"]
-    max_age           = 86400
-  }
 }
