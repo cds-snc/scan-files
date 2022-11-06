@@ -83,23 +83,6 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
 resource "aws_cloudfront_response_headers_policy" "security_headers_policy_api" {
   name = "scan-files-security-headers-api"
 
-  cors_config {
-    origin_override                  = true
-    access_control_allow_credentials = true
-
-    access_control_allow_headers {
-      items = ["Authorization", "Content-Type"]
-    }
-
-    access_control_allow_methods {
-      items = ["GET", "POST", "HEAD", "OPTIONS"]
-    }
-
-    access_control_allow_origins {
-      items = ["https://${var.domain}"]
-    }
-  }
-
   security_headers_config {
     frame_options {
       frame_option = "DENY"
