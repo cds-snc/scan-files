@@ -45,7 +45,7 @@ services:
       - "8082:8080"
 
   db:
-    image: postgres:14.5@sha256:135c62a8134dcef829a1e4f5568bfae44bcfa2c75659ff948f43c71964366aa4
+    image: postgres:14.6@sha256:9b7088219492a24fd13210bdefcbe6843acc958db1055b29bf9fb5a82cd1a383
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
     restart: unless-stopped
@@ -64,7 +64,7 @@ services:
       - "5434:5432"
   
   test-db:
-    image: postgres:14.5@sha256:135c62a8134dcef829a1e4f5568bfae44bcfa2c75659ff948f43c71964366aa4
+    image: postgres:14.6@sha256:9b7088219492a24fd13210bdefcbe6843acc958db1055b29bf9fb5a82cd1a383
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
     restart: unless-stopped
