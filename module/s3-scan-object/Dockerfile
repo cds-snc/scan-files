@@ -4,6 +4,7 @@ ARG BASE_IMAGE=node:14.21.1-alpine3.16@sha256:12b14bdfa8c89a1a060c53b57141570857
 FROM ${BASE_IMAGE} as builder
 
 ARG APP_DIR="/app"
+
 WORKDIR ${APP_DIR}
 
 RUN apk add --no-cache \
