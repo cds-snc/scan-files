@@ -130,6 +130,6 @@ resource "aws_route53_resolver_firewall_rule" "blocked" {
 resource "aws_route53_resolver_firewall_rule_group_association" "api_rules" {
   name                   = "ApiRules"
   firewall_rule_group_id = aws_route53_resolver_firewall_rule_group.api_rules.id
-  priority               = 100
+  priority               = 101
   vpc_id                 = module.vpc.vpc_id
 }
