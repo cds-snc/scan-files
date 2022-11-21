@@ -65,3 +65,71 @@ resource "aws_route53_resolver_query_log_config_association" "route53_vpc_dns" {
   resolver_query_log_config_id = aws_route53_resolver_query_log_config.route53_vpc_dns.id
   resource_id                  = module.vpc.vpc_id
 }
+
+#
+# Resolve DNS firewall to only allow DNS queries to the `allowed` domains
+# and block all other queries
+#
+resource "aws_route53_resolver_firewall_domain_list" "allowed" {
+  name = "AllowedDomains"
+  domains = [
+    "*.cyber.gc.ca",
+    "*.${var.region}.rds.amazonaws.com",
+    "*.s3.${var.region}.amazonaws.com",
+    "current.cvd.clamav.net",
+    "database.clamav.net",
+    "lambda.${var.region}.amazonaws.com",
+    "secretsmanager.${var.region}.amazonaws.com",
+    "sns.${var.region}.amazonaws.com",
+    "ssm.${var.region}.amazonaws.com",
+    "sts.amazonaws.com"
+  ]
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_route53_resolver_firewall_domain_list" "blocked" {
+  name    = "BlockedDomains"
+  domains = ["*"]
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_route53_resolver_firewall_rule_group" "api_rules" {
+  name = "ApiRules"
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
+resource "aws_route53_resolver_firewall_rule" "allowed" {
+  name                    = "AllowedDomains"
+  action                  = "ALLOW"
+  firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.allowed.id
+  firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.api_rules.id
+  priority                = 100
+}
+
+resource "aws_route53_resolver_firewall_rule" "blocked" {
+  name                    = "BlockedDomains"
+  action                  = "BLOCK"
+  block_response          = "NODATA"
+  firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.blocked.id
+  firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.api_rules.id
+  priority                = 200
+}
+
+resource "aws_route53_resolver_firewall_rule_group_association" "api_rules" {
+  name                   = "ApiRules"
+  firewall_rule_group_id = aws_route53_resolver_firewall_rule_group.api_rules.id
+  priority               = 100
+  vpc_id                 = module.vpc.vpc_id
+}
