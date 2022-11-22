@@ -73,16 +73,10 @@ resource "aws_route53_resolver_query_log_config_association" "route53_vpc_dns" {
 resource "aws_route53_resolver_firewall_domain_list" "allowed" {
   name = "AllowedDomains"
   domains = [
+    "*.amazonaws.com.",
     "*.cyber.gc.ca.",
-    "*.${var.region}.rds.amazonaws.com.",
-    "*.s3.${var.region}.amazonaws.com.",
     "current.cvd.clamav.net.",
-    "database.clamav.net.",
-    "lambda.${var.region}.amazonaws.com.",
-    "secretsmanager.${var.region}.amazonaws.com.",
-    "sns.${var.region}.amazonaws.com.",
-    "ssm.${var.region}.amazonaws.com.",
-    "sts.amazonaws.com."
+    "database.clamav.net."
   ]
 
   tags = {
