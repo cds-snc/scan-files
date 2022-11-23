@@ -38,6 +38,19 @@ variable "scan_files_api_scan_verdict_suspicious_threshold" {
   type        = string
 }
 
+variable "sentinel_customer_id" {
+  type        = string
+  sensitive   = true
+  description = "Sentinel customer ID"
+}
+
+variable "sentinel_shared_key" {
+  type        = string
+  sensitive   = true
+  description = "Sentinel customer ID"
+}
+
+
 variable "slack_webhook_url" {
   description = "Slack webhook URL that will be used to send notifications"
   type        = string
