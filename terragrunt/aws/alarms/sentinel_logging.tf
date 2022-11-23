@@ -1,3 +1,7 @@
+locals {
+  scan_verdict_suspicious_arn = "arn:aws:logs:${var.region}:${var.account_id}:log-group:${var.scan_files_api_log_group_name}"
+}
+
 module "sentinel_forwarder" {
   source            = "github.com/cds-snc/terraform-modules?ref=v4.0.2//sentinel_forwarder"
   function_name     = "sentinel-cloud-watch-forwarder"
@@ -6,7 +10,7 @@ module "sentinel_forwarder" {
   customer_id = var.sentinel_customer_id
   shared_key  = var.sentinel_shared_key
 
-  cloudwatch_log_arns = [var.scan_files_api_log_group_name]
+  cloudwatch_log_arns = [locals.scan_verdict_suspicious_arn]
 }
 
 
