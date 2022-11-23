@@ -14,6 +14,6 @@ resource "aws_cloudwatch_log_subscription_filter" "scan_verdict_suspicious" {
   name            = local.scan_verdict_suspicious
   log_group_name  = var.scan_files_api_log_group_name
   filter_pattern  = "?suspicious ?malicious ?unknown ?unable_to_scan"
-  destination_arn = module.forwarder.lambda_arn
+  destination_arn = module.sentinel_forwarder.lambda_arn
   distribution    = "Random"
 }
