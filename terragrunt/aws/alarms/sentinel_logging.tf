@@ -10,7 +10,7 @@ module "sentinel_forwarder" {
   customer_id = var.sentinel_customer_id
   shared_key  = var.sentinel_shared_key
 
-  cloudwatch_log_arns = [locals.scan_verdict_suspicious_arn]
+  cloudwatch_log_arns = [local.scan_verdict_suspicious_arn]
 }
 
 
