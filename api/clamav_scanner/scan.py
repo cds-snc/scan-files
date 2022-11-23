@@ -98,7 +98,11 @@ def launch_scan(
         scan.verdict = scan_result
         scan.checksum = checksum
         scan.meta_data = {AV_SIGNATURE_METADATA: scan_signature}
-        log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
+
+        if scan_result == ScanVerdicts.CLEAN.value:
+            log.info("Scan of %s resulted in %s\n" % (file_path, scan_result))
+        else:
+            log.warning("Scan of %s resulted in %s\n" % (file_path, scan_result))
     except Exception as err:
         log.error("Scan %s failed. Reason %s" % (str(scan.id), str(err)))
         scan.completed = datetime.datetime.utcnow()

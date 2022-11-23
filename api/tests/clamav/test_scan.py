@@ -5,15 +5,13 @@ from factories import ScanFactory
 from models.Scan import ScanVerdicts
 
 
+@patch("clamav_scanner.scan.log")
 @patch("clamav_scanner.scan.sns_scan_results")
 @patch("clamav_scanner.scan.scan_file")
-@patch("clamav_scanner.scan.get_session")
-@patch("clamav_scanner.scan.get_db_session")
 def test_clamav_scan(
-    mock_db_session,
-    mock_aws_session,
     mock_scan_file,
     mock_sns_scan_results,
+    mock_log,
     session,
 ):
     scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
@@ -31,8 +29,37 @@ def test_clamav_scan(
     )
 
     assert scan_verdict == ScanVerdicts.CLEAN.value
-    assert scan.verdict == ScanVerdicts.CLEAN.value
     assert mock_sns_scan_results.called is False
+    assert mock_log.info.called is True
+    assert mock_log.warning.called is False
+
+
+@patch("clamav_scanner.scan.log")
+@patch("clamav_scanner.scan.sns_scan_results")
+@patch("clamav_scanner.scan.scan_file")
+def test_clamav_scan_malicious(
+    mock_scan_file,
+    mock_sns_scan_results,
+    mock_log,
+    session,
+):
+    scan = ScanFactory(verdict=ScanVerdicts.IN_PROGRESS.value, meta_data={"sid": "123"})
+    session.commit()
+    mock_scan_file.return_value = (
+        "123",
+        ScanVerdicts.MALICIOUS.value,
+        AV_SIGNATURE_OK,
+        "/foo/bar/file.txt",
+    )
+    scan_verdict = launch_scan(
+        "/tmp/foo",  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+        scan.id,
+        session=session,
+    )
+
+    assert scan_verdict == ScanVerdicts.MALICIOUS.value
+    assert mock_sns_scan_results.called is False
+    mock_log.warning.assert_called_once_with("Scan of /tmp/foo resulted in malicious\n")
 
 
 @patch("clamav_scanner.scan.get_session")
