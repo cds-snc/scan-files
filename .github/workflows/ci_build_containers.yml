@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: write
+  checks: write
+  security-events: write
+
 
 jobs:
   changes:
@@ -46,13 +49,14 @@ jobs:
           -t ${{ matrix.image }}:latest .
 
       - name: Docker dependency scan
-        uses: ./.github/actions/docker-scan
+        uses: cds-snc/security-tools/.github/actions/docker-scan@00801dc7049671a1a9bfa25a11ef2c2709ca78ed
         with:
-          docker-image: ${{ matrix.image }}:latest
-          github-pat: ${{ secrets.GITHUB_TOKEN }}
+          docker_image: ${{ matrix.image }}:latest
+          sbom_name: ${{ matrix.image }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@e8bfe289161e1a923f8bb153c57280abfa33eb22 # v1
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@00801dc7049671a1a9bfa25a11ef2c2709ca78ed # v1
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           docker_image: ${{ matrix.image }}:latest
