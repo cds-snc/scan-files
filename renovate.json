@@ -1,5 +1,24 @@
 {
   "extends": [
     "github>cds-snc/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Group all GitHub action dependencies",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "separateMajorMinor": false,
+      "groupName": "all github action dependencies",
+      "groupSlug": "all-github-action"
+    },
+    {
+      "description": "Group all Docker image updates that are not major",
+      "matchDatasources": [
+        "docker"
+      ],
+      "groupName": "all docker images",
+      "groupSlug": "all-docker-images"
+    }
   ]
 }
