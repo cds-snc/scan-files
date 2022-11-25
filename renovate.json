@@ -17,6 +17,14 @@
       "matchDatasources": [
         "docker"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "bump"
+      ],
       "groupName": "all docker images",
       "groupSlug": "all-docker-images"
     }
