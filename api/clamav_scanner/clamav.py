@@ -120,7 +120,6 @@ def update_defs_from_freshclam(path, library_path=""):
         [
             FRESHCLAM_PATH,
             "--config-file=%s/freshclam.conf" % CLAMAVLIB_PATH,
-            "-u %s" % pwd.getpwuid(os.getuid())[0],
             "--datadir=%s" % path,
         ],
         stderr=subprocess.STDOUT,
