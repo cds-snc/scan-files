@@ -34,7 +34,7 @@ load_non_existing_envs() {
 
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
     echo "Running aws-lambda-rie"
-    exec find . -name "*.py" | entr -r -n /usr/bin/aws-lambda-rie /usr/local/bin/python -m awslambdaric "$1"
+    exec /usr/bin/aws-lambda-rie /usr/local/bin/python -m awslambdaric "$1"
 else
     if [ ! -f "$ENV_PATH/.env" ]; then # Only setup envs once per lambda lifecycle
       echo "Retrieving environment parameters"

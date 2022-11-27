@@ -43,11 +43,11 @@ RUN apk upgrade --no-cache \
     clamav \
     clamav-daemon \
     clamav-clamdscan \
-    entr \
-    freshclam
+    freshclam \
+    libstdc++
 
 COPY bin/entry.sh /
-RUN chmod 555 /usr/bin/aws-lambda-rie /entry.sh
+RUN chmod 500 /usr/bin/aws-lambda-rie /entry.sh
 
 # Setup ClamAV config
 COPY conf /etc/clamav
@@ -59,5 +59,4 @@ RUN mkdir -p /tmp/clamav/quarantine \
 WORKDIR ${FUNCTION_DIR}
 COPY . ${FUNCTION_DIR}
 
-ENTRYPOINT [ "/entry.sh" ]
-CMD [ "main.handler" ]
+ENTRYPOINT [ "/entry.sh", "main.handler" ]
