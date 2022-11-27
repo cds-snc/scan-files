@@ -1,7 +1,7 @@
-ARG BASE_IMAGE="python:3.9.15-alpine3.16"
+ARG BASE_IMAGE="python:3.9.15-alpine3.16@sha256:ea679ee27dbb8f36fbfc304be1b488b4fd7bea95dd230a47f97187c2e3fd4807"
 FROM ${BASE_IMAGE} as builder
 
-ARG RIE_VERSION="1.1"
+ARG RIE_VERSION="v1.9"
 
 RUN apk add --no-cache \
     autoconf \
@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     python3-dev \
     wget
 
-RUN wget -O aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/${RIE_VERSION}/aws-lambda-rie
+RUN wget https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/${RIE_VERSION}/aws-lambda-rie
 
 RUN mkdir -p /pymodules \
     && pip install awslambdaric --target /pymodules
