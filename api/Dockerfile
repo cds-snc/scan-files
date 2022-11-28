@@ -26,9 +26,9 @@ RUN pip install \
 # Install AWS cli
 ARG AWS_CLI_VERSION="2.4.5"
 RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip \
- && unzip awscliv2.zip \
- && aws/install \
- && rm -rf \
+    && unzip awscliv2.zip \
+    && aws/install \
+    && rm -rf \
     awscliv2.zip \
     aws \
     /usr/local/aws-cli/v2/*/dist/aws_completer \
@@ -52,15 +52,15 @@ RUN chmod 777 /usr/bin/aws-lambda-rie /entry.sh
 
 # Setup ClamAV
 RUN mkdir -p /tmp/clamav/quarantine \
- && chown -R clamav:clamav /tmp/clamav \
- && sed -i 's=DatabaseDirectory /var/lib/clamav=DatabaseDirectory /tmp/clamav=g' /etc/clamav/clamd.conf \
- && sed -i 's=DisableCache false=DisableCache true=g' /etc/clamav/clamd.conf \ 
- && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
- && sed -i 's=LogFile /var/log/clamav/clamav.log=LogFile /tmp/clamav.log=g' /etc/clamav/clamd.conf \ 
- && sed -i 's=LocalSocket /var/run/clamav/clamd.ctl=LocalSocket /tmp/clamd.sock=g' /etc/clamav/clamd.conf \ 
- && sed -i 's=LocalSocketGroup clamav=# LocalSocketGroup python=g' /etc/clamav/clamd.conf \
- && echo "PidFile /tmp/clamd.pid" >> /etc/clamav/clamd.conf \ 
- && sed -i 's=UpdateLogFile /var/log/clamav/freshclam.log=UpdateLogFile /tmp/clamav/freshclam.log=g' /etc/clamav/freshclam.conf
+    && chown -R clamav:clamav /tmp/clamav \
+    && sed -i 's=DatabaseDirectory /var/lib/clamav=DatabaseDirectory /tmp/clamav=g' /etc/clamav/clamd.conf \
+    && sed -i 's=DisableCache false=DisableCache true=g' /etc/clamav/clamd.conf \ 
+    && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
+    && sed -i 's=LogFile /var/log/clamav/clamav.log=LogFile /tmp/clamav.log=g' /etc/clamav/clamd.conf \ 
+    && sed -i 's=LocalSocket /var/run/clamav/clamd.ctl=LocalSocket /tmp/clamd.sock=g' /etc/clamav/clamd.conf \ 
+    && sed -i 's=LocalSocketGroup clamav=# LocalSocketGroup python=g' /etc/clamav/clamd.conf \
+    && echo "PidFile /tmp/clamd.pid" >> /etc/clamav/clamd.conf \ 
+    && sed -i 's=UpdateLogFile /var/log/clamav/freshclam.log=UpdateLogFile /tmp/clamav/freshclam.log=g' /etc/clamav/freshclam.conf
 
 ENTRYPOINT [ "/entry.sh" ]
 CMD [ "main.handler" ]
