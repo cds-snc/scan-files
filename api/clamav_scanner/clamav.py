@@ -1,7 +1,6 @@
 import datetime
 import hashlib
 import os
-import pwd
 import re
 import subprocess
 import socket
