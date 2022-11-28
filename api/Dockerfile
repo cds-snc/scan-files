@@ -48,7 +48,7 @@ RUN apk upgrade --no-cache \
     libstdc++
 
 COPY bin/entry.sh /
-RUN chmod 500 /usr/bin/aws-lambda-rie /entry.sh
+RUN chmod 555 /usr/bin/aws-lambda-rie /entry.sh
 
 # Setup ClamAV config
 COPY conf /etc/clamav
