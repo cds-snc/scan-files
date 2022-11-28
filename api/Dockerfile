@@ -1,66 +1,63 @@
-# Define function directory
+ARG BASE_IMAGE="python:3.9.15-alpine3.16@sha256:ea679ee27dbb8f36fbfc304be1b488b4fd7bea95dd230a47f97187c2e3fd4807"
+FROM ${BASE_IMAGE} as builder
+
+ARG RIE_VERSION="v1.9"
+
+RUN apk add --no-cache \
+    autoconf \
+    automake \
+    build-base \
+    gcc \
+    libc-dev \
+    libcurl \
+    libexecinfo-dev \
+    libstdc++ \
+    libtool \
+    make \
+    cmake \
+    python3-dev \
+    wget
+
+RUN wget https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/${RIE_VERSION}/aws-lambda-rie
+
+RUN mkdir -p /pymodules \
+    && pip install awslambdaric --target /pymodules
+
+COPY ./requirements.txt /
+RUN pip install -r /requirements.txt --target /pymodules
+
+# Lambda API image
+FROM ${BASE_IMAGE} as lambda
+
+COPY --from=builder /pymodules /pymodules
+COPY --from=builder /aws-lambda-rie /usr/bin/aws-lambda-rie
+
+# Build variables
 ARG FUNCTION_DIR="/function"
-
-FROM python:3.9-slim-buster@sha256:c52820000fca6d55f26b8b22bd8f2a9266f42a9cc24e003d920c9625bb80d359
-
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends ca-certificates curl git gstreamer1.0-libav libnss3-tools libatk-bridge2.0-0 libcups2-dev libxkbcommon-x11-0 libxcomposite-dev libxrandr2 libgbm-dev libgtk-3-0 libxshmfence-dev gnupg2 postgresql-client openssh-client python3-pip vim wget xz-utils zsh entr unzip clamav clamav-daemon clamdscan \
-    && apt-get autoremove -y && apt-get clean -y
-
-# Include global arg in this stage of the build
-ARG FUNCTION_DIR
-WORKDIR ${FUNCTION_DIR}
-
-RUN mkdir -p /pymodules
+ARG GIT_SHA
+ENV GIT_SHA=$GIT_SHA
 ENV PYTHONPATH=/pymodules
 
-COPY ./requirements.txt ${FUNCTION_DIR}
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
+    binutils \
+    clamav \
+    clamav-daemon \
+    clamav-clamdscan \
+    freshclam \
+    libstdc++
 
-RUN python3.9 -m pip install -r ${FUNCTION_DIR}/requirements.txt --target /pymodules
-
-# Install the runtime interface client
-RUN pip install \
-    --target /pymodules \
-    awslambdaric
-
-# Install AWS cli
-ARG AWS_CLI_VERSION="2.4.5"
-RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip -o awscliv2.zip \
-    && unzip awscliv2.zip \
-    && aws/install \
-    && rm -rf \
-    awscliv2.zip \
-    aws \
-    /usr/local/aws-cli/v2/*/dist/aws_completer \
-    /usr/local/aws-cli/v2/*/dist/awscli/data/ac.index \
-    /usr/local/aws-cli/v2/*/dist/awscli/examples
-
-# Copy function code
-COPY . ${FUNCTION_DIR}
-
-# Set build variables
-ARG git_sha 
-ENV GIT_SHA=$git_sha
-
-# Install lambda runtime interactive environment
-ARG RIE_VERSION=1.1
-RUN wget -O aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/${RIE_VERSION}/aws-lambda-rie \
-    && mv aws-lambda-rie /usr/bin/aws-lambda-rie
 COPY bin/entry.sh /
-RUN chmod 755 /usr/bin/aws-lambda-rie /entry.sh
-RUN chmod 777 /usr/bin/aws-lambda-rie /entry.sh
+RUN chmod 500 /usr/bin/aws-lambda-rie /entry.sh
 
-# Setup ClamAV
+# Setup ClamAV config
+COPY conf /etc/clamav
 RUN mkdir -p /tmp/clamav/quarantine \
     && chown -R clamav:clamav /tmp/clamav \
-    && sed -i 's=DatabaseDirectory /var/lib/clamav=DatabaseDirectory /tmp/clamav=g' /etc/clamav/clamd.conf \
-    && sed -i 's=DisableCache false=DisableCache true=g' /etc/clamav/clamd.conf \ 
-    && sed -i 's/CompressLocalDatabase no/CompressLocalDatabase yes/g' /etc/clamav/freshclam.conf \
-    && sed -i 's=LogFile /var/log/clamav/clamav.log=LogFile /tmp/clamav.log=g' /etc/clamav/clamd.conf \ 
-    && sed -i 's=LocalSocket /var/run/clamav/clamd.ctl=LocalSocket /tmp/clamd.sock=g' /etc/clamav/clamd.conf \ 
-    && sed -i 's=LocalSocketGroup clamav=# LocalSocketGroup python=g' /etc/clamav/clamd.conf \
-    && echo "PidFile /tmp/clamd.pid" >> /etc/clamav/clamd.conf \ 
-    && sed -i 's=UpdateLogFile /var/log/clamav/freshclam.log=UpdateLogFile /tmp/clamav/freshclam.log=g' /etc/clamav/freshclam.conf
+    && chown -R clamav:clamav /etc/clamav
 
-ENTRYPOINT [ "/entry.sh" ]
-CMD [ "main.handler" ]
+# Copy function code
+WORKDIR ${FUNCTION_DIR}
+COPY . ${FUNCTION_DIR}
+
+ENTRYPOINT [ "/entry.sh", "main.handler" ]
