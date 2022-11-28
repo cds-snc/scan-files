@@ -47,7 +47,7 @@ jobs:
 
       - name: Generate ${{ matrix.component }} SBOM
         if: steps.changes.outputs.lock == 'true' || steps.changes.outputs.common == 'true'
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@e8bfe289161e1a923f8bb153c57280abfa33eb22
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@2b07fca5c5316524884c64622cf54d1d2ba2bab1
         with:
           dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
           project_name: ${{ matrix.component }}
