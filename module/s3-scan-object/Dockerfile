@@ -44,10 +44,15 @@ WORKDIR ${APP_DIR}
 
 COPY --from=builder ${APP_DIR} ${APP_DIR}
 
+# Update Node's cache directory to /tmp so Lambda can write to it
+RUN mkdir -p /tmp/.npm && \
+    npm config set cache /tmp/.npm --global 
+
 # Create non-root user to run the lambda
 RUN addgroup --gid 10001 --system ${USER} && \
     adduser --uid 10000 --system --ingroup ${USER} --home /home/${USER} ${USER} && \
-    chown --recursive ${USER}:${USER} ${APP_DIR}
+    chown --recursive ${USER}:${USER} ${APP_DIR} && \
+    chown --recursive ${USER}:${USER} /tmp/.npm
 
 USER ${USER}
 
