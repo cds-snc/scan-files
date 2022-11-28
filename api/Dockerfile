@@ -40,6 +40,7 @@ ENV PYTHONPATH=/pymodules
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
+    aws-cli \
     binutils \
     clamav \
     clamav-daemon \
