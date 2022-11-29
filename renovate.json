@@ -4,22 +4,36 @@
   ],
   "packageRules": [
     {
-      "description": "Group all GitHub action dependencies",
+      "description": "Group all non-major GitHub actions",
       "matchManagers": [
         "github-actions"
       ],
-      "separateMajorMinor": false,
-      "groupName": "all github action dependencies",
-      "groupSlug": "all-github-action"
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "bump"
+      ],
+      "groupName": "all non-major github action dependencies",
+      "groupSlug": "all-non-major-github-action"
     },
     {
-      "description": "Group all Docker image updates that are not major",
+      "description": "Group all non-major Docker images",
       "matchDatasources": [
         "docker"
       ],
-      "separateMultipleMajor": true,
-      "groupName": "all docker images",
-      "groupSlug": "all-docker-images"
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "bump"
+      ],
+      "groupName": "all non-major docker images",
+      "groupSlug": "all-non-major-docker-images"
     }
   ]
 }
