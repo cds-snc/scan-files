@@ -37,7 +37,8 @@ module "resolver_dns" {
     "*.amazonaws.com.",
     "*.cyber.gc.ca.",
     "current.cvd.clamav.net.",
-    "database.clamav.net."
+    "database.clamav.net.",
+    "database.clamav.net.cdn.cloudflare.net."
   ]
 
   billing_tag_value = var.billing_code
