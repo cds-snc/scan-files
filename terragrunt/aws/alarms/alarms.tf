@@ -31,7 +31,7 @@ resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
 
 resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
   name           = local.error_logged_api
-  pattern        = "?ERROR ?error ?failed"
+  pattern        = "?ERROR ?Error ?error ?failed"
   log_group_name = var.scan_files_api_log_group_name
 
   metric_transformation {
@@ -118,7 +118,7 @@ resource "aws_cloudwatch_metric_alarm" "scan_verdict_suspicious" {
 
 resource "aws_cloudwatch_log_metric_filter" "s3_scan_object_error" {
   name           = local.error_logged_s3_scan_object
-  pattern        = "?ERROR ?error ?failed"
+  pattern        = "?ERROR ?Error ?error ?failed"
   log_group_name = var.s3_scan_object_log_group_name
 
   metric_transformation {
