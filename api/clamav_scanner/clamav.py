@@ -115,6 +115,19 @@ def update_defs_from_freshclam(path, library_path=""):
         )
     log.info("Starting freshclam with defs in %s." % path)
 
+    # Debug available space in directory
+    du_proc = subprocess.run(
+        [
+            "du",
+            "-h",
+            "%s" % AV_DEFINITION_PATH,
+        ],
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE,
+        env=fc_env,
+    )
+    log.info("du output:: %s" % du_proc.stdout.decode("utf-8"))
+
     fc_proc = subprocess.run(
         [
             FRESHCLAM_PATH,
