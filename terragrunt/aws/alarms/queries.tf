@@ -7,7 +7,7 @@ resource "aws_cloudwatch_query_definition" "api_errors" {
 
   query_string = <<-QUERY
     fields @timestamp, @message, @logStream
-    | filter @message like /ERROR/
+    | filter @message like /(?i)ERROR|FAILED/
     | sort @timestamp desc
     | limit 20
   QUERY
@@ -22,7 +22,7 @@ resource "aws_cloudwatch_query_definition" "s3_scan_object_errors" {
 
   query_string = <<-QUERY
     fields @timestamp, @message, @logStream
-    | filter @message like /ERROR/
+    | filter @message like /(?i)ERROR|FAILED/
     | sort @timestamp desc
     | limit 20
   QUERY
