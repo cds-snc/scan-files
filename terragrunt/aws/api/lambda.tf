@@ -1,5 +1,5 @@
 module "api" {
-  source                 = "github.com/cds-snc/terraform-modules?ref=v0.0.45//lambda"
+  source                 = "github.com/cds-snc/terraform-modules?ref=v5.0.0//lambda"
   name                   = "${var.product_name}-api"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
@@ -7,6 +7,7 @@ module "api" {
   image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
   memory                 = 3008
   timeout                = 300
+  ephemeral_storage      = 768
 
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
