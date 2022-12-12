@@ -54,11 +54,3 @@ jobs:
           dockerfile_path: "${{ matrix.image }}/Dockerfile"
           sbom_name: ${{ matrix.image }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate ${{ matrix.image }}/docker SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@aa6a6b097e75fd2007aee070b89a8d03c955ac81 # v1.1.5
-        with:
-          dependency_track_api_key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
-          docker_image: ${{ matrix.image }}:latest
-          project_name: scan-files/${{ matrix.image }}/docker
-          project_type: docker
