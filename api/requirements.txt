@@ -1,11 +1,11 @@
 alembic==1.8.1
 assemblyline-client==4.5.0
 aws-lambda-powertools==2.4.0
-boto3==1.26.19
+boto3==1.26.22
 fastapi==0.88.0
 mangum==0.17.0
 psycopg2-binary==2.9.5
 python-multipart
 SQLAlchemy==1.4.44
 pytz==2022.6
-filelock==3.8.0
+filelock==3.8.1
