@@ -428,11 +428,12 @@ resource "aws_wafv2_regex_pattern_set" "valid_uri_paths" {
 
 resource "aws_cloudwatch_log_group" "api_waf" {
   name              = "/aws/kinesisfirehose/api_waf"
-  retention_in_days = 14
+  retention_in_days = 30
 
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
+    Test       = "true"
   }
 }
 
