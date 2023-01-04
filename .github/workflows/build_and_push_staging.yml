@@ -102,8 +102,8 @@ jobs:
           max-attempts: 3
           retry-delay: 5s
 
-      - name: Docker dependency scan
-        uses: cds-snc/security-tools/.github/actions/docker-scan@4368a5486da1f0bb698ffe717687612d4231c6cd # v1.1.7
+      - name: Docker generate SBOM
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@3791a6bf8d4cd9b37d2929ce6d850e5de207655f
         with:
           docker_image: ${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.GITHUB_SHA }}
           dockerfile_path: "${{ matrix.image }}/Dockerfile"
