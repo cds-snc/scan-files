@@ -75,7 +75,7 @@ jobs:
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
 
       - name: Docker generate SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@3791a6bf8d4cd9b37d2929ce6d850e5de207655f
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@4fed9af3b063f1129cfdc889c94ce2dc00432238
         with:
           docker_image: "${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.GITHUB_SHA }}"
           dockerfile_path: "${{ matrix.image }}/Dockerfile"
