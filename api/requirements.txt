@@ -9,4 +9,4 @@ python-multipart
 setuptools==65.6.3  # Pin to fix CVE-2022-40897
 SQLAlchemy==1.4.45
 pytz==2022.7
-filelock==3.8.2
+filelock==3.9.0
