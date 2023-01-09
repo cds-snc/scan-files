@@ -25,7 +25,7 @@ jobs:
       images: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # tag=v2.11.1
         id: filter
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
@@ -75,7 +75,7 @@ jobs:
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
 
       - name: Docker generate SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@4fed9af3b063f1129cfdc889c94ce2dc00432238
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@9faac3985a4a93b005452697f1165556fac5dced
         with:
           docker_image: "${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.GITHUB_SHA }}"
           dockerfile_path: "${{ matrix.image }}/Dockerfile"
