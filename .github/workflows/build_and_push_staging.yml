@@ -103,7 +103,7 @@ jobs:
           retry-delay: 5s
 
       - name: Docker generate SBOM
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@9faac3985a4a93b005452697f1165556fac5dced
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@a38917b147dfc8f086abcf81529e3c12f26529b8 # v2.1.0
         with:
           docker_image: "${{ env.REGISTRY }}/${{ matrix.image }}:${{ env.GITHUB_SHA }}"
           dockerfile_path: "${{ matrix.image }}/Dockerfile"
