@@ -80,7 +80,5 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Logout of Amazon ECR
-        if: always(
+        if: always()
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
-
-
