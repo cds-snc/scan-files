@@ -2,6 +2,7 @@ locals {
   error_logged_api            = "ErrorLoggedAPI"
   error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
   error_namespace             = "ScanFiles"
+  scan_verdict_suspicious     = "ScanVerdictSuspicious"
   scan_verdict_unknown        = "ScanVerdictUnknown"
   warning_logged_api          = "WarningLoggedAPI"
 }
