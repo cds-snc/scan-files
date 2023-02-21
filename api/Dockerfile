@@ -42,11 +42,11 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
     aws-cli \
     binutils \
-    clamav \
-    clamav-daemon \
-    clamav-clamdscan \
-    freshclam \
     libstdc++
+
+# Upgrade to latest stable ClamAV
+RUN sed -i "s/3.16/3.17/g" /etc/apk/repositories \
+    && apk add --no-cache clamav
 
 COPY bin/entry.sh /
 RUN chmod 555 /usr/bin/aws-lambda-rie /entry.sh
