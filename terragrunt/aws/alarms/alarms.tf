@@ -3,6 +3,7 @@ locals {
   error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
   error_namespace             = "ScanFiles"
   scan_verdict_suspicious     = "ScanVerdictSuspicious"
+  scan_verdict_unknown        = "ScanVerdictUnknown"
   warning_logged_api          = "WarningLoggedAPI"
 }
 
@@ -87,29 +88,29 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_warning" {
   ok_actions    = [aws_sns_topic.cloudwatch_warning.arn]
 }
 
-resource "aws_cloudwatch_log_metric_filter" "scan_verdict_suspicious" {
-  name           = local.scan_verdict_suspicious
-  pattern        = "?suspicious ?malicious ?unknown ?unable_to_scan"
+resource "aws_cloudwatch_log_metric_filter" "scan_verdict_unknown" {
+  name           = local.scan_verdict_unknown
+  pattern        = "?unknown ?unable_to_scan"
   log_group_name = var.scan_files_api_log_group_name
 
   metric_transformation {
-    name      = local.scan_verdict_suspicious
+    name      = local.scan_verdict_unknown
     namespace = local.error_namespace
     value     = "1"
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "scan_verdict_suspicious" {
-  alarm_name          = local.scan_verdict_suspicious
-  alarm_description   = "Scan verdicts that are malicious, suspicious, or that could not complete"
+resource "aws_cloudwatch_metric_alarm" "scan_verdict_unknown" {
+  alarm_name          = local.scan_verdict_unknown
+  alarm_description   = "Scans that returned an unknown or unable to scan verdict"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].name
-  namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_suspicious.metric_transformation[0].namespace
+  metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_unknown.metric_transformation[0].name
+  namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_unknown.metric_transformation[0].namespace
 
   period             = "60"
   evaluation_periods = "1"
   statistic          = "Sum"
-  threshold          = var.scan_files_api_scan_verdict_suspicious_threshold
+  threshold          = var.scan_files_api_scan_verdict_unknown_threshold
   treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.cloudwatch_warning.arn]
