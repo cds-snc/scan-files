@@ -12,3 +12,9 @@ variable "scan_files_api_key_secret_arn" {
   description = "ARN of the Scan Files API key secret"
   type        = string
 }
+
+variable "scan_files_api_function_url" {
+  description = "URL of the Scan Files API function"
+  type        = string
+  sensitive   = true
+}

@@ -14,6 +14,7 @@ dependency "api" {
   mock_outputs = {
     function_name                 = ""
     function_role_arn             = ""
+    function_url                  = "http://localhost"
     scan_files_api_key_secret_arn = ""
   }
 }
@@ -21,6 +22,7 @@ dependency "api" {
 inputs = {
   scan_files_api_function_role_arn  = dependency.api.outputs.function_role_arn
   scan_files_api_function_role_name = dependency.api.outputs.function_name
+  scan_files_api_function_url       = dependency.api.outputs.function_url
   scan_files_api_key_secret_arn     = dependency.api.outputs.scan_files_api_key_secret_arn
 }
 

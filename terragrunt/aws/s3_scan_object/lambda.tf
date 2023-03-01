@@ -1,7 +1,3 @@
-data "aws_lambda_function_url" "scan_files_api" {
-  function_name = "${var.product_name}-api"
-}
-
 module "s3_scan_object" {
   source = "github.com/cds-snc/terraform-modules?ref=v3.0.6//lambda"
 
@@ -13,7 +9,7 @@ module "s3_scan_object" {
 
   environment_variables = {
     LOGGING_LEVEL                 = "warn"
-    SCAN_FILES_URL                = sensitive(data.aws_lambda_function_url.scan_files_api.function_url)
+    SCAN_FILES_URL                = var.scan_files_api_function_url
     SCAN_FILES_API_KEY_SECRET_ARN = var.scan_files_api_key_secret_arn
     SNS_SCAN_COMPLETE_TOPIC_ARN   = aws_sns_topic.scan_complete.arn
   }

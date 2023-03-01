@@ -30,6 +30,11 @@ output "function_role_arn" {
   value = "arn:aws:iam::${var.account_id}:role/${module.api.function_name}"
 }
 
+output "function_url" {
+  value     = aws_lambda_function_url.scan_files_url.function_url
+  sensitive = true
+}
+
 output "invoke_arn" {
   value = module.api.invoke_arn
 }
