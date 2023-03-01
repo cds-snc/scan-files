@@ -7,8 +7,6 @@ module "s3_scan_object" {
   memory    = 512
   timeout   = 60
 
-  reserved_concurrent_executions = 3
-
   environment_variables = {
     LOGGING_LEVEL                 = "warn"
     SCAN_FILES_URL                = "https://${var.domain}"
