@@ -5,7 +5,7 @@ module "s3_scan_object" {
   image_uri = "${aws_ecr_repository.s3_scan_object.repository_url}:latest"
   ecr_arn   = aws_ecr_repository.s3_scan_object.arn
   memory    = 512
-  timeout   = 60
+  timeout   = 300
 
   environment_variables = {
     LOGGING_LEVEL                 = "warn"
