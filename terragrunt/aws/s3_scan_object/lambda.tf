@@ -9,7 +9,7 @@ module "s3_scan_object" {
 
   environment_variables = {
     LOGGING_LEVEL                 = "warn"
-    SCAN_FILES_URL                = "https://${var.domain}"
+    SCAN_FILES_URL                = var.scan_files_api_function_url
     SCAN_FILES_API_KEY_SECRET_ARN = var.scan_files_api_key_secret_arn
     SNS_SCAN_COMPLETE_TOPIC_ARN   = aws_sns_topic.scan_complete.arn
   }
