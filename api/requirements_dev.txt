@@ -5,6 +5,6 @@ factory-boy==3.2.1
 flake8==6.0.0
 httpx==0.23.3
 locust==2.14.2
-pytest==7.2.1
+pytest==7.2.2
 requests==2.28.2
 uvicorn==0.20.0
