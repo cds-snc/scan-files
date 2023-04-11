@@ -1836,18 +1836,18 @@ atomic-sleep@^1.0.0:
   resolved "https://registry.yarnpkg.com/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
   integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
 
-aws-sdk-client-mock-jest@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock-jest/-/aws-sdk-client-mock-jest-2.1.0.tgz#93031b4f92d42edd79a063f7b02c4b240e7d779a"
-  integrity sha512-2HcKQA0kMKi0Lp2ynq/u3trEKDIreXU3wyY9xyeVcbEC5Q2Bw8oWX4ovIZgmvdJHif/IvM7ABcvp/mpBNfyTYQ==
+aws-sdk-client-mock-jest@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock-jest/-/aws-sdk-client-mock-jest-2.1.1.tgz#95527a21fbc3bebf62edb7ef6d5448436d9df39f"
+  integrity sha512-z1rpv2ACN1WSGU8u73sJVC0pHPuJfHyITAE88Luz6ph6w47YIkgG0G2latoSmvqJwanv1gJYFk+1VPHJdco1Ig==
   dependencies:
     "@types/jest" "^28.1.3"
     tslib "^2.1.0"
 
-aws-sdk-client-mock@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-2.1.0.tgz#58247c0fb651cddedbd093c0c06d6bc0caf82e89"
-  integrity sha512-JkrPrcEvQ4JwylVdQ0njYQMFVwVaZzoVc557rsCorIMjEtmrFvlVYEfIKWoYw8psU4cLjOMyqpxg65NcAn9fvQ==
+aws-sdk-client-mock@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-2.1.1.tgz#52e5e580fd5654492f9b477153928e373034798e"
+  integrity sha512-UuxXmICU4nmXTRm2BzLZdXmnyI+5NEBb5McRDkObasXVxXChvLm0Ci/PGENh4sCD+Es64SJiz70mtY48JROk0A==
   dependencies:
     "@types/sinon" "^10.0.10"
     sinon "^14.0.2"
