@@ -8,5 +8,5 @@ psycopg2-binary==2.9.6
 python-multipart
 setuptools==65.7.0  # Pin to fix CVE-2022-40897
 SQLAlchemy==1.4.47
-pytz==2022.7.1
+pytz==2023.3
 filelock==3.10.7
