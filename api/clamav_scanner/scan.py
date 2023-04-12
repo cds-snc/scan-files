@@ -17,7 +17,6 @@ from models.Scan import Scan, ScanVerdicts
 
 
 def sns_scan_results(sns_client, scan, sns_arn, scan_signature, file_path, aws_account):
-
     message = {
         "scan_id": str(scan.id),
         "file_path": file_path,

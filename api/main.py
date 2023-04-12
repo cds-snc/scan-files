@@ -28,7 +28,6 @@ else:
 
 @metrics.log_metrics(capture_cold_start_metric=True)
 def handler(event, context):
-
     if environ.get("CI") is None and not is_clamd_running():
         setup_clamd_daemon()
 

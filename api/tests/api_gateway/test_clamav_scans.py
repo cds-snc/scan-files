@@ -316,7 +316,6 @@ def test_clamav_get_results_in_progress(mock_db_session, session):
 
 @patch("database.db.db_session")
 def test_get_clamav_results_random_sql_error(mock_db_session, session):
-
     scan = ScanFactory()
 
     mock_session = MagicMock()
