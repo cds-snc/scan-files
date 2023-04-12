@@ -4,7 +4,6 @@ from clamav_scanner.common import AWS_ENDPOINT_URL, AWS_ROLE_TO_ASSUME
 
 
 def get_session(credentials=None):
-
     options = {"region_name": "ca-central-1"}
 
     use_localstack = os.environ.get("AWS_LOCALSTACK", False)

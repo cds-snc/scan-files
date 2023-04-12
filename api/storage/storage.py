@@ -35,7 +35,6 @@ def get_file(save_path, aws_account=None, ref_only=False):
 
 
 def get_object(record, ref_only=False):
-
     if environ.get("AWS_LOCALSTACK", False):
         client = get_session().resource("s3", endpoint_url="http://localstack:4566")
     else:
@@ -61,7 +60,6 @@ def get_object(record, ref_only=False):
 
 
 def put_file(file):
-
     if environ.get("AWS_LOCALSTACK", False):
         client = get_session().resource("s3", endpoint_url="http://localstack:4566")
     else:

@@ -21,7 +21,6 @@ async def add_security_headers(request: Request, call_next):
 
 
 async def log_requests(request: Request, call_next):
-
     log.info(f"start request path={request.url.path}")
     start_time = time.time()
 

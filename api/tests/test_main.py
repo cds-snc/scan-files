@@ -103,7 +103,6 @@ def test_handler_assemblyline_result_event(
 def test_handler_assemblyline_result_event_scan_not_complete(
     mock_get_scan_result, mock_poll_for_results, context_fixture
 ):
-
     mock_poll_for_results.return_value = False
     main.handler(
         {
