@@ -3,6 +3,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.sql import text
 
 if os.environ.get("CI"):
     connection_string = os.environ.get("SQLALCHEMY_DATABASE_TEST_URI")
@@ -27,6 +28,6 @@ def get_db_session():
 
 
 def get_db_version(session):
-    query = "SELECT version_num FROM alembic_version"
+    query = text("SELECT version_num FROM alembic_version")
     full_name = session.execute(query).fetchone()[0]
     return full_name
