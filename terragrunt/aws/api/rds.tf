@@ -10,7 +10,7 @@ module "rds" {
   username                = var.rds_username
   password                = var.rds_password
   vpc_id                  = module.vpc.vpc_id
-  engine_version          = "14.3"
+  engine_version          = "14.5"
 
   upgrade_immediately         = true
   allow_major_version_upgrade = true
