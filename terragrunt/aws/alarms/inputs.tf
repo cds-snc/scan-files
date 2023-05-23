@@ -8,6 +8,11 @@ variable "route53_health_check_api_id" {
   type        = string
 }
 
+variable "route53_hosted_zone_id" {
+  description = "ID of the Route53 hosted zone"
+  type        = string
+}
+
 variable "s3_scan_object_log_group_name" {
   description = "CloudWatch log group name for the S3 scan object lambda function"
   type        = string
@@ -49,7 +54,6 @@ variable "sentinel_shared_key" {
   sensitive   = true
   description = "Sentinel customer ID"
 }
-
 
 variable "slack_webhook_url" {
   description = "Slack webhook URL that will be used to send notifications"
