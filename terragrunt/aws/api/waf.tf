@@ -15,6 +15,62 @@ resource "aws_wafv2_web_acl" "api_waf" {
   }
 
   rule {
+    name     = "IpAllowList"
+    priority = 1
+
+    action {
+      allow {}
+    }
+
+    statement {
+      ip_set_reference_statement {
+        arn = aws_wafv2_ip_set.ip_allowlist.arn
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "IpAllowList"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "NorthAmericaOnly"
+    priority = 2
+
+    action {
+      dynamic "block" {
+        for_each = var.enable_waf == true ? [""] : []
+        content {
+        }
+      }
+
+      dynamic "count" {
+        for_each = var.enable_waf == false ? [""] : []
+        content {
+        }
+      }
+    }
+
+    statement {
+      not_statement {
+        statement {
+          geo_match_statement {
+            country_codes = ["CA", "US"]
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "NorthAmericaOnly"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
     name     = "APIInvalidPath"
     priority = 5
 
@@ -413,4 +469,20 @@ resource "aws_wafv2_web_acl_logging_configuration" "api_waf" {
   provider                = aws.us-east-1
   log_destination_configs = [aws_kinesis_firehose_delivery_stream.api_waf.arn]
   resource_arn            = aws_wafv2_web_acl.api_waf.arn
+}
+
+# Azure US East CIDR blocks that are being identified as being in Germany
+# These should be allowed.
+resource "aws_wafv2_ip_set" "ip_allowlist" {
+  provider = aws.us-east-1
+
+  name               = "ip_allowlist"
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV4"
+  addresses = [
+    "172.172.0.0/15",
+    "172.174.0.0/16",
+    "172.175.0.0/16",
+    "172.176.0.0/15"
+  ]
 }
