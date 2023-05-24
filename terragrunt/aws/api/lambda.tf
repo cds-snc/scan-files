@@ -5,7 +5,7 @@ module "api" {
   ecr_arn                = aws_ecr_repository.api.arn
   enable_lambda_insights = true
   image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
-  memory                 = 5308
+  memory                 = 3008
   timeout                = 300
   ephemeral_storage      = 768
 
