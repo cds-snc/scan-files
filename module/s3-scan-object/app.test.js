@@ -11,9 +11,6 @@ const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
 const mockS3Client = mockClient(S3Client);
 const mockSecretManagerClient = mockClient(SecretsManagerClient);
 const mockSTSClient = mockClient(STSClient);
-mockSecretManagerClient.on(GetSecretValueCommand).resolves({
-  SecretString: "someSuperSecretValue",
-});
 
 const { handler, helpers } = require("./app.js");
 const {
@@ -44,6 +41,12 @@ beforeEach(() => {
 });
 
 describe("handler", () => {
+  beforeEach(() => {
+    mockSecretManagerClient.on(GetSecretValueCommand).resolves({
+      SecretString: "someSuperSecretValue",
+    });
+  });
+
   test("records success", async () => {
     const event = {
       AccountId: "123456789012",

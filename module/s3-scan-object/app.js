@@ -61,9 +61,9 @@ const initConfig = async () => {
   })();
 };
 
-// Start config load on cold starts. This can switch to a top level `await` if we switch to ES modules:
-// https://aws.amazon.com/blogs/compute/using-node-js-es-modules-and-top-level-await-in-aws-lambda/
-const configPromise = initConfig();
+// Config object used by the handler.  On cold start it is initialized by the
+// first handler call.
+let config = null;
 
 /**
  * Lambda handler function.  This function is invoked when a new S3 object is
@@ -74,12 +74,19 @@ const configPromise = initConfig();
 exports.handler = async (event, context) => {
   withRequest(event, context);
 
-  const config = await configPromise;
   const s3Clients = {};
   let errorCount = 0;
 
+  // Initialize the function configuration.  This only occurs once per cold start.
+  if (config == null) {
+    logger.debug(`Initializing config`);
+    config = await initConfig();
+  }
+
   // Process all event records
   for (const record of event.Records) {
+    logger.debug(`Processing event: ${util.inspect(record, false, 10)}`);
+
     let roleArn = null;
     let scanChecksum = null;
     let scanStatus = null;
@@ -106,6 +113,7 @@ exports.handler = async (event, context) => {
     // Start a scan of the new S3 object
     if (awsAccountId != null && eventSource !== null && s3Object !== null) {
       if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
+        logger.debug(`S3 scan started for: ${util.inspect(s3Object)}`);
         const response = await startS3ObjectScan(
           `${SCAN_FILES_URL}/clamav/s3`,
           config.apiKey,
@@ -120,6 +128,7 @@ exports.handler = async (event, context) => {
       } else if (eventSource === EVENT_SNS) {
         scanChecksum = record.Sns.MessageAttributes["av-checksum"].Value;
         scanStatus = record.Sns.MessageAttributes["av-status"].Value;
+        logger.debug(`S3 scan status '${scanStatus}' received for: ${util.inspect(s3Object)}`);
       }
     } else {
       logger.error(`Unsupported event record: ${util.inspect(record)}`);

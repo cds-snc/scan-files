@@ -4,11 +4,11 @@ module "s3_scan_object" {
   name      = "s3-scan-object"
   image_uri = "${aws_ecr_repository.s3_scan_object.repository_url}:latest"
   ecr_arn   = aws_ecr_repository.s3_scan_object.arn
-  memory    = 512
+  memory    = 1024
   timeout   = 300
 
   environment_variables = {
-    LOGGING_LEVEL                 = "warn"
+    LOGGING_LEVEL                 = "debug"
     SCAN_FILES_URL                = var.scan_files_api_function_url
     SCAN_FILES_API_KEY_SECRET_ARN = var.scan_files_api_key_secret_arn
     SNS_SCAN_COMPLETE_TOPIC_ARN   = aws_sns_topic.scan_complete.arn

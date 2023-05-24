@@ -5,7 +5,7 @@ module "api" {
   ecr_arn                = aws_ecr_repository.api.arn
   enable_lambda_insights = true
   image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
-  memory                 = 3008
+  memory                 = 5308
   timeout                = 300
   ephemeral_storage      = 768
 
@@ -20,7 +20,7 @@ module "api" {
     COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
     FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
     FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
-    LOG_LEVEL                    = "WARNING"
+    LOG_LEVEL                    = "INFO"
     OPENAPI_URL                  = "/openapi.json"
     POWERTOOLS_SERVICE_NAME      = "${var.product_name}-api"
     SCAN_QUEUE_STATEMACHINE_NAME = "assemblyline-file-scan-queue"
