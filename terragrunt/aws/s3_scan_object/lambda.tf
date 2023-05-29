@@ -17,7 +17,7 @@ module "s3_scan_object" {
   policies = [
     data.aws_iam_policy_document.s3_scan_object.json,
     sensitive(data.aws_iam_policy_document.assume_cross_account.json),
-    data.aws_iam_policy_document.sqs_s3_events.json,
+    sensitive(data.aws_iam_policy_document.sqs_s3_events.json),
   ]
 
   billing_tag_value = var.billing_code
@@ -72,8 +72,14 @@ data "aws_iam_policy_document" "sqs_s3_events" {
       values   = ["alias/s3_scan_object_queue"]
       variable = "kms:ResourceAliases"
     }
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      values   = [var.aws_org_id, var.aws_org_id_old]
+      variable = "aws:PrincipalOrgID"
+    }
   }
 
+  # checkov:skip=CKV_AWS_111:cross-account delete is restricted to within our org
   statement {
     sid    = "SqsQueueGetEvent"
     effect = "Allow"
@@ -85,6 +91,11 @@ data "aws_iam_policy_document" "sqs_s3_events" {
     resources = [
       "arn:aws:sqs:${var.region}:*:s3-scan-object"
     ]
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      values   = [var.aws_org_id, var.aws_org_id_old]
+      variable = "aws:PrincipalOrgID"
+    }
   }
 }
 
