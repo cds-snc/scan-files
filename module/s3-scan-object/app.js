@@ -26,6 +26,7 @@ const SNS_SCAN_COMPLETE_TOPIC_ARN = process.env.SNS_SCAN_COMPLETE_TOPIC_ARN;
 const EVENT_RESCAN = "custom:rescan";
 const EVENT_S3 = "aws:s3";
 const EVENT_SNS = "aws:sns";
+const EVENT_SQS = "aws:sqs";
 
 const stsClient = new STSClient({ region: REGION, endpoint: ENDPOINT_URL });
 const secretsManagerClient = new SecretsManagerClient({ region: REGION, endpoint: ENDPOINT_URL });
@@ -74,24 +75,49 @@ let config = null;
 exports.handler = async (event, context) => {
   withRequest(event, context);
 
-  const s3Clients = {};
-  let errorCount = 0;
-
   // Initialize the function configuration.  This only occurs once per cold start.
   if (config == null) {
     logger.debug(`Initializing config`);
     config = await initConfig();
   }
 
+  const errorCount = await processEventRecords(event, config.apiKey);
+
+  return {
+    status: errorCount > 0 ? 422 : 200,
+    body: `Event records processesed: ${event.Records.length}, Errors: ${errorCount}`,
+  };
+};
+
+/**
+ * Processes the event records.  This function is responsible for starting S3 event
+ * record scans and updating the scan results based on SNS topic records.
+ * @param {Object} event Lambda invocation event
+ * @param {string} apiKey API key used to invoke the Scan Files API
+ * @returns int Number of errors encountered processing the event records
+ */
+const processEventRecords = async (event, apiKey) => {
+  const s3Clients = {};
+  let errorCount = 0;
+
   // Process all event records
   for (const record of event.Records) {
-    logger.debug(`Processing event: ${util.inspect(record, false, 10)}`);
+    logger.debug(`Processing event record: ${util.inspect(record, false, 10)}`);
+
+    // If this is an SQS event, extract the nested records from the body
+    let eventSource = getRecordEventSource(record);
+    if (eventSource === EVENT_SQS) {
+      const eventBody = record.body;
+      eventBody["RequestId"] = record.messageId;
+      eventBody["AccountId"] = record.eventSourceARN.split(":")[4];
+      errorCount += await processEventRecords(eventBody);
+      continue;
+    }
 
     let roleArn = null;
     let scanChecksum = null;
     let scanStatus = null;
     let isObjectTagged = false;
-    let eventSource = getRecordEventSource(record);
     let s3Object = getS3ObjectFromRecord(eventSource, record);
     let awsAccountId = getEventAttribute(eventSource, event, record, {
       root: "AccountId",
@@ -116,7 +142,7 @@ exports.handler = async (event, context) => {
         logger.debug(`S3 scan started for: ${util.inspect(s3Object)}`);
         const response = await startS3ObjectScan(
           `${SCAN_FILES_URL}/clamav/s3`,
-          config.apiKey,
+          apiKey,
           s3Object,
           awsAccountId,
           SNS_SCAN_COMPLETE_TOPIC_ARN,
@@ -161,10 +187,7 @@ exports.handler = async (event, context) => {
     }
   }
 
-  return {
-    status: errorCount > 0 ? 422 : 200,
-    body: `Event records processesed: ${event.Records.length}, Errors: ${errorCount}`,
-  };
+  return errorCount;
 };
 
 /**
@@ -194,7 +217,7 @@ const getEventAttribute = (eventSource, event, record, attribute) => {
  */
 const getRecordEventSource = (record) => {
   let eventSource = record.eventSource || record.EventSource;
-  const validSources = [EVENT_S3, EVENT_SNS, EVENT_RESCAN];
+  const validSources = [EVENT_S3, EVENT_SNS, EVENT_SQS, EVENT_RESCAN];
   return validSources.includes(eventSource) ? eventSource : null;
 };
 
@@ -369,6 +392,7 @@ exports.helpers = {
   initConfig,
   isS3Folder,
   parseS3Url,
+  processEventRecords,
   startS3ObjectScan,
   tagS3Object,
 };

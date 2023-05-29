@@ -12,7 +12,7 @@ const mockS3Client = mockClient(S3Client);
 const mockSecretManagerClient = mockClient(SecretsManagerClient);
 const mockSTSClient = mockClient(STSClient);
 
-const { handler, helpers } = require("./app.js");
+const { helpers } = require("./app.js");
 const {
   getEventAttribute,
   getRecordEventSource,
@@ -22,6 +22,7 @@ const {
   initConfig,
   isS3Folder,
   parseS3Url,
+  processEventRecords,
   startS3ObjectScan,
   tagS3Object,
 } = helpers;
@@ -40,13 +41,7 @@ beforeEach(() => {
   mockSTSClient.reset();
 });
 
-describe("handler", () => {
-  beforeEach(() => {
-    mockSecretManagerClient.on(GetSecretValueCommand).resolves({
-      SecretString: "someSuperSecretValue",
-    });
-  });
-
+describe("processEventRecords", () => {
   test("records success", async () => {
     const event = {
       AccountId: "123456789012",
@@ -94,19 +89,38 @@ describe("handler", () => {
             },
           },
         },
+        {
+          eventSource: "aws:sqs",
+          eventSourceARN: "arn:aws:sqs:us-east-1:098765432109:example-queue",
+          messageId: "0987",
+          body: {
+            Records: [
+              {
+                eventSource: "aws:s3",
+                s3: {
+                  bucket: { name: "muffins" },
+                  object: { key: "blueberry" },
+                },
+              },
+              {
+                eventSource: "aws:s3",
+                s3: {
+                  bucket: { name: "scones" },
+                  object: { key: "cranberry" },
+                },
+              },
+            ],
+          },
+        },
       ],
-    };
-    const expectedResponse = {
-      status: 200,
-      body: "Event records processesed: 5, Errors: 0",
     };
 
     axios.post.mockResolvedValue({ status: 200 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event, {});
-    expect(response).toEqual(expectedResponse);
+    const errorCount = await processEventRecords(event, "api-key");
+    expect(errorCount).toEqual(0);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
       Key: "bar",
@@ -156,12 +170,40 @@ describe("handler", () => {
         ],
       },
     });
+    expect(mockS3Client).toHaveReceivedNthCommandWith(5, PutObjectTaggingCommand, {
+      Bucket: "muffins",
+      Key: "blueberry",
+      Tagging: {
+        TagSet: [
+          { Key: "av-scanner", Value: "clamav" },
+          { Key: "av-status", Value: "in_progress" },
+          { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "0987" },
+        ],
+      },
+    });
+    expect(mockS3Client).toHaveReceivedNthCommandWith(6, PutObjectTaggingCommand, {
+      Bucket: "scones",
+      Key: "cranberry",
+      Tagging: {
+        TagSet: [
+          { Key: "av-scanner", Value: "clamav" },
+          { Key: "av-status", Value: "in_progress" },
+          { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "request-id", Value: "0987" },
+        ],
+      },
+    });
     expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
       RoleArn: "arn:aws:iam::123456789012:role/ScanFilesGetObjects",
       RoleSessionName: "s3-scan-object",
     });
     expect(mockSTSClient).toHaveReceivedNthCommandWith(2, AssumeRoleCommand, {
       RoleArn: "arn:aws:iam::210987654321:role/ScanFilesGetObjects",
+      RoleSessionName: "s3-scan-object",
+    });
+    expect(mockSTSClient).toHaveReceivedNthCommandWith(3, AssumeRoleCommand, {
+      RoleArn: "arn:aws:iam::098765432109:role/ScanFilesGetObjects",
       RoleSessionName: "s3-scan-object",
     });
   });
@@ -180,17 +222,13 @@ describe("handler", () => {
         },
       ],
     };
-    const expectedResponse = {
-      status: 422,
-      body: "Event records processesed: 1, Errors: 1",
-    };
 
     axios.post.mockResolvedValue({ status: 500 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event, {});
-    expect(response).toEqual(expectedResponse);
+    const errorCount = await processEventRecords(event, "api-key");
+    expect(errorCount).toEqual(1);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
       Key: "bar",
@@ -223,17 +261,13 @@ describe("handler", () => {
         },
       ],
     };
-    const expectedResponse = {
-      status: 422,
-      body: "Event records processesed: 1, Errors: 1",
-    };
 
     axios.post.mockResolvedValue(undefined);
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
     mockSTSClient.on(AssumeRoleCommand).resolves({ Credentials: {} });
 
-    const response = await handler(event, {});
-    expect(response).toEqual(expectedResponse);
+    const errorCount = await processEventRecords(event, "api-key");
+    expect(errorCount).toEqual(1);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
       Bucket: "foo",
       Key: "bar",
@@ -260,16 +294,12 @@ describe("handler", () => {
         },
       ],
     };
-    const expectedResponse = {
-      status: 422,
-      body: "Event records processesed: 1, Errors: 1",
-    };
 
     axios.post.mockResolvedValue({ status: 200 });
     mockS3Client.on(PutObjectTaggingCommand).resolves({ VersionId: "yeet" });
 
-    const response = await handler(event, {});
-    expect(response).toEqual(expectedResponse);
+    const errorCount = await processEventRecords(event, "api-key");
+    expect(errorCount).toEqual(1);
   });
 });
 
@@ -310,6 +340,7 @@ describe("getRecordEventSource", () => {
   test("valid event sources", () => {
     expect(getRecordEventSource({ eventSource: "aws:s3" })).toBe("aws:s3");
     expect(getRecordEventSource({ EventSource: "aws:sns" })).toBe("aws:sns");
+    expect(getRecordEventSource({ EventSource: "aws:sqs" })).toBe("aws:sqs");
     expect(getRecordEventSource({ EventSource: "custom:rescan" })).toBe("custom:rescan");
   });
 
