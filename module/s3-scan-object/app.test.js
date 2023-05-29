@@ -93,24 +93,7 @@ describe("processEventRecords", () => {
           eventSource: "aws:sqs",
           eventSourceARN: "arn:aws:sqs:us-east-1:098765432109:example-queue",
           messageId: "0987",
-          body: {
-            Records: [
-              {
-                eventSource: "aws:s3",
-                s3: {
-                  bucket: { name: "muffins" },
-                  object: { key: "blueberry" },
-                },
-              },
-              {
-                eventSource: "aws:s3",
-                s3: {
-                  bucket: { name: "scones" },
-                  object: { key: "cranberry" },
-                },
-              },
-            ],
-          },
+          body: '{"Records":[{"eventSource":"aws:s3","s3":{"bucket":{"name":"muffins"},"object":{"key":"blueberry"}}},{"eventSource":"aws:s3","s3":{"bucket":{"name":"scones"},"object":{"key":"cranberry"}}}]}',
         },
       ],
     };
