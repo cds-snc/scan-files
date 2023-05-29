@@ -100,6 +100,11 @@ const processEventRecords = async (event, apiKey) => {
   const s3Clients = {};
   let errorCount = 0;
 
+  if (!event.Records || event.Records.length === 0) {
+    logger.warn(`No records to process for event: ${util.inspect(event)}`);
+    return errorCount;
+  }
+
   // Process all event records
   for (const record of event.Records) {
     logger.debug(`Processing event record: ${util.inspect(record, false, 10)}`);
@@ -107,10 +112,10 @@ const processEventRecords = async (event, apiKey) => {
     // If this is an SQS event, extract the nested records from the body
     let eventSource = getRecordEventSource(record);
     if (eventSource === EVENT_SQS) {
-      const eventBody = record.body;
+      const eventBody = JSON.parse(record.body);
       eventBody["RequestId"] = record.messageId;
       eventBody["AccountId"] = record.eventSourceARN.split(":")[4];
-      errorCount += await processEventRecords(eventBody);
+      errorCount += await processEventRecords(eventBody, apiKey);
       continue;
     }
 
