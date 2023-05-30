@@ -77,7 +77,7 @@ exports.handler = async (event, context) => {
 
   // Initialize the function configuration.  This only occurs once per cold start.
   if (config == null) {
-    logger.debug(`Initializing config`);
+    logger.info(`Initializing config`);
     config = await initConfig();
   }
 
@@ -107,7 +107,7 @@ const processEventRecords = async (event, apiKey) => {
 
   // Process all event records
   for (const record of event.Records) {
-    logger.debug(`Processing event record: ${util.inspect(record, false, 10)}`);
+    logger.info(`Processing event record: ${util.inspect(record, false, 10)}`);
 
     // If this is an SQS event, extract the nested records from the body
     let eventSource = getRecordEventSource(record);
@@ -144,7 +144,6 @@ const processEventRecords = async (event, apiKey) => {
     // Start a scan of the new S3 object
     if (awsAccountId != null && eventSource !== null && s3Object !== null) {
       if (eventSource === EVENT_RESCAN || eventSource === EVENT_S3) {
-        logger.debug(`S3 scan started for: ${util.inspect(s3Object)}`);
         const response = await startS3ObjectScan(
           `${SCAN_FILES_URL}/clamav/s3`,
           apiKey,
@@ -159,7 +158,7 @@ const processEventRecords = async (event, apiKey) => {
       } else if (eventSource === EVENT_SNS) {
         scanChecksum = record.Sns.MessageAttributes["av-checksum"].Value;
         scanStatus = record.Sns.MessageAttributes["av-status"].Value;
-        logger.debug(`S3 scan status '${scanStatus}' received for: ${util.inspect(s3Object)}`);
+        logger.info(`S3 scan status '${scanStatus}' received for: ${util.inspect(s3Object)}`);
       }
     } else {
       logger.error(`Unsupported event record: ${util.inspect(record)}`);
@@ -188,6 +187,11 @@ const processEventRecords = async (event, apiKey) => {
 
     // Track if there were any errors processing this record
     if (scanStatus === SCAN_FAILED_TO_START || isObjectTagged === false) {
+      logger.warn(
+        `Error processing event record: ${util.inspect(
+          record
+        )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`
+      );
       errorCount++;
     }
   }
@@ -237,6 +241,7 @@ const getRoleCredentials = async (stsClient, roleArn) => {
   let credentials = null;
 
   try {
+    logger.info(`Assuming role ${roleArn}`);
     const command = new AssumeRoleCommand({ RoleArn: roleArn, RoleSessionName: "s3-scan-object" });
     const response = await stsClient.send(command);
     // Submitted, without comment or judgement
@@ -262,6 +267,7 @@ const getRoleCredentials = async (stsClient, roleArn) => {
  */
 const getS3Client = async (s3Client, stsClient, roleArn) => {
   if (!s3Client) {
+    logger.info(`Initializing new S3 client for ${roleArn}`);
     const credentials = await getRoleCredentials(stsClient, roleArn);
     return new S3Client({
       region: REGION,
@@ -269,6 +275,7 @@ const getS3Client = async (s3Client, stsClient, roleArn) => {
       credentials: credentials,
     });
   } else {
+    logger.info(`Returning cached S3 client for ${roleArn}`);
     return s3Client;
   }
 };
@@ -339,6 +346,7 @@ const parseS3Url = (url) => {
  */
 const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, snsArn, requestId) => {
   try {
+    logger.info(`S3 scan starting for: ${util.inspect(s3Object)}`);
     const response = await axios.post(
       apiEndpoint,
       {
@@ -354,7 +362,7 @@ const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, sn
         },
       }
     );
-    logger.info(`Scan response ${response.status}: ${util.inspect(response.data)}`);
+    logger.info(`S3 scan response ${response.status}: ${util.inspect(response.data)}`);
     return response;
   } catch (error) {
     logger.error(`Could not start scan for ${util.inspect(s3Object)}: ${util.inspect(error.response)}`);
@@ -377,9 +385,11 @@ const tagS3Object = async (s3Client, s3Object, tags) => {
   let isSuccess = false;
 
   try {
+    logger.info(`Tag S3 object starting: ${util.inspect(s3Object)} tags: ${util.inspect(tags)}`);
     const command = new PutObjectTaggingCommand({ ...s3Object, ...tagging });
     const response = await s3Client.send(command);
     isSuccess = response.VersionId !== undefined;
+    logger.info(`Tag S3 object response: ${util.inspect(response)}`);
   } catch (error) {
     logger.error(`Failed to tag S3 object: ${error}`);
   }
