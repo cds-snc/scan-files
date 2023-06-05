@@ -108,7 +108,7 @@ resource "aws_lambda_permission" "s3_scan_object_org_account_execute" {
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_s3_events" {
-  for_each         = toset(local.onboarded_accounts)
+  for_each         = var.sqs_event_accounts
   event_source_arn = "arn:aws:sqs:${var.region}:${each.key}:s3-scan-object"
   function_name    = module.s3_scan_object.function_arn
 }
