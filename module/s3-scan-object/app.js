@@ -188,7 +188,7 @@ const processEventRecords = async (event, apiKey) => {
     // Track if there were any errors processing this record
     if (scanStatus === SCAN_FAILED_TO_START || isObjectTagged === false) {
       logger.warn(
-        `Error processing event record: ${util.inspect(
+        `Could not process event record: ${util.inspect(
           record
         )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`
       );
@@ -388,7 +388,7 @@ const tagS3Object = async (s3Client, s3Object, tags) => {
     logger.info(`Tag S3 object starting: ${util.inspect(s3Object)} tags: ${util.inspect(tags)}`);
     const command = new PutObjectTaggingCommand({ ...s3Object, ...tagging });
     const response = await s3Client.send(command);
-    isSuccess = response.VersionId !== undefined;
+    isSuccess = response.$metadata && response.$metadata.httpStatusCode === 200;
     logger.info(`Tag S3 object response: ${util.inspect(response)}`);
   } catch (error) {
     logger.error(`Failed to tag S3 object: ${error}`);

@@ -551,7 +551,7 @@ describe("startS3ObjectScan", () => {
 
 describe("tagS3Object", () => {
   test("successfully tags", async () => {
-    mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({ VersionId: "yeet" });
+    mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({ $metadata: { httpStatusCode: 200 } });
     const input = {
       Bucket: "foo",
       Key: "bar",
@@ -567,7 +567,7 @@ describe("tagS3Object", () => {
   });
 
   test("fails to tag", async () => {
-    mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({});
+    mockS3Client.on(PutObjectTaggingCommand).resolvesOnce({ $metadata: { httpStatusCode: 500 } });
     const response = await tagS3Object(mockS3Client, {}, []);
     expect(response).toBe(false);
   });
