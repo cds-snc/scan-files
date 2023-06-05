@@ -18,3 +18,8 @@ variable "scan_files_api_function_url" {
   type        = string
   sensitive   = true
 }
+
+variable "sqs_event_accounts" {
+  description = "Accounts that have an SQS queue to receive S3 events from"
+  type        = set(string)
+}
