@@ -34,13 +34,13 @@ load_non_existing_envs() {
 
 # Local testing
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-    echo "Running aws-lambda-rie"
+    echo "INFO Running aws-lambda-rie"
     exec /usr/bin/aws-lambda-rie /usr/local/bin/python -m awslambdaric "$1"
 
 # Running in AWS Lambda
 else
     if [ ! -f "$ENV_PATH/.env" ]; then # Only setup envs once per lambda lifecycle
-      echo "Retrieving environment parameters"
+      echo "INFO Retrieving environment parameters"
       if [ ! -d "$ENV_PATH" ]; then
         mkdir "$ENV_PATH"
       fi
@@ -51,7 +51,15 @@ else
         aws secretsmanager get-secret-value --region ca-central-1 --secret-id "$API_AUTH_TOKEN_SECRET_ARN" --query 'SecretString' --output text | sed -e 's/^/API_AUTH_TOKEN=/' >> "$TMP_ENV_FILE"
       fi
     fi
+
+    # Check if secrets were retrieved
+    if [ ! -s "$TMP_ENV_FILE" ]; then
+        echo "ERROR Failed to retrieve secrets during init"
+        rm "$TMP_ENV_FILE"
+        exit 1
+    fi    
     load_non_existing_envs
 
+    echo "INFO Starting lambda handler"
     exec /usr/local/bin/python -m awslambdaric "$1"
 fi
