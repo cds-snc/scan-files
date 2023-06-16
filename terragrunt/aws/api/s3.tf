@@ -5,9 +5,10 @@ locals {
 }
 
 module "log_bucket" {
-  source            = "github.com/cds-snc/terraform-modules?ref=v6.0.3//S3_log_bucket"
-  bucket_name       = "${var.product_name}-${var.env}-logs"
-  billing_tag_value = var.billing_code
+  source             = "github.com/cds-snc/terraform-modules?ref=v6.0.3//S3_log_bucket"
+  bucket_name        = "${var.product_name}-${var.env}-logs"
+  billing_tag_value  = var.billing_code
+  critical_tag_value = false
 }
 
 module "file-queue" {
