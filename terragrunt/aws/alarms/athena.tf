@@ -12,7 +12,7 @@ module "simple" {
 # Hold the Athena data
 #
 module "athena_bucket" {
-  source            = "github.com/cds-snc/terraform-modules?ref=v6.0.3//S3"
+  source            = "github.com/cds-snc/terraform-modules?ref=v6.1.0"
   bucket_name       = "${var.product_name}-${var.env}-athena-bucket"
   billing_tag_value = var.billing_code
 
