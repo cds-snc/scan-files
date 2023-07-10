@@ -1,5 +1,5 @@
 module "vpc" {
-  source            = "github.com/cds-snc/terraform-modules?ref=v3.0.19//vpc"
+  source            = "github.com/cds-snc/terraform-modules?ref=v3.0.20"
   name              = var.product_name
   billing_tag_value = var.billing_code
   high_availability = true
