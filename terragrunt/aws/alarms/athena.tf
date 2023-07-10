@@ -1,5 +1,5 @@
 module "simple" {
-  source = "github.com/cds-snc/terraform-modules?ref=v3.0.16//athena_access_logs"
+  source = "github.com/cds-snc/terraform-modules?ref=v6.1.0//athena_access_logs"
 
   athena_bucket_name         = module.athena_bucket.s3_bucket_id
   waf_access_queries_create  = true

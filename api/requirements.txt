@@ -1,12 +1,12 @@
 alembic==1.11.1
 assemblyline-client==4.5.1
 aws-lambda-powertools==2.17.0
-boto3==1.26.155
+boto3==1.26.165
 fastapi==0.97.0
 mangum==0.17.0
 psycopg2-binary==2.9.6
 python-multipart
 setuptools==67.8.0  # Pin to fix CVE-2022-40897
-SQLAlchemy==2.0.16
+SQLAlchemy==2.0.17
 pytz==2023.3
 filelock==3.12.2
