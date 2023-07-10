@@ -1,5 +1,5 @@
 module "s3_scan_object" {
-  source = "github.com/cds-snc/terraform-modules?ref=v6.1.1//lambda"
+  source = "github.com/cds-snc/terraform-modules//lambda?ref=v6.1.1"
 
   name      = "s3-scan-object"
   image_uri = "${aws_ecr_repository.s3_scan_object.repository_url}:latest"
