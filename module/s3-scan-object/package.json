@@ -18,9 +18,9 @@
     "pino-lambda": "^4.0.0"
   },
   "devDependencies": {
-    "aws-sdk-client-mock": "2.1.1",
-    "aws-sdk-client-mock-jest": "2.1.1",
-    "eslint": "8.43.0",
+    "aws-sdk-client-mock": "2.2.0",
+    "aws-sdk-client-mock-jest": "2.2.0",
+    "eslint": "8.44.0",
     "jest": "29.5.0",
     "prettier": "2.8.8"
   }
