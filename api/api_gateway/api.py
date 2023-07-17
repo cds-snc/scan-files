@@ -1,7 +1,7 @@
 from aws_lambda_powertools import Metrics
 from fastapi import FastAPI
 from os import environ
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from starlette.middleware.base import BaseHTTPMiddleware
 from uuid import uuid4
 
