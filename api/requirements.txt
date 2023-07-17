@@ -1,8 +1,8 @@
 alembic==1.11.1
 assemblyline-client==4.5.1
 aws-lambda-powertools==2.19.0
-boto3==1.26.165
-fastapi==0.99.1
+boto3==1.28.1
+fastapi==0.100.0
 mangum==0.17.0
 psycopg2-binary==2.9.6
 python-multipart
