@@ -4,6 +4,7 @@ aws-lambda-powertools==2.19.0
 boto3==1.28.1
 fastapi==0.100.0
 mangum==0.17.0
+pydantic-settings==2.0.2
 psycopg2-binary==2.9.6
 python-multipart
 setuptools==67.8.0  # Pin to fix CVE-2022-40897
