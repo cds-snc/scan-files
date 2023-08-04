@@ -1,7 +1,7 @@
 module "integration_test" {
-  source = "github.com/cds-snc/terraform-modules//S3_scan_object?ref=v6.1.5"
+  source = "github.com/cds-snc/terraform-modules//S3_scan_object?ref=v7.0.1"
 
-  s3_upload_bucket_name   = module.integration_test_bucket.s3_bucket_id
+  s3_upload_bucket_names  = [module.integration_test_bucket.s3_bucket_id]
   scan_files_role_arn     = "arn:aws:iam::${var.account_id}:role/scan-files-api"
   s3_scan_object_role_arn = "arn:aws:iam::${var.account_id}:role/s3-scan-object"
 
@@ -9,7 +9,7 @@ module "integration_test" {
 }
 
 module "integration_test_bucket" {
-  source            = "github.com/cds-snc/terraform-modules//S3?ref=v6.1.5"
+  source            = "github.com/cds-snc/terraform-modules//S3?ref=v7.0.1"
   bucket_name       = "${var.product_name}-${var.env}-integration-test"
   billing_tag_value = var.billing_code
 
