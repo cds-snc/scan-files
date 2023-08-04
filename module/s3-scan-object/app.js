@@ -150,7 +150,7 @@ const processEventRecords = async (event, apiKey) => {
           s3Object,
           awsAccountId,
           SNS_SCAN_COMPLETE_TOPIC_ARN,
-          requestId
+          requestId,
         );
         scanStatus = response !== undefined && response.status === 200 ? SCAN_IN_PROGRESS : SCAN_FAILED_TO_START;
 
@@ -189,8 +189,8 @@ const processEventRecords = async (event, apiKey) => {
     if (scanStatus === SCAN_FAILED_TO_START || isObjectTagged === false) {
       logger.warn(
         `Could not process event record: ${util.inspect(
-          record
-        )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`
+          record,
+        )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`,
       );
       errorCount++;
     }
@@ -360,7 +360,7 @@ const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, sn
           Authorization: apiKey,
           "X-Scanning-Request-Id": requestId,
         },
-      }
+      },
     );
     logger.info(`S3 scan response ${response.status}: ${util.inspect(response.data)}`);
     return response;

@@ -297,12 +297,12 @@ describe("getEventAttribute", () => {
       },
     };
     expect(getEventAttribute("aws:s3", { AccountId: "123456789012" }, null, { root: "AccountId" })).toBe(
-      "123456789012"
+      "123456789012",
     );
     expect(getEventAttribute("aws:sns", null, record, { sns: "aws-account" })).toBe("654321789012");
     expect(getEventAttribute("aws:sns", null, record, { sns: "request-id" })).toBe("qwer7890");
     expect(getEventAttribute("custom:rescan", { RequestId: "210987654321" }, null, { root: "RequestId" })).toBe(
-      "210987654321"
+      "210987654321",
     );
   });
 
@@ -513,7 +513,7 @@ describe("startS3ObjectScan", () => {
       },
       "123456789012",
       "someSnsTopicArn",
-      "mmmmRequestId"
+      "mmmmRequestId",
     );
     expect(response).toEqual({ status: 200 });
     expect(axios.post.mock.calls[0]).toEqual([
@@ -543,7 +543,7 @@ describe("startS3ObjectScan", () => {
         Key: "bar",
       },
       "123456789012",
-      "someSnsTopicArn"
+      "someSnsTopicArn",
     );
     expect(response).toEqual({ status: 500 });
   });
