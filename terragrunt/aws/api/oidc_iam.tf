@@ -4,7 +4,7 @@ locals {
 
 # Role used by Terraform to manage all satellite accounts
 module "gh_oidc_roles" {
-  source = "github.com/cds-snc/terraform-modules//gh_oidc_role?ref=v2.0.5"
+  source = "github.com/cds-snc/terraform-modules//gh_oidc_role?ref=v7.0.1"
   roles = [
     {
       name      = local.oidc_role
