@@ -14,13 +14,13 @@
     "@aws-sdk/client-secrets-manager": "^3.118.1",
     "@aws-sdk/client-sts": "^3.121.0",
     "axios": "^1.0.0",
-    "pino": "8.14.2",
+    "pino": "8.15.0",
     "pino-lambda": "^4.0.0"
   },
   "devDependencies": {
     "aws-sdk-client-mock": "3.0.0",
     "aws-sdk-client-mock-jest": "3.0.0",
-    "eslint": "8.46.0",
+    "eslint": "8.47.0",
     "jest": "29.6.3",
     "prettier": "3.0.1"
   }
