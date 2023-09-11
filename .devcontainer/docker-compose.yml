@@ -45,7 +45,7 @@ services:
       - "8082:8080"
 
   db:
-    image: postgres:14.9@sha256:34e6f382acb75bd089169d78121e60cb7bdfa6bafbdbabc201847ceb41494ace
+    image: postgres:14.9@sha256:b2f06ce12103bedbc0a49ae4ffff062d90824e0f45462de712f66952679f7670
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
     restart: unless-stopped
@@ -64,7 +64,7 @@ services:
       - "5434:5432"
   
   test-db:
-    image: postgres:14.9@sha256:34e6f382acb75bd089169d78121e60cb7bdfa6bafbdbabc201847ceb41494ace
+    image: postgres:14.9@sha256:b2f06ce12103bedbc0a49ae4ffff062d90824e0f45462de712f66952679f7670
     volumes:
     - ./initdb:/docker-entrypoint-initdb.d
     restart: unless-stopped
@@ -79,7 +79,7 @@ services:
       POSTGRES_DB: scan-files
 
   localstack:
-    image: localstack/localstack@sha256:27e96d8543c323e86211ac2d3f1307ca35b1c969923373577ce1c75964464b81
+    image: localstack/localstack@sha256:6a2453af8a46df6e0206f5329e9dc1a6f78084e4371e50ce3bd84e2be4c50a67
     hostname: localstack
     volumes:
       - "./data:/tmp/localstack"
