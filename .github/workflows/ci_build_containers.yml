@@ -46,3 +46,9 @@ jobs:
           docker build \
           --build-arg GIT_SHA=${{ github.sha }} \
           -t ${{ matrix.image }}:latest .
+
+      - name: Docker image analysis
+        uses: cds-snc/dive-action@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_NAME: ${{ matrix.image }}:latest
