@@ -48,7 +48,7 @@ jobs:
           -t ${{ matrix.image }}:latest .
 
       - name: Docker image analysis
-        uses: cds-snc/dive-action@main
+        uses: cds-snc/dive-action@573b52d289f6b7a24d70623a5fd5765b80302fd7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IMAGE_NAME: ${{ matrix.image }}:latest
