@@ -1,6 +1,6 @@
 alembic==1.12.0
 assemblyline-client==4.5.1
-aws-lambda-powertools==2.24.0
+aws-lambda-powertools==2.25.0
 boto3==1.28.49
 fastapi==0.103.1
 mangum==0.17.0
