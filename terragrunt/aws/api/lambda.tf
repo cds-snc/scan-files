@@ -1,5 +1,5 @@
 module "api" {
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v7.0.2"
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v7.2.5"
   name                   = "${var.product_name}-api"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
