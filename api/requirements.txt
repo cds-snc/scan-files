@@ -1,8 +1,8 @@
-alembic==1.12.0
+alembic==1.12.1
 assemblyline-client==4.5.1
 aws-lambda-powertools==2.26.0
-boto3==1.28.68
-fastapi==0.104.0
+boto3==1.28.73
+fastapi==0.104.1
 mangum==0.17.0
 pydantic-settings==2.0.3
 psycopg2-binary==2.9.9
