@@ -365,7 +365,7 @@ const startS3ObjectScan = async (apiEndpoint, apiKey, s3Object, awsAccountId, sn
     logger.info(`S3 scan response ${response.status}: ${util.inspect(response.data)}`);
     return response;
   } catch (error) {
-    logger.error(`Could not start scan for ${util.inspect(s3Object)}: ${util.inspect(error.response)}`);
+    logger.error(`Could not start scan for ${util.inspect(s3Object)}: ${util.inspect(error)}`);
     return error.response;
   }
 };
