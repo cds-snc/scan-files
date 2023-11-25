@@ -38,5 +38,6 @@ async def log_requests(request: Request, call_next):
 def verify_token(req: Request):
     token = req.headers.get("Authorization", None)
     if token != API_AUTH_TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        log.warning(f"Unauthorized: token '{token}' != expected '{API_AUTH_TOKEN}'")
+        raise HTTPException(status_code=401, detail="Unauthorized API request")
     return True

@@ -34,8 +34,8 @@ load_non_existing_envs() {
 
 # Local testing
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-    echo "INFO Running aws-lambda-rie"
-    exec /usr/bin/aws-lambda-rie /usr/local/bin/python -m awslambdaric "$1"
+  echo "INFO Running aws-lambda-rie"
+  exec /usr/bin/aws-lambda-rie /usr/local/bin/python -m awslambdaric "$1"
 
 # Running in AWS Lambda
 else
@@ -44,19 +44,26 @@ else
       if [ ! -d "$ENV_PATH" ]; then
         mkdir "$ENV_PATH"
       fi
-      aws ssm get-parameters --region ca-central-1 --with-decryption --names ENVIRONMENT_VARIABLES --query 'Parameters[*].Value' --output text > "$TMP_ENV_FILE"
-      if [ -z "${API_AUTH_TOKEN_SECRET_ARN}" ]; then
-        echo "API_AUTH_TOKEN_SECRET_ARN is not set"
+
+      # Retrieve secrets and write them to the .env file
+      ENV_VARS="$(aws ssm get-parameters --region ca-central-1 --with-decryption --names ENVIRONMENT_VARIABLES --query 'Parameters[*].Value' --output text)"
+      API_AUTH_TOKEN="$(aws secretsmanager get-secret-value --region ca-central-1 --secret-id $API_AUTH_TOKEN_SECRET_ARN --query 'SecretString' --output text)"
+      if [ -z "$ENV_VARS" ] || [ -z "$API_AUTH_TOKEN" ]; then
+        echo "ERROR Failed to retrieve secrets during init"
+        echo "ENV_VARS value: $ENV_VARS"
+        echo "API_AUTH_TOKEN value: $API_AUTH_TOKEN"
+        exit 1
       else
-        aws secretsmanager get-secret-value --region ca-central-1 --secret-id "$API_AUTH_TOKEN_SECRET_ARN" --query 'SecretString' --output text | sed -e 's/^/API_AUTH_TOKEN=/' >> "$TMP_ENV_FILE"
+        echo "$ENV_VARS" > "$TMP_ENV_FILE"
+        echo "API_AUTH_TOKEN=$API_AUTH_TOKEN" >> "$TMP_ENV_FILE"
       fi
     fi
 
-    # Check if secrets were retrieved
+    # Check if the tmp .env file has content
     if [ ! -s "$TMP_ENV_FILE" ]; then
-        echo "ERROR Failed to retrieve secrets during init"
-        rm "$TMP_ENV_FILE"
-        exit 1
+      echo "ERROR .env file does not have content"
+      rm "$TMP_ENV_FILE"
+      exit 1
     fi    
     load_non_existing_envs
 
