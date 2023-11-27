@@ -5,8 +5,6 @@ import time
 
 
 API_AUTH_TOKEN = environ.get("API_AUTH_TOKEN")
-if not API_AUTH_TOKEN:
-    raise Exception("API_AUTH_TOKEN environment variable is not set")
 
 
 async def add_security_headers(request: Request, call_next):

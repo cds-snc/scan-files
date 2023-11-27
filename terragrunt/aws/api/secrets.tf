@@ -16,7 +16,6 @@ resource "aws_ssm_parameter" "api_secret_environment_variables" {
   name  = "ENVIRONMENT_VARIABLES"
   type  = "SecureString"
   value = var.api_secret_environment_variables
-
   tags = {
     CostCentre = var.billing_code
     Terraform  = true

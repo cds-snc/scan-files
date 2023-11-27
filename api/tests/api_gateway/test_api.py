@@ -41,7 +41,7 @@ def test_healthcheck_failure(mock_log, mock_get_db_version):
     assert response.json() == expected_val
 
 
-@patch.dict(os.environ, {"OPENAPI_URL": ""}, clear=True)
+@patch.dict(os.environ, {"OPENAPI_URL": "", "API_AUTH_TOKEN": "secret"}, clear=True)
 def test_api_docs_disabled_via_environ():
     reload(api)
 
@@ -55,7 +55,9 @@ def test_api_docs_disabled_via_environ():
     assert response.status_code == 404
 
 
-@patch.dict(os.environ, {"OPENAPI_URL": "/openapi.json"}, clear=True)
+@patch.dict(
+    os.environ, {"OPENAPI_URL": "/openapi.json", "API_AUTH_TOKEN": "secret"}, clear=True
+)
 def test_api_docs_enabled_via_environ():
     reload(api)
 

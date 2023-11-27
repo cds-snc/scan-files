@@ -15,7 +15,7 @@ var_expand() {
 load_non_existing_envs() {
   _isComment='^[[:space:]]*#'
   _isBlank='^[[:space:]]*$'
-  while IFS= read -r line; do
+  while IFS= read -r line || [ -n "$line" ]; do
     if echo "$line" | grep -Eq "$_isComment"; then # Ignore comment line
       continue
     fi
@@ -47,15 +47,11 @@ else
 
       # Retrieve secrets and write them to the .env file
       ENV_VARS="$(aws ssm get-parameters --region ca-central-1 --with-decryption --names ENVIRONMENT_VARIABLES --query 'Parameters[*].Value' --output text)"
-      API_AUTH_TOKEN="$(aws secretsmanager get-secret-value --region ca-central-1 --secret-id $API_AUTH_TOKEN_SECRET_ARN --query 'SecretString' --output text)"
-      if [ -z "$ENV_VARS" ] || [ -z "$API_AUTH_TOKEN" ]; then
+      if [ -z "$ENV_VARS" ]; then
         echo "ERROR Failed to retrieve secrets during init"
-        echo "ENV_VARS value: $ENV_VARS"
-        echo "API_AUTH_TOKEN value: $API_AUTH_TOKEN"
         exit 1
       else
         echo "$ENV_VARS" > "$TMP_ENV_FILE"
-        echo "API_AUTH_TOKEN=$API_AUTH_TOKEN" >> "$TMP_ENV_FILE"
       fi
     fi
 
