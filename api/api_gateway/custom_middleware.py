@@ -1,11 +1,12 @@
 from fastapi import HTTPException, Request
 from logger import log
 from os import environ
-from uuid import uuid4
 import time
 
 
-API_AUTH_TOKEN = environ.get("API_AUTH_TOKEN", uuid4())
+API_AUTH_TOKEN = environ.get("API_AUTH_TOKEN")
+if not API_AUTH_TOKEN:
+    raise Exception("API_AUTH_TOKEN environment variable is not set")
 
 
 async def add_security_headers(request: Request, call_next):
@@ -38,6 +39,17 @@ async def log_requests(request: Request, call_next):
 def verify_token(req: Request):
     token = req.headers.get("Authorization", None)
     if token != API_AUTH_TOKEN:
-        log.info(f"Unauthorized: token '{token}' != expected '{API_AUTH_TOKEN}'")
+        log.info(
+            f"Unauthorized: token '{redact(token)}' != expected '{redact(API_AUTH_TOKEN)}'"
+        )
         raise HTTPException(status_code=401, detail="Unauthorized API request")
     return True
+
+
+def redact(value: str):
+    "Redact value if it is a string and longer than 6 characters"
+    show_chars = 6
+    if isinstance(value, str) and len(value) > show_chars:
+        return (len(value) - show_chars) * "*" + value[-show_chars:]
+    else:
+        return value
