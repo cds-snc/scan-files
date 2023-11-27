@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from os import environ
 from pydantic_settings import BaseSettings
 from starlette.middleware.base import BaseHTTPMiddleware
-from uuid import uuid4
 
 from .custom_middleware import add_security_headers, log_requests
 from .routers import ops, assemblyline, clamav
@@ -14,11 +13,13 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-API_AUTH_TOKEN = environ.get("API_AUTH_TOKEN", uuid4())
+API_AUTH_TOKEN = environ.get("API_AUTH_TOKEN")
 MLWR_HOST = environ.get("MLWR_HOST")
 MLWR_USER = environ.get("MLWR_USER")
 MLWR_KEY = environ.get("MLWR_KEY")
 
+if not API_AUTH_TOKEN:
+    raise Exception("API_AUTH_TOKEN environment variable is not set")
 
 description = """
 Scan files 📁 API. Submit files for malware scanning
