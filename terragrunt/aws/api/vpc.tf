@@ -2,7 +2,6 @@ module "vpc" {
   source            = "github.com/cds-snc/terraform-modules//vpc?ref=v9.0.4"
   name              = var.product_name
   billing_tag_value = var.billing_code
-  high_availability = true
   enable_flow_log   = true
   block_ssh         = true
   block_rdp         = true
