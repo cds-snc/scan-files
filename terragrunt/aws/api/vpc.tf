@@ -6,6 +6,7 @@ module "vpc" {
   block_ssh          = true
   block_rdp          = true
   cidrsubnet_newbits = 8
+  availability_zones = 3
 
   single_nat_gateway = var.env != "production"
 
