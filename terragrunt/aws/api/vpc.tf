@@ -1,11 +1,12 @@
 module "vpc" {
-  source            = "github.com/cds-snc/terraform-modules//vpc?ref=v8.0.0"
-  name              = var.product_name
-  billing_tag_value = var.billing_code
-  high_availability = true
-  enable_flow_log   = true
-  block_ssh         = true
-  block_rdp         = true
+  source = "github.com/cds-snc/terraform-modules//vpc?ref=v9.0.4"
+
+  name               = var.product_name
+  enable_flow_log    = true
+  block_ssh          = true
+  block_rdp          = true
+  cidrsubnet_newbits = 8
+  availability_zones = 3
 
   single_nat_gateway = var.env != "production"
 
@@ -13,6 +14,8 @@ module "vpc" {
   allow_https_request_out_response = true
   allow_https_request_in           = true
   allow_https_request_in_response  = true
+
+  billing_tag_value = var.billing_code
 }
 
 #
