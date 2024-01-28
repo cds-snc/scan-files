@@ -79,7 +79,7 @@ services:
       POSTGRES_DB: scan-files
 
   localstack:
-    image: localstack/localstack@sha256:977fe2f5cac8b4cb8e3e51466f6b84205319e8e69d81ed753cfa9826a309820a
+    image: localstack/localstack@sha256:fb1bc9a2b9a13db68e96ec707c1ff414a79e4763a24b81df36e4d2c7bf14afe9
     hostname: localstack
     volumes:
       - "./data:/tmp/localstack"
