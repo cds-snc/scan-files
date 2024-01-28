@@ -7,4 +7,4 @@ httpx==0.26.0
 locust==2.20.1
 pytest==7.4.4
 requests==2.31.0
-uvicorn==0.25.0
+uvicorn==0.26.0
