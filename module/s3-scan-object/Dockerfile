@@ -11,8 +11,8 @@ RUN apk add --no-cache \
     autoconf \
     automake \
     build-base \
+    elfutils-dev \
     libcurl \
-    libexecinfo-dev \
     libstdc++ \
     libtool \
     make \
