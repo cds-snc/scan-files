@@ -17,6 +17,8 @@ module "api" {
   environment_variables = {
     API_AUTH_TOKEN_SECRET_ARN    = aws_secretsmanager_secret.api_auth_token.id
     AV_DEFINITION_S3_BUCKET      = "${var.product_name}-${var.env}-clamav-defs"
+    AWS_MAX_ATTEMPTS             = "5"
+    AWS_RETRY_MODE               = "standard"
     COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
     FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
     FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id

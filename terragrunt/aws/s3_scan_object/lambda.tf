@@ -8,6 +8,8 @@ module "s3_scan_object" {
   timeout   = 300
 
   environment_variables = {
+    AWS_MAX_ATTEMPTS              = "5"
+    AWS_RETRY_MODE                = "standard"
     LOGGING_LEVEL                 = "info"
     SCAN_FILES_URL                = var.scan_files_api_function_url
     SCAN_FILES_API_KEY_SECRET_ARN = var.scan_files_api_key_secret_arn
