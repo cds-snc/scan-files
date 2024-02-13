@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=node:20.2.0-alpine3.16@sha256:f9b54b46639a9017b39eba677cf44c8cb96760ca69dadcc1d4cbd1daea753225
+ARG BASE_IMAGE=node:20.11.0-alpine3.19@sha256:2f46fd49c767554c089a5eb219115313b72748d8f62f5eccb58ef52bc36db4ad
 
 # Builder to install lambda dependencies
 FROM ${BASE_IMAGE} as builder
@@ -12,12 +12,15 @@ RUN apk add --no-cache \
     automake \
     build-base \
     libcurl \
-    libexecinfo-dev \
     libstdc++ \
     libtool \
     make \
     cmake \
     python3
+
+# Install libexecinfo-dev from the Alpine v3.16 repository
+RUN apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ \
+    libexecinfo-dev
 
 RUN npm install --prefix ${APP_DIR}/tmp aws-lambda-ric
 
