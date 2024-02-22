@@ -1,4 +1,4 @@
-name: "Terraform plan staging"
+name: "Terraform plan Staging"
 
 on:
   workflow_dispatch:
