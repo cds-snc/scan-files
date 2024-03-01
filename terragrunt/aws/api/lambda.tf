@@ -36,6 +36,44 @@ module "api" {
   ]
 }
 
+module "api_provisioned" {
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.1.0"
+  name                   = "${var.product_name}-api-provisioned"
+  billing_tag_value      = var.billing_code
+  ecr_arn                = aws_ecr_repository.api.arn
+  enable_lambda_insights = true
+  image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
+  memory                 = 3008
+  timeout                = 300
+  ephemeral_storage      = 768
+
+  vpc = {
+    security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
+    subnet_ids         = module.vpc.private_subnet_ids
+  }
+
+  environment_variables = {
+    API_AUTH_TOKEN_SECRET_ARN    = aws_secretsmanager_secret.api_auth_token.id
+    AV_DEFINITION_S3_BUCKET      = "${var.product_name}-${var.env}-clamav-defs"
+    AWS_MAX_ATTEMPTS             = "5"
+    AWS_RETRY_MODE               = "standard"
+    COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
+    FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
+    FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
+    LOG_LEVEL                    = "INFO"
+    OPENAPI_URL                  = "/openapi.json"
+    POWERTOOLS_SERVICE_NAME      = "${var.product_name}-api"
+    SCAN_QUEUE_STATEMACHINE_NAME = "assemblyline-file-scan-queue"
+    SQLALCHEMY_DATABASE_URI      = module.rds.proxy_connection_string_value
+  }
+
+  policies = [
+    data.aws_iam_policy_document.api_policies.json,
+    data.aws_iam_policy_document.api_get_secrets.json,
+    sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
+  ]
+}
+
 # Rescan stale files every 24 hours
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
@@ -95,5 +133,11 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_de
 resource "aws_lambda_function_url" "scan_files_url" {
   # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
   function_name      = module.api.function_name
+  authorization_type = "NONE"
+}
+
+resource "aws_lambda_function_url" "scan_files_provisioned_url" {
+  # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
+  function_name      = module.api_provisioned.function_name
   authorization_type = "NONE"
 }
