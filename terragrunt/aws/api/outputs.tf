@@ -15,28 +15,28 @@ output "log_bucket_id" {
 }
 
 output "function_arn" {
-  value = module.api.function_arn
+  value = module.scan_files["api"].function_arn
 }
 
 output "function_log_group_name" {
-  value = "/aws/lambda/${module.api.function_name}"
+  value = "/aws/lambda/${module.scan_files["api"].function_name}"
 }
 
 output "function_name" {
-  value = module.api.function_name
+  value = module.scan_files["api"].function_name
 }
 
 output "function_role_arn" {
-  value = "arn:aws:iam::${var.account_id}:role/${module.api.function_name}"
+  value = "arn:aws:iam::${var.account_id}:role/${module.scan_files["api"].function_name}"
 }
 
 output "function_url" {
-  value     = aws_lambda_function_url.scan_files_url.function_url
+  value     = aws_lambda_function_url.scan_files["api"].function_url
   sensitive = true
 }
 
 output "invoke_arn" {
-  value = module.api.invoke_arn
+  value = module.scan_files["api"].invoke_arn
 }
 
 output "route53_health_check_api_id" {

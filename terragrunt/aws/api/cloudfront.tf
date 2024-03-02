@@ -5,8 +5,8 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
   web_acl_id  = aws_wafv2_web_acl.api_waf.arn
 
   origin {
-    domain_name = split("/", aws_lambda_function_url.scan_files_url.function_url)[2]
-    origin_id   = aws_lambda_function_url.scan_files_url.function_name
+    domain_name = split("/", aws_lambda_function_url.scan_files["api"].function_url)[2]
+    origin_id   = aws_lambda_function_url.scan_files["api"].function_name
 
     custom_origin_config {
       http_port              = 80
@@ -28,7 +28,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
       }
     }
 
-    target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
+    target_origin_id           = aws_lambda_function_url.scan_files["api"].function_name
     viewer_protocol_policy     = "redirect-to-https"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
   }
@@ -46,7 +46,7 @@ resource "aws_cloudfront_distribution" "scan_files_api" {
       }
     }
 
-    target_origin_id           = aws_lambda_function_url.scan_files_url.function_name
+    target_origin_id           = aws_lambda_function_url.scan_files["api"].function_name
     viewer_protocol_policy     = "redirect-to-https"
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers_policy_api.id
 
