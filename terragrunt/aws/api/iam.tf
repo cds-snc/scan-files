@@ -112,7 +112,8 @@ data "aws_iam_policy_document" "api_policies" {
       "lambda:InvokeFunction"
     ]
     resources = [
-      module.api.function_arn
+      module.scan_files["api"].function_arn,
+      module.scan_files["api-provisioned"].function_arn
     ]
   }
 }

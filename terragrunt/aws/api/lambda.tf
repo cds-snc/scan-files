@@ -1,44 +1,12 @@
-module "api" {
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.3"
-  name                   = "${var.product_name}-api"
-  billing_tag_value      = var.billing_code
-  ecr_arn                = aws_ecr_repository.api.arn
-  enable_lambda_insights = true
-  image_uri              = "${aws_ecr_repository.api.repository_url}:latest"
-  memory                 = 3008
-  timeout                = 300
-  ephemeral_storage      = 768
-
-  vpc = {
-    security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
-    subnet_ids         = module.vpc.private_subnet_ids
-  }
-
-  environment_variables = {
-    API_AUTH_TOKEN_SECRET_ARN    = aws_secretsmanager_secret.api_auth_token.id
-    AV_DEFINITION_S3_BUCKET      = "${var.product_name}-${var.env}-clamav-defs"
-    AWS_MAX_ATTEMPTS             = "5"
-    AWS_RETRY_MODE               = "standard"
-    COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
-    FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
-    FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
-    LOG_LEVEL                    = "INFO"
-    OPENAPI_URL                  = "/openapi.json"
-    POWERTOOLS_SERVICE_NAME      = "${var.product_name}-api"
-    SCAN_QUEUE_STATEMACHINE_NAME = "assemblyline-file-scan-queue"
-    SQLALCHEMY_DATABASE_URI      = module.rds.proxy_connection_string_value
-  }
-
-  policies = [
-    data.aws_iam_policy_document.api_policies.json,
-    data.aws_iam_policy_document.api_get_secrets.json,
-    sensitive(data.aws_iam_policy_document.api_assume_cross_account.json)
-  ]
+locals {
+  scan_files_api_functions = ["api", "api-provisioned"]
 }
 
-module "api_provisioned" {
+module "scan_files" {
+  for_each = toset(local.scan_files_api_functions)
+
   source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.3"
-  name                   = "${var.product_name}-api-provisioned"
+  name                   = "${var.product_name}-${each.key}"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
   enable_lambda_insights = true
@@ -79,7 +47,7 @@ module "api_provisioned" {
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = module.api.function_name
+  function_name = module.scan_files["api"].function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.arn
 }
@@ -98,7 +66,7 @@ resource "aws_cloudwatch_event_rule" "assemblyline_rescan_every_24_hours" {
 resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
   rule      = aws_cloudwatch_event_rule.assemblyline_rescan_every_24_hours.name
   target_id = "${var.product_name}-${var.env}-assemblyline-stale-scan-resubmitter"
-  arn       = module.api.function_arn
+  arn       = module.scan_files["api"].function_arn
   input     = jsonencode({ task = "assemblyline_resubmit_stale" })
 }
 
@@ -107,7 +75,7 @@ resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_rescan" {
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda_for_update_clamav" {
   statement_id  = "AllowExecutionFromCloudWatchForVirusDefs"
   action        = "lambda:InvokeFunction"
-  function_name = module.api.function_name
+  function_name = module.scan_files["api"].function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.clamav_update_avdefs.arn
 }
@@ -126,18 +94,31 @@ resource "aws_cloudwatch_event_rule" "clamav_update_avdefs" {
 resource "aws_cloudwatch_event_target" "trigger_api_lambda_to_download_clamav_defs" {
   rule      = aws_cloudwatch_event_rule.clamav_update_avdefs.name
   target_id = "${var.product_name}-${var.env}-clamav-update-avdefs"
-  arn       = module.api.function_arn
+  arn       = module.scan_files["api"].function_arn
   input     = jsonencode({ task = "clamav_update_virus_defs" })
 }
 
-resource "aws_lambda_function_url" "scan_files_url" {
+resource "aws_lambda_function_url" "scan_files" {
   # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
-  function_name      = module.api.function_name
+  for_each = toset(local.scan_files_api_functions)
+
+  function_name      = module.scan_files[each.key].function_name
   authorization_type = "NONE"
 }
 
-resource "aws_lambda_function_url" "scan_files_provisioned_url" {
-  # checkov:skip=CKV_AWS_258: Lambda function url auth is handled at the API level
-  function_name      = module.api_provisioned.function_name
-  authorization_type = "NONE"
+#
+# Setup provisioned concurency for the api-provisioned lambda
+# This function will be used for synchronous requests
+#
+resource "aws_lambda_alias" "api_provisioned_latest" {
+  name             = "latest"
+  description      = "The most recently deployed version of the API"
+  function_name    = module.scan_files["api-provisioned"].function_arn
+  function_version = module.scan_files["api-provisioned"].function_version
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "api_provisioned" {
+  function_name                     = module.scan_files["api-provisioned"].function_name
+  provisioned_concurrent_executions = 1
+  qualifier                         = aws_lambda_alias.api_provisioned_latest.name
 }
