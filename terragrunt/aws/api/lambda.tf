@@ -1,5 +1,5 @@
 module "api" {
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.1.0"
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.3"
   name                   = "${var.product_name}-api"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
@@ -37,7 +37,7 @@ module "api" {
 }
 
 module "api_provisioned" {
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.1.0"
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.3"
   name                   = "${var.product_name}-api-provisioned"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
