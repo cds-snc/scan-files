@@ -5,7 +5,7 @@ locals {
 module "scan_files" {
   for_each = toset(local.scan_files_api_functions)
 
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.3"
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v9.2.4"
   name                   = "${var.product_name}-${each.key}"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
@@ -14,6 +14,7 @@ module "scan_files" {
   memory                 = 3008
   timeout                = 300
   ephemeral_storage      = 768
+  publish                = each.key == "api-provisioned"
 
   vpc = {
     security_group_ids = [module.rds.proxy_security_group_id, aws_security_group.api.id]
