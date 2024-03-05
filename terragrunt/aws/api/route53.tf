@@ -4,8 +4,8 @@ resource "aws_route53_record" "scan_files_A" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.scan_files_api.domain_name
-    zone_id                = aws_cloudfront_distribution.scan_files_api.hosted_zone_id
+    name                   = aws_cloudfront_distribution.scan_files["api"].domain_name
+    zone_id                = aws_cloudfront_distribution.scan_files["api"].hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -22,6 +22,18 @@ resource "aws_route53_health_check" "scan_files_A" {
   tags = {
     CostCentre = var.billing_code
     Terraform  = true
+  }
+}
+
+resource "aws_route53_record" "sync_scan_files_A" {
+  zone_id = var.hosted_zone_id
+  name    = "sync.${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.scan_files["api-provisioned"].domain_name
+    zone_id                = aws_cloudfront_distribution.scan_files["api-provisioned"].hosted_zone_id
+    evaluate_target_health = false
   }
 }
 
