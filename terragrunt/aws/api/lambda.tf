@@ -105,7 +105,7 @@ resource "aws_lambda_function_url" "scan_files" {
 
   function_name      = module.scan_files[each.key].function_name
   authorization_type = "NONE"
-  qualifier          = each.key == "api-provisioned" ? aws_lambda_alias.api_provisioned_latest.name : "$LATEST"
+  qualifier          = each.key == "api-provisioned" ? aws_lambda_alias.api_provisioned_latest.name : null
 }
 
 #
