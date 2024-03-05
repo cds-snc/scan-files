@@ -1,7 +1,3 @@
-locals {
-  scan_files_api_functions = ["api", "api-provisioned"]
-}
-
 module "scan_files" {
   for_each = toset(local.scan_files_api_functions)
 
