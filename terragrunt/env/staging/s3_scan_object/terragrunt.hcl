@@ -13,7 +13,7 @@ dependency "api" {
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
     api_function_name             = "scan-files-api"
-    api_function_role_arn         = "arn:aws:iam::${local.vars.inputs.account_id}:role/scan-files-api"
+    api_function_role_arn         = "arn:aws:iam::127893201980:role/scan-files-api"
     api_function_url              = "http://localhost"
     scan_files_api_key_secret_arn = ""
   }

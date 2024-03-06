@@ -12,7 +12,7 @@ dependency "api" {
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
-    api_function_arn  = "arn:aws:lambda:${local.vars.inputs.region}:${local.vars.inputs.account_id}:function:scan-files-api"
+    api_function_arn  = "arn:aws:lambda:ca-central-1:127893201980:function:scan-files-api"
     api_function_name = "scan-files-api"
   }
 }
