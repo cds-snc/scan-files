@@ -12,15 +12,15 @@ dependency "api" {
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
-    function_arn  = ""
-    function_name = ""
+    api_function_arn  = "arn:aws:lambda:ca-central-1:806545929748:function:scan-files-api"
+    api_function_name = "scan-files-api"
   }
 }
 
 inputs = {
   concurrent_scan_limit  = 5
-  api_function_arn       = dependency.api.outputs.function_arn
-  api_function_name      = dependency.api.outputs.function_name
+  api_function_arn       = dependency.api.outputs.api_function_arn
+  api_function_name      = dependency.api.outputs.api_function_name
 }
 
 include {

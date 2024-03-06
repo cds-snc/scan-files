@@ -8,6 +8,16 @@ resource "aws_shield_protection" "cloudfront_api" {
   }
 }
 
+resource "aws_shield_protection" "cloudfront_api" {
+  name         = "CloudFrontAPISync"
+  resource_arn = "arn:aws:cloudfront::${var.account_id}:distribution/${var.api_sync_cloudfront_distribution_id}"
+
+  tags = {
+    CostCentre = var.billing_code
+    Terraform  = true
+  }
+}
+
 resource "aws_shield_protection" "route53_hosted_zone" {
   name         = "Route53HostedZone"
   resource_arn = "arn:aws:route53:::hostedzone/${var.route53_hosted_zone_id}"

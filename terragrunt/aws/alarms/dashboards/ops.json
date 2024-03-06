@@ -9,7 +9,7 @@
             "properties": {
                 "title": "Alarms",
                 "alarms": [
-                    "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ErrorLoggedAPI",
+                    "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ErrorLogged-api",
                     "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ErrorLoggedS3ScanObject",
                     "arn:aws:cloudwatch:ca-central-1:${account_id}:alarm:ScanVerdictSuspicious"
                 ]
