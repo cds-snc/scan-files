@@ -76,7 +76,7 @@ jobs:
       - name: Update alias for provisioned concurrency API
         if: steps.filter.outputs.changes == 'true' && matrix.function == 'scan-files-api-provisioned'
         run: |
-          aws lambda wait function-active --function-name ${{ matrix.function }}
+          aws lambda wait function-updated --function-name ${{ matrix.function }}
           VERSION="$(aws lambda publish-version --function-name ${{ matrix.function }} | jq -r '.Version')"
           aws lambda update-alias \
             --function-name ${{ matrix.function }} \
@@ -87,6 +87,6 @@ jobs:
         if: steps.filter.outputs.changes == 'true'
         uses: jtalk/url-health-check-action@61a0e49fff5cde3773b0bbe069d4ebbd04d24f07 # tag=v2
         with:
-          url: https://scan-files.alpha.canada.ca/version
+          url: https://scan-files.alpha.canada.ca/version|https://sync.scan-files.alpha.canada.ca/version
           max-attempts: 3
           retry-delay: 5s
