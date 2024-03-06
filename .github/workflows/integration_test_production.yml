@@ -11,20 +11,21 @@ on:
 
 env:
   API_TOKEN: ${{ secrets.PRODUCTION_API_AUTH_TOKEN }}
-  API_URL: https://scan-files.alpha.canada.ca
   BUCKET_NAME: scan-files-production-integration-test
 
 permissions:
   id-token: write
   contents: read
-  pull-requests: write
-  actions: write
-  checks: write
-  statuses: write
 
 jobs:
   integration-test-production:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        url:
+          - https://scan-files.alpha.canada.ca
+          - https://sync.scan-files.alpha.canada.ca   
 
     steps:
       - name: Checkout
@@ -74,7 +75,7 @@ jobs:
 
       - name: Sync test - expected verdict
         run: |
-          VERDICT=$(curl --silent --request POST "${{ env.API_URL }}/clamav" \
+          VERDICT=$(curl --silent --request POST "${{ matrix.url }}/clamav" \
             --header "Authorization: ${{ env.API_TOKEN }}" \
             --header "Content-Type: multipart/form-data" \
             --form "ignore_cache=True" \

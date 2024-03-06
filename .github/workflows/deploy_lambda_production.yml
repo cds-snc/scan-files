@@ -32,6 +32,10 @@ jobs:
             image: api
             version: .github/manifests/lambda_api_version
 
+          - function: scan-files-api-provisioned
+            image: api
+            version: .github/manifests/lambda_api_version
+
           - function: s3-scan-object
             image: module/s3-scan-object
             version: .github/manifests/lambda_s3_scan_object_version
@@ -68,6 +72,16 @@ jobs:
           aws lambda wait function-active --function-name ${{ matrix.function }}
           source .github/workflows/scripts/migrate.sh
           migrate
+
+      - name: Update alias for provisioned concurrency API
+        if: steps.filter.outputs.changes == 'true' && matrix.function == 'scan-files-api-provisioned'
+        run: |
+          aws lambda wait function-active --function-name ${{ matrix.function }}
+          VERSION="$(aws lambda publish-version --function-name ${{ matrix.function }} | jq -r '.Version')"
+          aws lambda update-alias \
+            --function-name ${{ matrix.function }} \
+            --name latest \
+            --function-version "$VERSION" > /dev/null 2>&1
 
       - name: API healthcheck
         if: steps.filter.outputs.changes == 'true'
