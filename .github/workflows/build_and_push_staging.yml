@@ -84,6 +84,9 @@ jobs:
           aws lambda update-function-code \
             --function-name scan-files-api \
             --image-uri $REGISTRY/${{ matrix.image }}:$GITHUB_SHA  > /dev/null 2>&1
+          aws lambda update-function-code \
+            --function-name scan-files-api-provisioned \
+            --image-uri $REGISTRY/${{ matrix.image }}:$GITHUB_SHA  > /dev/null 2>&1
 
       - name: Migrate database
         if: matrix.image == 'api'
@@ -91,6 +94,16 @@ jobs:
           aws lambda wait function-active --function-name scan-files-api
           source .github/workflows/scripts/migrate.sh
           migrate
+
+      - name: Update alias for provisioned concurrency API
+        if: matrix.image == 'api'
+        run: |
+          aws lambda wait function-active --function-name scan-files-api-provisioned
+          VERSION="$(aws lambda publish-version --function-name scan-files-api-provisioned | jq -r '.Version')"
+          aws lambda update-alias \
+            --function-name scan-files-api-provisioned \
+            --name latest \
+            --function-version "$VERSION" > /dev/null 2>&1
 
       - name: API healthcheck
         uses: jtalk/url-health-check-action@61a0e49fff5cde3773b0bbe069d4ebbd04d24f07 # tag=v2
