@@ -8,7 +8,7 @@ resource "aws_shield_protection" "cloudfront_api" {
   }
 }
 
-resource "aws_shield_protection" "cloudfront_api" {
+resource "aws_shield_protection" "cloudfront_api_sync" {
   name         = "CloudFrontAPISync"
   resource_arn = "arn:aws:cloudfront::${var.account_id}:distribution/${var.api_sync_cloudfront_distribution_id}"
 
