@@ -9,7 +9,7 @@ dependencies {
 dependency "api" {
   config_path = "../api"
 
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "fmt", "validate", "plan", "show"]
   mock_outputs_merge_strategy_with_state  = "shallow"
   mock_outputs = {
     api_function_arn  = "arn:aws:lambda:ca-central-1:806545929748:function:scan-files-api"
