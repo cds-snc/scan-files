@@ -5,6 +5,7 @@ Revises: fdbf608faf86
 Create Date: 2021-11-18 18:47:34.804287
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 

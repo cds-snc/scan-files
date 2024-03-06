@@ -79,8 +79,8 @@ def hsts_middleware_client():
 def mock_s3_download():
     download = {}
     download["s3_path"] = "s3://bucket/prefix/definitions.json"
-    download[
-        "local_path"
-    ] = "/tmp/definitions.json"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    download["local_path"] = (
+        "/tmp/definitions.json"  # nosec - [B108:hardcoded_tmp_directory] no risk in tests
+    )
 
     return download
