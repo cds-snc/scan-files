@@ -3,6 +3,7 @@ Performance testing for the scanning endpoints.  Creates
 a ramdom file and uploads it to the endpoint to trigger
 a scan.
 """
+
 from locust import HttpUser, task
 import os
 import tempfile
