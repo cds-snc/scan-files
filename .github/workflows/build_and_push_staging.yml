@@ -98,7 +98,7 @@ jobs:
       - name: Update alias for provisioned concurrency API
         if: matrix.image == 'api'
         run: |
-          aws lambda wait function-active --function-name scan-files-api-provisioned
+          aws lambda wait function-updated --function-name scan-files-api-provisioned
           VERSION="$(aws lambda publish-version --function-name scan-files-api-provisioned | jq -r '.Version')"
           aws lambda update-alias \
             --function-name scan-files-api-provisioned \
@@ -108,7 +108,7 @@ jobs:
       - name: API healthcheck
         uses: jtalk/url-health-check-action@61a0e49fff5cde3773b0bbe069d4ebbd04d24f07 # tag=v2
         with:
-          url: https://scan-files.cdssandbox.xyz/version
+          url: https://scan-files.cdssandbox.xyz/version|https://sync.scan-files.cdssandbox.xyz/version
           max-attempts: 3
           retry-delay: 5s
 
