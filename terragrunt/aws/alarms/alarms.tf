@@ -40,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
+resource "aws_cloudwatch_log_metric_filter" "scan_files_error" {
   for_each = { for function in local.api_functions : function.name => function }
 
   name           = local.error_logged_api
@@ -54,7 +54,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "scan_files_api_warning" {
+resource "aws_cloudwatch_log_metric_filter" "scan_files_warning" {
   for_each = { for function in local.api_functions : function.name => function }
 
   name           = local.warning_logged_api
@@ -68,15 +68,15 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_warning" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
+resource "aws_cloudwatch_metric_alarm" "scan_files_error" {
   for_each = { for function in local.api_functions : function.name => function }
 
   alarm_name          = "${local.error_logged_api}-${each.value.name}"
   alarm_description   = "Errors logged by the Scan Files ${each.value.name} lambda function"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 
-  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_error[each.value.name].metric_transformation[0].name
-  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_error[each.value.name].metric_transformation[0].namespace
+  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_error[each.value.name].metric_transformation[0].name
+  namespace          = aws_cloudwatch_log_metric_filter.scan_files_error[each.value.name].metric_transformation[0].namespace
   period             = "60"
   evaluation_periods = "1"
   statistic          = "Sum"
@@ -87,15 +87,15 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   ok_actions    = [aws_sns_topic.cloudwatch_warning.arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "scan_files_api_warning" {
+resource "aws_cloudwatch_metric_alarm" "scan_files_warning" {
   for_each = { for function in local.api_functions : function.name => function }
 
   alarm_name          = "${local.warning_logged_api}-${each.value.name}"
   alarm_description   = "Warnings logged by the Scan Files ${each.value.name} lambda function"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 
-  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_warning[each.value.name].metric_transformation[0].name
-  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_warning[each.value.name].metric_transformation[0].namespace
+  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_warning[each.value.name].metric_transformation[0].name
+  namespace          = aws_cloudwatch_log_metric_filter.scan_files_warning[each.value.name].metric_transformation[0].namespace
   period             = "60"
   evaluation_periods = "1"
   statistic          = "Sum"
