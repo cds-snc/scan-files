@@ -45,7 +45,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_error" {
 
   name           = local.error_logged_api
   pattern        = "?ERROR ?Error ?error ?failed"
-  log_group_name = function.value.log_group_name
+  log_group_name = each.value.log_group_name
 
   metric_transformation {
     name      = local.error_logged_api
@@ -59,7 +59,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_warning" {
 
   name           = local.warning_logged_api
   pattern        = "WARNING"
-  log_group_name = function.value.log_group_name
+  log_group_name = each.value.log_group_name
 
   metric_transformation {
     name      = local.warning_logged_api
@@ -71,12 +71,12 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_api_warning" {
 resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  alarm_name          = "${local.error_logged_api}-${function.value.name}"
-  alarm_description   = "Errors logged by the Scan Files ${function.value.name} lambda function"
+  alarm_name          = "${local.error_logged_api}-${each.value.name}"
+  alarm_description   = "Errors logged by the Scan Files ${each.value.name} lambda function"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 
-  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_error[function.value.name].metric_transformation[0].name
-  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_error[function.value.name].metric_transformation[0].namespace
+  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_error[each.value.name].metric_transformation[0].name
+  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_error[each.value.name].metric_transformation[0].namespace
   period             = "60"
   evaluation_periods = "1"
   statistic          = "Sum"
@@ -90,12 +90,12 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_api_error" {
 resource "aws_cloudwatch_metric_alarm" "scan_files_api_warning" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  alarm_name          = "${local.warning_logged_api}-${function.value.name}"
-  alarm_description   = "Warnings logged by the Scan Files ${function.value.name} lambda function"
+  alarm_name          = "${local.warning_logged_api}-${each.value.name}"
+  alarm_description   = "Warnings logged by the Scan Files ${each.value.name} lambda function"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 
-  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_warning[function.value.name].metric_transformation[0].name
-  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_warning[function.value.name].metric_transformation[0].namespace
+  metric_name        = aws_cloudwatch_log_metric_filter.scan_files_api_warning[each.value.name].metric_transformation[0].name
+  namespace          = aws_cloudwatch_log_metric_filter.scan_files_api_warning[each.value.name].metric_transformation[0].namespace
   period             = "60"
   evaluation_periods = "1"
   statistic          = "Sum"
@@ -111,7 +111,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_verdict_unknown" {
 
   name           = local.scan_verdict_unknown
   pattern        = "?unknown ?unable_to_scan"
-  log_group_name = function.value.log_group_name
+  log_group_name = each.value.log_group_name
 
   metric_transformation {
     name      = local.scan_verdict_unknown
@@ -123,11 +123,11 @@ resource "aws_cloudwatch_log_metric_filter" "scan_verdict_unknown" {
 resource "aws_cloudwatch_metric_alarm" "scan_verdict_unknown" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  alarm_name          = "${local.scan_verdict_unknown}-${function.value.name}"
-  alarm_description   = "Scans from the ${function.value.name} that returned an unknown or unable to scan verdict"
+  alarm_name          = "${local.scan_verdict_unknown}-${each.value.name}"
+  alarm_description   = "Scans from the ${each.value.name} that returned an unknown or unable to scan verdict"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_unknown[function.each.name].metric_transformation[0].name
-  namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_unknown[function.each.name].metric_transformation[0].namespace
+  metric_name         = aws_cloudwatch_log_metric_filter.scan_verdict_unknown[each.value.name].metric_transformation[0].name
+  namespace           = aws_cloudwatch_log_metric_filter.scan_verdict_unknown[each.value.name].metric_transformation[0].namespace
 
   period             = "60"
   evaluation_periods = "1"
