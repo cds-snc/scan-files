@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="python:3.9.15-alpine3.16@sha256:ea679ee27dbb8f36fbfc304be1b488b4fd7bea95dd230a47f97187c2e3fd4807"
+ARG BASE_IMAGE="python:3.11.8-alpine3.19@sha256:2c0e25da660a20c1e99ccd091a3fdda4c6e3525d91fe5306d89cc24b54fc6b95"
 FROM ${BASE_IMAGE} as builder
 
 ARG RIE_VERSION="v1.9"
@@ -10,13 +10,16 @@ RUN apk add --no-cache \
     gcc \
     libc-dev \
     libcurl \
-    libexecinfo-dev \
     libstdc++ \
     libtool \
     make \
     cmake \
     python3-dev \
     wget
+
+# Install libexecinfo-dev from the Alpine v3.16 repository
+RUN apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ \
+    libexecinfo-dev
 
 RUN wget https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/${RIE_VERSION}/aws-lambda-rie
 
@@ -41,12 +44,9 @@ ENV PYTHONPATH=/pymodules
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
     aws-cli \
+    clamav \
     binutils \
     libstdc++
-
-# Upgrade to latest stable ClamAV
-RUN sed -i "s/3.16/3.17/g" /etc/apk/repositories \
-    && apk add --no-cache clamav
 
 COPY bin/entry.sh /
 RUN chmod 555 /usr/bin/aws-lambda-rie /entry.sh
