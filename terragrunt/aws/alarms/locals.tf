@@ -27,6 +27,7 @@ locals {
     "database server doesn't have the latest patch",
   ]
   api_warnings = [
+    "WARNING",
     "Warning",
     "warning",
   ]
