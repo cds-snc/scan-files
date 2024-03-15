@@ -11,3 +11,4 @@ setuptools==69.1.1  # Pin to fix CVE-2022-40897
 SQLAlchemy==2.0.28
 pytz==2024.1
 filelock==3.13.1
+urllib3<2 # Boto currently does not support urllib3 2+
