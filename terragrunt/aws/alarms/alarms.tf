@@ -29,7 +29,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_error" {
   log_group_name = each.value.log_group_name
 
   metric_transformation {
-    name      = local.error_logged_api
+    name      = "${local.error_logged_api}-${each.value.name}"
     namespace = local.error_namespace
     value     = "1"
   }
@@ -43,7 +43,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_warning" {
   log_group_name = each.value.log_group_name
 
   metric_transformation {
-    name      = local.warning_logged_api
+    name      = "${local.warning_logged_api}-${each.value.name}"
     namespace = local.error_namespace
     value     = "1"
   }
@@ -95,7 +95,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_verdict_unknown" {
   log_group_name = each.value.log_group_name
 
   metric_transformation {
-    name      = local.scan_verdict_unknown
+    name      = "${local.scan_verdict_unknown}-${each.value.name}"
     namespace = local.error_namespace
     value     = "1"
   }
