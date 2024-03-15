@@ -24,7 +24,7 @@ resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
 resource "aws_cloudwatch_log_metric_filter" "scan_files_error" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  name           = local.error_logged_api
+  name           = "${local.error_logged_api}-${each.value.name}"
   pattern        = local.api_error_metric_pattern
   log_group_name = each.value.log_group_name
 
@@ -38,7 +38,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_error" {
 resource "aws_cloudwatch_log_metric_filter" "scan_files_warning" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  name           = local.warning_logged_api
+  name           = "${local.warning_logged_api}-${each.value.name}"
   pattern        = local.api_warning_metric_pattern
   log_group_name = each.value.log_group_name
 
@@ -90,7 +90,7 @@ resource "aws_cloudwatch_metric_alarm" "scan_files_warning" {
 resource "aws_cloudwatch_log_metric_filter" "scan_verdict_unknown" {
   for_each = { for function in local.api_functions : function.name => function }
 
-  name           = local.scan_verdict_unknown
+  name           = "${local.scan_verdict_unknown}-${each.value.name}"
   pattern        = "?unknown ?unable_to_scan"
   log_group_name = each.value.log_group_name
 
