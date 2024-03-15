@@ -1,22 +1,3 @@
-locals {
-  api_functions = [
-    {
-      name           = "api",
-      log_group_name = var.scan_files_api_log_group_name,
-    },
-    {
-      name           = "api-provisioned",
-      log_group_name = var.scan_files_api_sync_log_group_name,
-    },
-  ]
-  error_logged_api            = "ErrorLogged"
-  error_logged_s3_scan_object = "ErrorLoggedS3ScanObject"
-  error_namespace             = "ScanFiles"
-  scan_verdict_suspicious     = "ScanVerdictSuspicious"
-  scan_verdict_unknown        = "ScanVerdictUnknown"
-  warning_logged_api          = "WarningLogged"
-}
-
 resource "aws_cloudwatch_metric_alarm" "route53_health_check_api" {
   provider = aws.us-east-1
 
@@ -44,7 +25,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_error" {
   for_each = { for function in local.api_functions : function.name => function }
 
   name           = local.error_logged_api
-  pattern        = "?ERROR ?Error ?error ?failed"
+  pattern        = local.api_error_metric_pattern
   log_group_name = each.value.log_group_name
 
   metric_transformation {
@@ -58,7 +39,7 @@ resource "aws_cloudwatch_log_metric_filter" "scan_files_warning" {
   for_each = { for function in local.api_functions : function.name => function }
 
   name           = local.warning_logged_api
-  pattern        = "WARNING"
+  pattern        = local.api_warning_metric_pattern
   log_group_name = each.value.log_group_name
 
   metric_transformation {
