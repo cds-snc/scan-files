@@ -24,7 +24,7 @@ locals {
     "failed",
   ]
   api_errors_skip = [
-    "database server doesn't have the latest patch",
+    "No application metrics to publish",
   ]
   api_warnings = [
     "WARNING",
@@ -32,7 +32,6 @@ locals {
     "warning",
   ]
   api_warnings_skip = [
-    "database server doesn't have the latest patch",
     "No application metrics to publish",
   ]
   api_error_metric_pattern   = "[(w1=\"*${join("*\" || w1=\"*", local.api_errors)}*\") && w1!=\"*${join("*\" && w1!=\"*", local.api_errors_skip)}*\"]"
