@@ -41,7 +41,7 @@ resource "aws_route53_record" "sync_scan_files_A" {
 # Route53 DNS logging and query firewall
 #
 module "resolver_dns" {
-  source           = "github.com/cds-snc/terraform-modules//resolver_dns?ref=v9.3.9"
+  source           = "github.com/cds-snc/terraform-modules//resolver_dns?ref=v9.4.2"
   vpc_id           = module.vpc.vpc_id
   firewall_enabled = true
 
