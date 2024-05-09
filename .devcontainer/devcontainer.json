@@ -74,9 +74,9 @@
       "moby": true
     },
     "terraform": {
-      "version": "1.3.5",
+      "version": "1.8.2",
       "tflint": "latest",
-      "terragrunt": "0.40.2"
+      "terragrunt": "0.58.3"
     },
     "aws-cli": {
       "version": "2.7.12"
