@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=node:20.13.1-alpine3.19@sha256:291e84d956f1aff38454bbd3da38941461ad569a185c20aa289f71f37ea08e23
+ARG BASE_IMAGE=node:20.14.0-alpine3.19@sha256:eb17a0816c6475000def8bf0dd0a85bc59340235eb9fbb0aff158b4c9a3c7d6f
 
 # Builder to install lambda dependencies
 FROM ${BASE_IMAGE} as builder
