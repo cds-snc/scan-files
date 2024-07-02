@@ -1,5 +1,5 @@
 module "rds" {
-  source                  = "github.com/cds-snc/terraform-modules//rds?ref=v9.5.1"
+  source                  = "github.com/cds-snc/terraform-modules//rds?ref=v9.6.0"
   backup_retention_period = 7
   billing_tag_value       = var.billing_code
   database_name           = "scan_files"
@@ -14,14 +14,4 @@ module "rds" {
 
   upgrade_immediately         = true
   allow_major_version_upgrade = true
-}
-
-import {
-  to = module.rds.aws_security_group_rule.rds_proxy_egress
-  id = "${module.rds.proxy_security_group_id}_egress_tcp_5432_5432_self"
-}
-
-import {
-  to = module.rds.aws_security_group_rule.rds_proxy_ingress
-  id = "${module.rds.proxy_security_group_id}_ingress_tcp_5432_5432_self"
 }
