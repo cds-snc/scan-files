@@ -168,9 +168,15 @@ const processEventRecords = async (event, apiKey) => {
     if (scanStatus !== null) {
       let tags = [
         { Key: "av-scanner", Value: "clamav" },
-        { Key: "av-status", Value: scanStatus },
         { Key: "av-timestamp", Value: new Date().getTime() },
       ];
+
+      // Only tag the scan status if it's not in progress.  We are seeing race conditions where a
+      // finished scan result is being overwritten by the in progress status.  Going forward, the precense of
+      // scan metadata with no status will be considered in progress.
+      if (scanStatus !== SCAN_IN_PROGRESS) {
+        tags.push({ Key: "av-status", Value: scanStatus });
+      }
 
       if (scanChecksum && scanChecksum !== "None") {
         tags.push({ Key: "av-checksum", Value: scanChecksum });

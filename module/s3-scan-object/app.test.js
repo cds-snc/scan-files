@@ -110,7 +110,6 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
           { Key: "request-id", Value: "1234asdf" },
         ],
@@ -122,8 +121,8 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "SPIFY" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "av-status", Value: "SPIFY" },
           { Key: "av-checksum", Value: "42" },
           { Key: "request-id", Value: "zxcv9584" },
         ],
@@ -135,7 +134,6 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
           { Key: "request-id", Value: "zxcv9584" },
         ],
@@ -147,8 +145,8 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "error" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "av-status", Value: "error" },
           { Key: "request-id", Value: "poiu0987" },
         ],
       },
@@ -159,7 +157,6 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
           { Key: "request-id", Value: "0987" },
         ],
@@ -171,7 +168,6 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "in_progress" },
           { Key: "av-timestamp", Value: TEST_TIME },
           { Key: "request-id", Value: "0987" },
         ],
@@ -218,8 +214,8 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "failed_to_start" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "av-status", Value: "failed_to_start" },
           { Key: "request-id", Value: "qwer7890" },
         ],
       },
@@ -257,8 +253,8 @@ describe("processEventRecords", () => {
       Tagging: {
         TagSet: [
           { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-status", Value: "failed_to_start" },
           { Key: "av-timestamp", Value: TEST_TIME },
+          { Key: "av-status", Value: "failed_to_start" },
           { Key: "request-id", Value: "zxcv5678" },
         ],
       },
