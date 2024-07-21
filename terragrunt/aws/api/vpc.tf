@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "github.com/cds-snc/terraform-modules//vpc?ref=v9.5.1"
+  source = "github.com/cds-snc/terraform-modules//vpc?ref=v9.6.0"
 
   name               = var.product_name
   enable_flow_log    = true
