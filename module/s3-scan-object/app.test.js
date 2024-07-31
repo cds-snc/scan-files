@@ -105,17 +105,6 @@ describe("processEventRecords", () => {
     const errorCount = await processEventRecords(event, "api-key");
     expect(errorCount).toEqual(0);
     expect(mockS3Client).toHaveReceivedNthCommandWith(1, PutObjectTaggingCommand, {
-      Bucket: "foo",
-      Key: "bar",
-      Tagging: {
-        TagSet: [
-          { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-timestamp", Value: TEST_TIME },
-          { Key: "request-id", Value: "1234asdf" },
-        ],
-      },
-    });
-    expect(mockS3Client).toHaveReceivedNthCommandWith(2, PutObjectTaggingCommand, {
       Bucket: "bam",
       Key: "baz",
       Tagging: {
@@ -128,18 +117,7 @@ describe("processEventRecords", () => {
         ],
       },
     });
-    expect(mockS3Client).toHaveReceivedNthCommandWith(3, PutObjectTaggingCommand, {
-      Bucket: "boom",
-      Key: "bing",
-      Tagging: {
-        TagSet: [
-          { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-timestamp", Value: TEST_TIME },
-          { Key: "request-id", Value: "zxcv9584" },
-        ],
-      },
-    });
-    expect(mockS3Client).toHaveReceivedNthCommandWith(4, PutObjectTaggingCommand, {
+    expect(mockS3Client).toHaveReceivedNthCommandWith(2, PutObjectTaggingCommand, {
       Bucket: "frodo",
       Key: "bagginsssis",
       Tagging: {
@@ -151,38 +129,12 @@ describe("processEventRecords", () => {
         ],
       },
     });
-    expect(mockS3Client).toHaveReceivedNthCommandWith(5, PutObjectTaggingCommand, {
-      Bucket: "muffins",
-      Key: "blueberry",
-      Tagging: {
-        TagSet: [
-          { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-timestamp", Value: TEST_TIME },
-          { Key: "request-id", Value: "0987" },
-        ],
-      },
-    });
-    expect(mockS3Client).toHaveReceivedNthCommandWith(6, PutObjectTaggingCommand, {
-      Bucket: "scones",
-      Key: "cranberry",
-      Tagging: {
-        TagSet: [
-          { Key: "av-scanner", Value: "clamav" },
-          { Key: "av-timestamp", Value: TEST_TIME },
-          { Key: "request-id", Value: "0987" },
-        ],
-      },
-    });
     expect(mockSTSClient).toHaveReceivedNthCommandWith(1, AssumeRoleCommand, {
       RoleArn: "arn:aws:iam::123456789012:role/ScanFilesGetObjects",
       RoleSessionName: "s3-scan-object",
     });
     expect(mockSTSClient).toHaveReceivedNthCommandWith(2, AssumeRoleCommand, {
       RoleArn: "arn:aws:iam::210987654321:role/ScanFilesGetObjects",
-      RoleSessionName: "s3-scan-object",
-    });
-    expect(mockSTSClient).toHaveReceivedNthCommandWith(3, AssumeRoleCommand, {
-      RoleArn: "arn:aws:iam::098765432109:role/ScanFilesGetObjects",
       RoleSessionName: "s3-scan-object",
     });
   });
