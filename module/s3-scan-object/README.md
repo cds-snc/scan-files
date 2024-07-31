@@ -8,7 +8,7 @@ The following S3 object tags are used to communicate the scan results:
 
 - `av-checksum`: Checksum of the file that was scanned.
 - `av-result`: The scan result verdict from ClamAV.
-- `av-status`: The status of the scan (in_progress, failed_to_start, complete).
+- `av-status`: The status of the scan (failed_to_start, clean, malicious).
 - `av-timestamp`: Epoch timestamp of when the tags were set.
 
 # Events

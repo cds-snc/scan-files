@@ -153,6 +153,7 @@ const processEventRecords = async (event, apiKey) => {
           requestId,
         );
         scanStatus = response !== undefined && response.status === 200 ? SCAN_IN_PROGRESS : SCAN_FAILED_TO_START;
+        logger.info(`S3 scan started status '${scanStatus}' for: ${util.inspect(s3Object)}`);
 
         // Get the scan status for an existing S3 object
       } else if (eventSource === EVENT_SNS) {
@@ -164,41 +165,39 @@ const processEventRecords = async (event, apiKey) => {
       logger.error(`Unsupported event record: ${util.inspect(record)}`);
     }
 
-    // Tag the S3 object if we've got a scan status
-    if (scanStatus !== null) {
-      let tags = [
-        { Key: "av-scanner", Value: "clamav" },
-        { Key: "av-timestamp", Value: new Date().getTime() },
-      ];
+    // In progress scans are not tagged as S3 object tagging is atomic, so we were seeing cases
+    // where a `clean` scan result was being overwritten by in progress tags.
+    if (scanStatus !== SCAN_IN_PROGRESS) {
+      // Tag the S3 object if we've got a scan status
+      if (scanStatus !== null) {
+        let tags = [
+          { Key: "av-scanner", Value: "clamav" },
+          { Key: "av-timestamp", Value: new Date().getTime() },
+          { Key: "av-status", Value: scanStatus },
+        ];
 
-      // Only tag the scan status if it's not in progress.  We are seeing race conditions where a
-      // finished scan result is being overwritten by the in progress status.  Going forward, the precense of
-      // scan metadata with no status will be considered in progress.
-      if (scanStatus !== SCAN_IN_PROGRESS) {
-        tags.push({ Key: "av-status", Value: scanStatus });
+        if (scanChecksum && scanChecksum !== "None") {
+          tags.push({ Key: "av-checksum", Value: scanChecksum });
+        }
+
+        if (requestId) {
+          tags.push({ Key: "request-id", Value: requestId });
+        }
+
+        roleArn = `arn:aws:iam::${awsAccountId}:role/${AWS_ROLE_TO_ASSUME}`;
+        s3Clients[awsAccountId] = await getS3Client(s3Clients[awsAccountId], stsClient, roleArn);
+        isObjectTagged = await tagS3Object(s3Clients[awsAccountId], s3Object, tags);
       }
 
-      if (scanChecksum && scanChecksum !== "None") {
-        tags.push({ Key: "av-checksum", Value: scanChecksum });
+      // Track if there were any errors processing this record
+      if (scanStatus === SCAN_FAILED_TO_START || isObjectTagged === false) {
+        logger.warn(
+          `Could not process event record: ${util.inspect(
+            record,
+          )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`,
+        );
+        errorCount++;
       }
-
-      if (requestId) {
-        tags.push({ Key: "request-id", Value: requestId });
-      }
-
-      roleArn = `arn:aws:iam::${awsAccountId}:role/${AWS_ROLE_TO_ASSUME}`;
-      s3Clients[awsAccountId] = await getS3Client(s3Clients[awsAccountId], stsClient, roleArn);
-      isObjectTagged = await tagS3Object(s3Clients[awsAccountId], s3Object, tags);
-    }
-
-    // Track if there were any errors processing this record
-    if (scanStatus === SCAN_FAILED_TO_START || isObjectTagged === false) {
-      logger.warn(
-        `Could not process event record: ${util.inspect(
-          record,
-        )} scanStatus: ${scanStatus} isObjectTagged: ${isObjectTagged}`,
-      );
-      errorCount++;
     }
   }
 
