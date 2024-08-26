@@ -8,7 +8,7 @@ pydantic-settings==2.4.0
 psycopg2-binary==2.9.9
 python-multipart
 setuptools==71.1.0  # Pin to fix CVE-2022-40897
-SQLAlchemy==2.0.31
+SQLAlchemy==2.0.32
 pytz==2024.1
 filelock==3.15.4
 urllib3<2 # Boto currently does not support urllib3 2+

@@ -5,7 +5,7 @@ locals {
 }
 
 module "log_bucket" {
-  source             = "github.com/cds-snc/terraform-modules//S3_log_bucket?ref=v9.6.1"
+  source             = "github.com/cds-snc/terraform-modules//S3_log_bucket?ref=v9.6.3"
   bucket_name        = "${var.product_name}-${var.env}-logs"
   critical_tag_value = false
   versioning_status  = "Suspended"
@@ -13,7 +13,7 @@ module "log_bucket" {
 }
 
 module "file-queue" {
-  source      = "github.com/cds-snc/terraform-modules//S3?ref=v9.6.1"
+  source      = "github.com/cds-snc/terraform-modules//S3?ref=v9.6.3"
   bucket_name = local.file_queue_name
   lifecycle_rule = [{
     id      = "expire"
@@ -30,7 +30,7 @@ module "file-queue" {
 }
 
 module "clamav-defs" {
-  source            = "github.com/cds-snc/terraform-modules//S3?ref=v9.6.1"
+  source            = "github.com/cds-snc/terraform-modules//S3?ref=v9.6.3"
   bucket_name       = local.clamav-defs
   billing_tag_value = var.billing_code
   logging = {
