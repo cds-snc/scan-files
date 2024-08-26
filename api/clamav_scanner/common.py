@@ -12,6 +12,10 @@ AV_DEFINITION_PATH = os.getenv(
 AV_SCAN_USE_CACHE = os.getenv("AV_SCAN_USE_CACHE", "True") in ("True", "true")
 AV_SCAN_START_SNS_ARN = os.getenv("AV_SCAN_START_SNS_ARN")
 AV_SCAN_START_METADATA = os.getenv("AV_SCAN_START_METADATA", "av-scan-start")
+# Suppress specific false positive signatures as there is currently no way
+# using ClamAV configuration to exclude PUA subcategories:
+# https://docs.clamav.net/faq/faq-pua.html
+AV_SIGNATURE_FALSE_POSITIVES = ["PUA.Pdf.Trojan.EmbeddedJavaScript"]
 AV_SIGNATURE_METADATA = os.getenv("AV_SIGNATURE_METADATA", "av-signature")
 AV_SIGNATURE_OK = "OK"
 AV_SIGNATURE_UNKNOWN = "UNKNOWN"

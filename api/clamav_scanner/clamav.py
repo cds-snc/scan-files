@@ -18,6 +18,7 @@ from .common import AV_DEFINITION_PATH
 from .common import AV_DEFINITION_FILE_PREFIXES
 from .common import AV_DEFINITION_FILE_SUFFIXES
 from .common import AV_SCAN_USE_CACHE
+from .common import AV_SIGNATURE_FALSE_POSITIVES
 from .common import AV_SIGNATURE_UNKNOWN
 from .common import AV_SIGNATURE_METADATA
 from .common import CLAMD_STARTUP_LOCK
@@ -291,7 +292,10 @@ def determine_verdict(provider, path, summary, av_proc):
             log.error("Unable to scan file: %s" % path)
             return ScanVerdicts.UNABLE_TO_SCAN.value, AV_SIGNATURE_UNKNOWN
 
-        if av_proc.returncode == 0:
+        if av_proc.returncode == 0 or any(
+            false_positive in signature
+            for false_positive in AV_SIGNATURE_FALSE_POSITIVES
+        ):
             return ScanVerdicts.CLEAN.value, signature
         elif av_proc.returncode == 1:
             return ScanVerdicts.MALICIOUS.value, signature
