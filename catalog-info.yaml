@@ -21,5 +21,6 @@ spec:
   lifecycle: experimental
   owner: group:cds-snc/internal-sre
   domain: site-reliability-engineering
-  definition: https://scan-files.alpha.canada.ca/openapi.json
+  definition: 
+    $json: https://scan-files.alpha.canada.ca/openapi.json
   
