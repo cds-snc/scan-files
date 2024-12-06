@@ -22,5 +22,5 @@ spec:
   owner: group:cds-snc/internal-sre
   domain: site-reliability-engineering
   definition: 
-    $json: https://scan-files.alpha.canada.ca/openapi.json
+    $text: https://scan-files.alpha.canada.ca/openapi.json
   
