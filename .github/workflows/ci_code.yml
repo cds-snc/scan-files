@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14.15@sha256:7fe0928f6de61208d6b39730456085d74578046df4c684fa198f0fb065f4381e
+        image: postgres:14.15@sha256:2a453914efff6156786247b2399e6f9f18d7fc37e1ca5574a23aba172cf37d3e
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -45,7 +45,7 @@ jobs:
 
       - name: Setup python
         if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'module/s3-scan-object' }}
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: "3.9"
 
