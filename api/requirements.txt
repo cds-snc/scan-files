@@ -1,14 +1,14 @@
 alembic==1.14.1
 assemblyline-client==4.9.5
 aws-lambda-powertools==2.43.1
-boto3==1.36.11
+boto3==1.36.17
 fastapi==0.115.8
 mangum==0.19.0
 pydantic-settings==2.7.1
 psycopg2-binary==2.9.10
 python-multipart
 setuptools==71.1.0  # Pin to fix CVE-2022-40897
-SQLAlchemy==2.0.37
+SQLAlchemy==2.0.38
 pytz==2024.2
 filelock==3.17.0
 urllib3<2 # Boto currently does not support urllib3 2+
