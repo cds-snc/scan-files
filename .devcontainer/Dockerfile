@@ -24,10 +24,6 @@ RUN curl -Lo shellcheck.tar.xz "https://github.com/koalaman/shellcheck/releases/
     && mv "shellcheck-v${SHELLCHECK_VERSION}/shellcheck" /usr/local/bin/ \
     && rm -r shellcheck*
 
-# Install Checkov
-RUN pip3 install --upgrade requests setuptools \
-    && pip3 install --upgrade botocore checkov
-
 COPY .devcontainer/apt-packages.txt ./
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && xargs apt-get -y install --no-install-recommends <apt-packages.txt
