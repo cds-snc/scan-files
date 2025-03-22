@@ -10,5 +10,5 @@ python-multipart
 setuptools==71.1.0  # Pin to fix CVE-2022-40897
 SQLAlchemy==2.0.38
 pytz==2024.2
-filelock==3.17.0
+filelock==3.18.0
 urllib3<2 # Boto currently does not support urllib3 2+
