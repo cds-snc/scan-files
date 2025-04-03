@@ -26,7 +26,7 @@ module "scan_files" {
     COMPLETED_SCANS_TABLE_NAME   = "completed-scans"
     FILE_CHECKSUM_TABLE_NAME     = "file-checksums"
     FILE_QUEUE_BUCKET            = module.file-queue.s3_bucket_id
-    LOG_LEVEL                    = "INFO"
+    LOG_LEVEL                    = "WARNING"
     OPENAPI_URL                  = "/openapi.json"
     POWERTOOLS_SERVICE_NAME      = "${var.product_name}-api"
     SCAN_QUEUE_STATEMACHINE_NAME = "assemblyline-file-scan-queue"
