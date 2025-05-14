@@ -24,7 +24,13 @@ inputs = {
   scan_files_api_function_role_name = dependency.api.outputs.api_function_name
   scan_files_api_function_url       = dependency.api.outputs.api_function_url
   scan_files_api_key_secret_arn     = dependency.api.outputs.scan_files_api_key_secret_arn
-  sqs_event_accounts                = ["239043911459", "127893201980", "687401027353"]
+
+  sqs_event_accounts = [
+    "127893201980",
+    "239043911459",
+    "687401027353",
+    "730335263169"
+  ]
 }
 
 include {
