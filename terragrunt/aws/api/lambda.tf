@@ -1,7 +1,7 @@
 module "scan_files" {
   for_each = toset(local.scan_files_api_functions)
 
-  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v10.4.2"
+  source                 = "github.com/cds-snc/terraform-modules//lambda?ref=v10.4.5"
   name                   = "${var.product_name}-${each.key}"
   billing_tag_value      = var.billing_code
   ecr_arn                = aws_ecr_repository.api.arn
