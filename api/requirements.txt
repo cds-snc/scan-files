@@ -7,7 +7,7 @@ mangum==0.19.0
 pydantic-settings==2.9.1
 psycopg2-binary==2.9.10
 python-multipart
-setuptools==71.1.0  # Pin to fix CVE-2022-40897
+setuptools==78.1.1  # Pin to fix CVE-2022-40897
 SQLAlchemy==2.0.40
 pytz==2024.2
 filelock==3.18.0
