@@ -1,4 +1,4 @@
-alembic==1.15.2
+alembic==1.16.1
 assemblyline-client==4.9.7
 aws-lambda-powertools==2.43.1
 boto3==1.38.18
