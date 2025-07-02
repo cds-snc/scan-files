@@ -1,10 +1,10 @@
-bandit==1.8.3
+bandit==1.8.5
 black==24.10.0
 coverage==7.9.1
 factory-boy==3.3.3
 flake8==7.2.0
 httpx==0.28.1
-locust==2.37.10
-pytest==8.4.0
+locust==2.37.11
+pytest==8.4.1
 requests==2.32.4
 uvicorn==0.34.3
