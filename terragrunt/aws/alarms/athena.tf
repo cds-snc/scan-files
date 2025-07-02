@@ -1,5 +1,5 @@
 module "simple" {
-  source = "github.com/cds-snc/terraform-modules//athena_access_logs?ref=v10.5.1"
+  source = "github.com/cds-snc/terraform-modules//athena_access_logs?ref=v10.6.0"
 
   athena_bucket_name         = module.athena_bucket.s3_bucket_id
   waf_access_queries_create  = true
@@ -12,7 +12,7 @@ module "simple" {
 # Hold the Athena data
 #
 module "athena_bucket" {
-  source            = "github.com/cds-snc/terraform-modules//S3?ref=v10.5.1"
+  source            = "github.com/cds-snc/terraform-modules//S3?ref=v10.6.0"
   bucket_name       = "${var.product_name}-${var.env}-athena-bucket"
   billing_tag_value = var.billing_code
 
