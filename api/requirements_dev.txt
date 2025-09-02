@@ -4,7 +4,7 @@ coverage==7.10.5
 factory-boy==3.3.3
 flake8==7.3.0
 httpx==0.28.1
-locust==2.38.1
+locust==2.39.0
 pytest==8.4.1
 requests==2.32.5
 uvicorn==0.35.0
