@@ -47,7 +47,7 @@ jobs:
         if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'module/s3-scan-object' }}
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Setup node
         if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'terragrunt' }}
