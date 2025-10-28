@@ -105,6 +105,25 @@ resource "aws_lambda_function_url" "scan_files" {
   qualifier          = each.key == "api-provisioned" ? aws_lambda_alias.api_provisioned_latest.name : null
 }
 
+resource "aws_lambda_permission" "scan_files_invoke_function_url" {
+  for_each = toset(local.scan_files_api_functions)
+
+  statement_id           = "AllowPublicInvokeFunctionUrl-${each.key}"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = module.scan_files[each.key].function_name
+  function_url_auth_type = "NONE"
+  principal              = "*"
+}
+
+resource "aws_lambda_permission" "scan_files_invoke_function" {
+  for_each = toset(local.scan_files_api_functions)
+
+  statement_id  = "AllowPublicInvokeFunction-${each.key}"
+  action        = "lambda:InvokeFunction"
+  function_name = module.scan_files[each.key].function_name
+  principal     = "*"
+}
+
 #
 # Setup provisioned concurency for the api-provisioned lambda
 # This function will be used for synchronous requests
