@@ -46,7 +46,7 @@ else
       fi
 
       # Retrieve secrets and write them to the .env file
-      ENV_VARS="$(aws ssm get-parameters --region ca-central-1 --with-decryption --names ENVIRONMENT_VARIABLES --query 'Parameters[*].Value' --output text)"
+      ENV_VARS="$(python -c "import boto3; client = boto3.client('ssm'); response = client.get_parameters(Names=['ENVIRONMENT_VARIABLES'], WithDecryption=True); print(response['Parameters'][0]['Value'] if response['Parameters'] else '')")"
       if [ -z "$ENV_VARS" ]; then
         echo "ERROR Failed to retrieve secrets during init"
         exit 1
