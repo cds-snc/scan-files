@@ -6,5 +6,5 @@ flake8==7.3.0
 httpx==0.28.1
 locust==2.42.0
 pytest==8.4.2
-requests==2.32.4
+requests==2.32.5
 uvicorn==0.38.0
