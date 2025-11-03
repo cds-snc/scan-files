@@ -1,5 +1,12 @@
 {
   "extends": [
     "github>cds-snc/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["requests"],
+      "matchFileNames": ["api/requirements_dev.txt"],
+      "allowedVersions": "<=2.32.4"
+    }
   ]
 }
