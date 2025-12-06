@@ -52,7 +52,7 @@ jobs:
 
       - name: Configure AWS credentials using OIDC
         if: steps.filter.outputs.changes == 'true'
-        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
         with:
           role-to-assume: arn:aws:iam::806545929748:role/scan-files-apply
           role-session-name: DeployLambda
