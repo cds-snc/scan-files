@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14.20@sha256:ca25035f7e6f74552655a1c5e4a9eb21f85e9d316f1f70371f790ef70095dd58
+        image: postgres:14.20@sha256:da076311f78c56e4bf6548ef3668fa77fa2865c5efca3f79a6d6bb9b3710b477
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -51,7 +51,7 @@ jobs:
 
       - name: Setup node
         if: ${{ steps.filter.outputs.changes == 'true' && matrix.folder != 'terragrunt' }}
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: "20"
 
