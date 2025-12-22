@@ -1,5 +1,5 @@
 module "rds" {
-  source                  = "github.com/cds-snc/terraform-modules//rds?ref=v10.9.1"
+  source                  = "github.com/cds-snc/terraform-modules//rds?ref=v10.10.1"
   backup_retention_period = 7
   billing_tag_value       = var.billing_code
   database_name           = "scan_files"
