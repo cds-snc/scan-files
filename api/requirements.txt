@@ -1,7 +1,7 @@
-alembic==1.18.0
+alembic==1.18.1
 assemblyline-client==4.9.9
 aws-lambda-powertools==2.43.1
-boto3==1.42.25
+boto3==1.42.30
 fastapi==0.128.0
 mangum==0.20.0
 pydantic-settings==2.12.0
